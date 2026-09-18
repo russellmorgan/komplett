@@ -27,19 +27,11 @@ describe("sessionsNewestFirst", () => {
 
 describe("taskStats", () => {
   it("counts sessions and sums focus minutes for one task", () => {
-    const s = (over: Partial<Session>): Session => ({
-      id: "s",
-      ownerId: "u",
-      taskId: "t1",
-      taskTitle: "",
-      note: "",
-      focusMinutes: 25,
-      startedAt: 0,
-      endedAt: 0,
-      endedEarly: false,
-      ...over,
-    });
-    const all = [s({ id: "a" }), s({ id: "b", focusMinutes: 10 }), s({ id: "c", taskId: "t2" })];
+    const all = [
+      session({ id: "a", taskId: "t1", focusMinutes: 25 }),
+      session({ id: "b", taskId: "t1", focusMinutes: 10 }),
+      session({ id: "c", taskId: "t2", focusMinutes: 25 }),
+    ];
     expect(taskStats(all, "t1")).toEqual({ count: 2, minutes: 35 });
     expect(taskStats(all, "none")).toEqual({ count: 0, minutes: 0 });
   });

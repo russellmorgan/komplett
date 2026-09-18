@@ -25,7 +25,10 @@ export function Timer({ user }: { user: AuthUser }) {
   return (
     <>
       <h1>Timer</h1>
-      <p className="muted">{LABEL[state.phase]}</p>
+      <p className="muted">
+        {LABEL[state.phase]}
+        {state.task && ` · ${state.task.title}`}
+      </p>
       <p className="timer-clock">{formatMmSs(remainingMs(state, now))}</p>
       <div className="timer-actions">
         {state.phase === "idle" && (

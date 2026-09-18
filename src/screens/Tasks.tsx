@@ -25,9 +25,13 @@ export function Tasks({ user }: { user: AuthUser }) {
   const navigate = useNavigate();
   const sessions = useSessions(user.uid);
   const { state: timer, startFocus } = useTimerContext();
-  // ponytail: one pomodoro at a time; starting from a task while one runs just goes to the Timer.
+  // ponytail: one pomodoro at a time; a running one has to finish or be stopped first.
   const startPomodoro = (task: Task) => {
-    if (timer.phase === "idle") startFocus({ id: task.id, title: task.title });
+    if (timer.phase !== "idle") {
+      alert("A pomodoro is already running. Stop it from the Timer first.");
+      return;
+    }
+    startFocus({ id: task.id, title: task.title });
     navigate("/timer");
   };
   const all = useTasks(user.uid);
