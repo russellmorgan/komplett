@@ -56,7 +56,7 @@ export function useSharedTaskSync(uid: string, user: User | undefined, tasks: Ta
 }
 
 // React to a partner's completed shared task; replaces this user's earlier reaction.
-export function react(ownerUid: string, shared: SharedTask, byUserId: string, emoji: string) {
+export function setReaction(ownerUid: string, shared: SharedTask, byUserId: string, emoji: string) {
   return updateDoc(doc(db, "sharedTasks", ownerUid), {
     reactions: withReaction(shared.reactions, byUserId, emoji, Date.now()),
   });

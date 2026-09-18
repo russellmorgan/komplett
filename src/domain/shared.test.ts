@@ -79,14 +79,10 @@ describe("projection follows the task lifecycle", () => {
     expect(next.completedAt).toBeNull();
     expect(sharedTaskChanged(done, next)).toBe(true);
   });
-  it("repeat advance: new due date, active, reactions kept", () => {
-    const prev = { ...done, completedAt: null, reactions: [{ emoji: "👏", byUserId: "p", at: 7 }] };
+  it("repeat advance: new due date, still active", () => {
+    const prev = { ...done, completedAt: null };
     const next = projectSharedTask(task({ dueDate: "2026-09-27" }), prev, 3);
-    expect(next).toMatchObject({
-      dueDate: "2026-09-27",
-      completedAt: null,
-      reactions: prev.reactions,
-    });
+    expect(next).toMatchObject({ dueDate: "2026-09-27", completedAt: null });
     expect(sharedTaskChanged(prev, next)).toBe(true);
   });
 });

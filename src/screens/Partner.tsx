@@ -1,5 +1,5 @@
 import type { AuthUser } from "../data/auth";
-import { react, useAllUsers, useSharedTask } from "../data/shared";
+import { setReaction, useAllUsers, useSharedTask } from "../data/shared";
 import { setPartner, useUserDoc } from "../data/user";
 import { REACTION_EMOJI, type SharedTask } from "../domain/shared";
 
@@ -61,7 +61,9 @@ export function Partner({ user }: { user: AuthUser }) {
             heading={`${partner.displayName}’s shared task`}
             shared={theirs}
             empty="They haven’t set an accountability task yet."
-            onReact={(emoji) => partnerId && theirs && react(partnerId, theirs, user.uid, emoji)}
+            onReact={(shared, emoji) =>
+              setReaction(partnerId, shared, user.uid, emoji).catch(console.error)
+            }
             myUid={user.uid}
           />
         )}
@@ -80,7 +82,7 @@ function SharedCard({
   heading: string;
   shared: SharedTask | null | undefined;
   empty: string;
-  onReact?: (emoji: string) => void;
+  onReact?: (shared: SharedTask, emoji: string) => void;
   myUid?: string;
 }) {
   const mine = shared?.reactions.find((r) => r.byUserId === myUid)?.emoji;
@@ -115,7 +117,7 @@ function SharedCard({
                   key={emoji}
                   type="button"
                   aria-pressed={emoji === mine}
-                  onClick={() => onReact(emoji)}
+                  onClick={() => onReact(shared, emoji)}
                 >
                   {emoji}
                 </button>

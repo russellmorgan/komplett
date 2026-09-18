@@ -2,6 +2,7 @@
 
 import type { Task } from "./tasks";
 
+// Mirrored in firestore.rules (sharedTasks.onlyOwnReaction); change both together.
 export const REACTION_EMOJI = ["👏", "🔥", "🎉", "💪", "❤️", "🙌", "⭐", "🚀"] as const;
 
 export type Reaction = { emoji: string; byUserId: string; at: number };
