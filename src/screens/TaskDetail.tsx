@@ -12,11 +12,15 @@ function toLocalInput(ms: number): string {
 export function TaskDetail({
   task,
   stats,
+  isAccountability,
+  onSetAccountability,
   onStart,
   onClose,
 }: {
   task: Task;
   stats: { count: number; minutes: number };
+  isAccountability: boolean;
+  onSetAccountability: () => void;
   onStart: () => void;
   onClose: () => void;
 }) {
@@ -47,7 +51,14 @@ export function TaskDetail({
         {stats.count} session{stats.count === 1 ? "" : "s"}, {stats.minutes} min focus{" "}
         <button type="button" onClick={onStart}>
           Start pomodoro
-        </button>
+        </button>{" "}
+        {isAccountability ? (
+          <span>Shared with partner</span>
+        ) : (
+          <button type="button" onClick={onSetAccountability}>
+            Set as accountability task
+          </button>
+        )}
       </p>
       <label>
         Due

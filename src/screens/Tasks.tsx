@@ -5,6 +5,7 @@ import { useLists } from "../data/lists";
 import { useSessions } from "../data/sessions";
 import { addTask, deleteTask, updateTask, useTasks } from "../data/tasks";
 import { useTimerContext } from "../data/timer";
+import { setAccountabilityTask, useUserDoc } from "../data/user";
 import { completePatch } from "../domain/repeat";
 import { taskStats } from "../domain/sessions";
 import {
@@ -24,6 +25,7 @@ export function Tasks({ user }: { user: AuthUser }) {
   const currentList = lists.find((l) => l.id === listId);
   const navigate = useNavigate();
   const sessions = useSessions(user.uid);
+  const me = useUserDoc(user.uid);
   const { state: timer, startFocus } = useTimerContext();
   // ponytail: one pomodoro at a time; a running one has to finish or be stopped first.
   const startPomodoro = (task: Task) => {
@@ -154,6 +156,8 @@ export function Tasks({ user }: { user: AuthUser }) {
         <TaskDetail
           task={open}
           stats={taskStats(sessions, open.id)}
+          isAccountability={me?.accountabilityTaskId === open.id}
+          onSetAccountability={() => setAccountabilityTask(user.uid, open.id)}
           onStart={() => startPomodoro(open)}
           onClose={() => setOpenId(null)}
         />
