@@ -11,7 +11,7 @@
     "test": "vitest run",
     "lint": "biome check . && tsc -b",
     "format": "biome format --write .",
-    "deploy": "pnpm build && firebase deploy --only hosting,firestore:rules"
+    "ship": "pnpm build && firebase deploy --only hosting,firestore:rules"
   },
   "dependencies": {
     "firebase": "^12.19.0",

@@ -14,7 +14,7 @@ pnpm dev      # Auth + Firestore emulators (UI at http://localhost:4000) and Vit
 pnpm test     # Vitest, domain module only
 pnpm lint     # Biome + tsc
 pnpm build    # production bundle in dist/
-pnpm deploy   # build, then publish dist/ and firestore.rules to Firebase (needs `pnpm firebase login`)
+pnpm ship     # build, then publish dist/ and firestore.rules to Firebase (needs `pnpm firebase login`)
 ```
 
 `pnpm dev` always talks to the local emulators under the fake project `demo-komplett`; no Firebase project is needed. In the emulator, "Sign in with Google" opens a fake account picker, and magic links are printed to the terminal instead of being emailed.
@@ -25,7 +25,7 @@ Production builds need a real Firebase project on the **Spark plan** (never Blaz
 
 1. [console.firebase.google.com](https://console.firebase.google.com) → **Add project**. Decline Google Analytics.
 2. **Build → Authentication → Get started → Sign-in method**: enable **Google** (pick a support email) and **Email/Password** with the **Email link (passwordless sign-in)** toggle on.
-3. **Build → Firestore Database → Create database** in production mode. `.firebaserc` already points at the project; `pnpm firebase login` once, then `pnpm deploy` publishes rules and hosting.
+3. **Build → Firestore Database → Create database** in production mode. `.firebaserc` already points at the project; `pnpm firebase login` once (if the CLI complains about an unknown alias, `pnpm firebase use default`), then `pnpm ship` publishes rules and hosting.
 4. **Project settings (gear) → Your apps → Add app → Web**. Copy `apiKey`, `authDomain`, `projectId`, `appId` into `.env` (see [.env.example](.env.example)).
 5. **Authentication → Settings → Authorised domains**: add every domain the app is served from (`localhost` and the Hosting domains are pre-listed; add any custom domain). Magic links only work from listed domains.
 
