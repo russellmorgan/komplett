@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   focusSummary,
+  formatMmSs,
   initialTimer,
   remainingMs,
   type TimerAction,
@@ -168,5 +169,13 @@ describe("focusSummary", () => {
       focusMinutes: 10,
       endedEarly: true,
     });
+  });
+});
+
+describe("formatMmSs", () => {
+  it("rounds up to whole seconds and pads", () => {
+    expect(formatMmSs(25 * MIN)).toBe("25:00");
+    expect(formatMmSs(61_500)).toBe("1:02");
+    expect(formatMmSs(0)).toBe("0:00");
   });
 });

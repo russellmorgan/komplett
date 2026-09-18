@@ -87,3 +87,8 @@ export function focusSummary(
     endedEarly: state.endedEarly,
   };
 }
+
+export function formatMmSs(ms: number): string {
+  const s = Math.ceil(ms / 1000);
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+}

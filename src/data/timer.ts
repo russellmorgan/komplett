@@ -1,5 +1,24 @@
-import { type Dispatch, useEffect, useReducer } from "react";
-import { initialTimer, type TimerAction, type TimerState, timerReducer } from "../domain/timer";
+import {
+  createContext,
+  createElement,
+  type Dispatch,
+  type ReactNode,
+  useContext,
+  useEffect,
+  useReducer,
+  useRef,
+  useState,
+} from "react";
+import {
+  focusSummary,
+  initialTimer,
+  remainingMs,
+  type TimerAction,
+  type TimerState,
+  timerReducer,
+} from "../domain/timer";
+import type { Settings } from "../domain/user";
+import { useUserDoc } from "./user";
 
 const KEY = "komplett:timer";
 
@@ -29,4 +48,70 @@ export function useTimer(): [TimerState, Dispatch<TimerAction>] {
   }, [running]);
 
   return [state, dispatch];
+}
+
+function beep() {
+  const ctx = new AudioContext();
+  const osc = ctx.createOscillator();
+  osc.frequency.value = 880;
+  osc.connect(ctx.destination);
+  osc.start();
+  osc.stop(ctx.currentTime + 0.3);
+  osc.onended = () => ctx.close();
+}
+
+function periodEnded(title: string, sound: boolean) {
+  if ("Notification" in window && Notification.permission === "granted") new Notification(title);
+  if (sound) beep();
+}
+
+export type PendingSession = ReturnType<typeof focusSummary>;
+
+type TimerContextValue = {
+  state: TimerState;
+  dispatch: Dispatch<TimerAction>;
+  settings: Settings | undefined;
+  pending: PendingSession | null; // a finished focus awaiting its note
+  clearPending: () => void;
+};
+
+const TimerContext = createContext<TimerContextValue | null>(null);
+
+// One timer for the whole app. Owns period-end effects (notification, sound, auto-break) so they
+// fire whichever screen is open, and captures the focus summary before the break overwrites it.
+export function TimerProvider({ uid, children }: { uid: string; children: ReactNode }) {
+  const [state, dispatch] = useTimer();
+  const settings = useUserDoc(uid)?.settings;
+  const [pending, setPending] = useState<PendingSession | null>(() =>
+    state.phase === "focusDone" ? focusSummary(state, Date.now()) : null,
+  );
+  const prev = useRef(state);
+
+  useEffect(() => {
+    const was = prev.current;
+    prev.current = state;
+    if (was.phase === state.phase) return;
+    const now = Date.now();
+    if (was.phase === "focus" && state.phase === "focusDone") {
+      setPending(focusSummary(state, now));
+      if (!state.endedEarly) {
+        periodEnded("Focus done — take a break", settings?.soundEnabled ?? true);
+        dispatch({ type: "startBreak", now, breakMinutes: settings?.breakMinutes ?? 5 });
+      }
+    } else if (was.phase === "break" && state.phase === "idle" && remainingMs(was, now) === 0) {
+      periodEnded("Break over", settings?.soundEnabled ?? true);
+    }
+  }, [state, dispatch, settings]);
+
+  return createElement(
+    TimerContext.Provider,
+    { value: { state, dispatch, settings, pending, clearPending: () => setPending(null) } },
+    children,
+  );
+}
+
+export function useTimerContext(): TimerContextValue {
+  const ctx = useContext(TimerContext);
+  if (!ctx) throw new Error("useTimerContext outside TimerProvider");
+  return ctx;
 }
