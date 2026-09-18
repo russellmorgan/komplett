@@ -2,6 +2,7 @@ import { BrowserRouter, NavLink, Route, Routes } from "react-router";
 import { useAuthUser } from "./data/auth";
 import { History, Partner, Settings, Timer } from "./screens";
 import { Completed } from "./screens/Completed";
+import { ListsNav } from "./screens/ListsNav";
 import { SignIn } from "./screens/SignIn";
 import { Tasks } from "./screens/Tasks";
 
@@ -11,7 +12,6 @@ export function App() {
   if (user === null) return <SignIn />;
 
   const screens = [
-    { path: "/", label: "Tasks", element: <Tasks user={user} /> },
     { path: "/completed", label: "Completed", element: <Completed user={user} /> },
     { path: "/timer", label: "Timer", element: <Timer /> },
     { path: "/history", label: "History", element: <History /> },
@@ -22,14 +22,17 @@ export function App() {
     <BrowserRouter>
       <div className="shell">
         <nav className="nav">
+          <ListsNav user={user} />
           {screens.map((screen) => (
-            <NavLink key={screen.path} to={screen.path} end={screen.path === "/"}>
+            <NavLink key={screen.path} to={screen.path}>
               {screen.label}
             </NavLink>
           ))}
         </nav>
         <main>
           <Routes>
+            <Route path="/" element={<Tasks user={user} />} />
+            <Route path="/list/:listId" element={<Tasks user={user} />} />
             {screens.map((screen) => (
               <Route key={screen.path} path={screen.path} element={screen.element} />
             ))}

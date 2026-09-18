@@ -1,9 +1,11 @@
 import type { AuthUser } from "../data/auth";
+import { useLists } from "../data/lists";
 import { deleteTask, deleteTasks, useTasks } from "../data/tasks";
 import { completedTasks } from "../domain/tasks";
 
 export function Completed({ user }: { user: AuthUser }) {
   const all = useTasks(user.uid);
+  const lists = useLists(user.uid);
   const completed = completedTasks(all);
 
   function clearAll() {
@@ -23,7 +25,9 @@ export function Completed({ user }: { user: AuthUser }) {
         {completed.map((task) => (
           <li className="task" key={task.id}>
             <span className="task-title">{task.title}</span>
-            <span className="muted">{task.listId}</span>
+            <span className="muted">
+              {lists.find((l) => l.id === task.listId)?.name ?? task.listId}
+            </span>
             <button
               type="button"
               onClick={() => {

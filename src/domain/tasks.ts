@@ -49,13 +49,18 @@ export function completedTasks(tasks: Task[], listId?: string): Task[] {
     .sort((a, b) => (b.completedAt as number) - (a.completedAt as number));
 }
 
-export function nextSortOrder(tasks: Task[]): number {
-  return Math.max(0, ...tasks.map((t) => t.sortOrder)) + 1;
+export function nextSortOrder(items: { sortOrder: number }[]): number {
+  return Math.max(0, ...items.map((t) => t.sortOrder)) + 1;
 }
 
 // New sortOrder for sorted[index] moved one step up (-1) or down (1); null if already at that edge.
+// Works for any sortOrder-carrying item (tasks, lists, folders) — sort the list first.
 // ponytail: midpoint floats lose precision after ~50 moves between the same two neighbours; renumber if it ever happens.
-export function movedSortOrder(sorted: Task[], index: number, direction: -1 | 1): number | null {
+export function movedSortOrder<T extends { sortOrder: number }>(
+  sorted: T[],
+  index: number,
+  direction: -1 | 1,
+): number | null {
   const target = index + direction;
   if (target < 0 || target >= sorted.length) return null;
   const neighbour = sorted[target]?.sortOrder as number;
