@@ -1,15 +1,31 @@
 import { type FormEvent, useRef, useState } from "react";
 import type { AuthUser } from "../data/auth";
 import { addTask, deleteTask, updateTask, useTasks } from "../data/tasks";
-import { activeTasks, movedSortOrder, nextSortOrder, type Task } from "../domain/tasks";
+import {
+  activeTasks,
+  completedTasks,
+  movedSortOrder,
+  nextSortOrder,
+  type Task,
+} from "../domain/tasks";
 import { inboxListId } from "../domain/user";
 
 export function Tasks({ user }: { user: AuthUser }) {
   const listId = inboxListId(user.uid);
   const all = useTasks(user.uid);
   const active = activeTasks(all, listId);
+  const completed = completedTasks(all, listId);
   const [title, setTitle] = useState("");
   const [lastCompleted, setLastCompleted] = useState<Task | null>(null);
+  const showCompletedKey = `showCompleted-${listId}`;
+  const [showCompleted, setShowCompleted] = useState(
+    () => localStorage.getItem(showCompletedKey) === "1",
+  );
+
+  function toggleShowCompleted(checked: boolean) {
+    setShowCompleted(checked);
+    localStorage.setItem(showCompletedKey, checked ? "1" : "0");
+  }
 
   function add(e: FormEvent) {
     e.preventDefault();
@@ -67,6 +83,29 @@ export function Tasks({ user }: { user: AuthUser }) {
           />
         ))}
       </ul>
+      <label className="muted">
+        <input
+          type="checkbox"
+          checked={showCompleted}
+          onChange={(e) => toggleShowCompleted(e.target.checked)}
+        />{" "}
+        Show completed
+      </label>
+      {showCompleted && (
+        <ul className="tasks">
+          {completed.map((task) => (
+            <li className="task" key={task.id}>
+              <input
+                type="checkbox"
+                checked={true}
+                onChange={() => updateTask(task.id, { completedAt: null })}
+                aria-label={`Un-complete ${task.title}`}
+              />
+              <span className="task-title">{task.title}</span>
+            </li>
+          ))}
+        </ul>
+      )}
     </>
   );
 }

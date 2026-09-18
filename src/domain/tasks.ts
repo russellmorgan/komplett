@@ -42,6 +42,13 @@ export function activeTasks(tasks: Task[], listId: string): Task[] {
     .sort((a, b) => a.sortOrder - b.sortOrder);
 }
 
+// Completed tasks, newest completedAt first. Pass listId to scope to one list; omit for all.
+export function completedTasks(tasks: Task[], listId?: string): Task[] {
+  return tasks
+    .filter((t) => t.completedAt !== null && (listId === undefined || t.listId === listId))
+    .sort((a, b) => (b.completedAt as number) - (a.completedAt as number));
+}
+
 export function nextSortOrder(tasks: Task[]): number {
   return Math.max(0, ...tasks.map((t) => t.sortOrder)) + 1;
 }
