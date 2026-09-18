@@ -3,9 +3,10 @@ import { type AuthUser, useAuthUser } from "./data/auth";
 import { useLists } from "./data/lists";
 import { useReminders } from "./data/reminders";
 import { useTasks } from "./data/tasks";
-import { History, Partner, Settings, Timer } from "./screens";
+import { History, Partner, Timer } from "./screens";
 import { Completed } from "./screens/Completed";
 import { ListsNav } from "./screens/ListsNav";
+import { Settings } from "./screens/Settings";
 import { SignIn } from "./screens/SignIn";
 import { Tasks } from "./screens/Tasks";
 
