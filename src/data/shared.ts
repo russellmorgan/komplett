@@ -1,6 +1,11 @@
-import { collection, doc, onSnapshot, setDoc } from "firebase/firestore";
+import { collection, doc, onSnapshot, setDoc, updateDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
-import { projectSharedTask, type SharedTask, sharedTaskChanged } from "../domain/shared";
+import {
+  projectSharedTask,
+  type SharedTask,
+  sharedTaskChanged,
+  withReaction,
+} from "../domain/shared";
 import type { Task } from "../domain/tasks";
 import type { User } from "../domain/user";
 import { db } from "./firebase";
@@ -48,6 +53,13 @@ export function useSharedTaskSync(uid: string, user: User | undefined, tasks: Ta
     const next = projectSharedTask(task, stored, Date.now());
     if (sharedTaskChanged(stored, next)) setDoc(doc(db, "sharedTasks", uid), next);
   }, [uid, task, stored]);
+}
+
+// React to a partner's completed shared task; replaces this user's earlier reaction.
+export function react(ownerUid: string, shared: SharedTask, byUserId: string, emoji: string) {
+  return updateDoc(doc(db, "sharedTasks", ownerUid), {
+    reactions: withReaction(shared.reactions, byUserId, emoji, Date.now()),
+  });
 }
 
 // Everyone who has signed in, for picking a partner.

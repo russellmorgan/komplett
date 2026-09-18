@@ -2,7 +2,9 @@
 
 import type { Task } from "./tasks";
 
-export type Reaction = { uid: string; emoji: string };
+export const REACTION_EMOJI = ["👏", "🔥", "🎉", "💪", "❤️", "🙌", "⭐", "🚀"] as const;
+
+export type Reaction = { emoji: string; byUserId: string; at: number };
 
 export type SharedTask = {
   taskId: string;
@@ -13,14 +15,16 @@ export type SharedTask = {
   updatedAt: number;
 };
 
-// Reactions survive edits to the same task and are cleared when a different task takes over.
+// Reactions belong to one completion: they survive edits to the same completed task and are
+// cleared when a different task takes over or the same task is completed again.
 export function projectSharedTask(task: Task, prev: SharedTask | null, now: number): SharedTask {
   return {
     taskId: task.id,
     title: task.title,
     dueDate: task.dueDate,
     completedAt: task.completedAt,
-    reactions: prev?.taskId === task.id ? prev.reactions : [],
+    reactions:
+      prev?.taskId === task.id && prev.completedAt === task.completedAt ? prev.reactions : [],
     updatedAt: now,
   };
 }
@@ -34,4 +38,14 @@ export function sharedTaskChanged(stored: SharedTask | null, next: SharedTask): 
     stored.dueDate !== next.dueDate ||
     stored.completedAt !== next.completedAt
   );
+}
+
+// One reaction per user: a new one replaces that user's previous one.
+export function withReaction(
+  reactions: Reaction[],
+  byUserId: string,
+  emoji: string,
+  at: number,
+): Reaction[] {
+  return [...reactions.filter((r) => r.byUserId !== byUserId), { emoji, byUserId, at }];
 }

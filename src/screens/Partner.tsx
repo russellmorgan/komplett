@@ -1,7 +1,7 @@
 import type { AuthUser } from "../data/auth";
-import { useAllUsers, useSharedTask } from "../data/shared";
+import { react, useAllUsers, useSharedTask } from "../data/shared";
 import { setPartner, useUserDoc } from "../data/user";
-import type { SharedTask } from "../domain/shared";
+import { REACTION_EMOJI, type SharedTask } from "../domain/shared";
 
 export function Partner({ user }: { user: AuthUser }) {
   const me = useUserDoc(user.uid);
@@ -61,6 +61,8 @@ export function Partner({ user }: { user: AuthUser }) {
             heading={`${partner.displayName}’s shared task`}
             shared={theirs}
             empty="They haven’t set an accountability task yet."
+            onReact={(emoji) => partnerId && theirs && react(partnerId, theirs, user.uid, emoji)}
+            myUid={user.uid}
           />
         )}
       </div>
@@ -72,18 +74,23 @@ function SharedCard({
   heading,
   shared,
   empty,
+  onReact,
+  myUid,
 }: {
   heading: string;
   shared: SharedTask | null | undefined;
   empty: string;
+  onReact?: (emoji: string) => void;
+  myUid?: string;
 }) {
+  const mine = shared?.reactions.find((r) => r.byUserId === myUid)?.emoji;
   return (
     <section className="shared-card">
       <h2>{heading}</h2>
       {shared === undefined ? null : shared === null ? (
         <p className="muted">{empty}</p>
       ) : (
-        <p>
+        <div>
           <span className="task-title">{shared.title}</span>
           <br />
           <span className="muted">
@@ -93,7 +100,29 @@ function SharedCard({
                 ? `Due ${shared.dueDate}`
                 : "In progress"}
           </span>
-        </p>
+          {shared.reactions.length > 0 && (
+            <span className="reactions" title="Reactions">
+              {shared.reactions.map((r) => (
+                <span key={r.byUserId}>{r.emoji}</span>
+              ))}
+            </span>
+          )}
+          {onReact && shared.completedAt !== null && (
+            <fieldset className="reaction-picker">
+              <legend className="muted">React</legend>
+              {REACTION_EMOJI.map((emoji) => (
+                <button
+                  key={emoji}
+                  type="button"
+                  aria-pressed={emoji === mine}
+                  onClick={() => onReact(emoji)}
+                >
+                  {emoji}
+                </button>
+              ))}
+            </fieldset>
+          )}
+        </div>
       )}
     </section>
   );

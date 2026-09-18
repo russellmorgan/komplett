@@ -20,8 +20,23 @@ service cloud.firestore {
           && userDoc(request.auth.uid).partnerId == uid
           && userDoc(uid).partnerId == request.auth.uid;
       }
+      // A partner may only change `reactions` on a completed task, and only to hold their own
+      // reaction. ponytail: rules can't diff arrays, so this allows at most one reaction — fine
+      // with one partner; loosen to per-user checks when Phase 2 adds more partners.
+      function onlyOwnReaction() {
+        let next = request.resource.data.reactions;
+        return request.resource.data.diff(resource.data).affectedKeys().hasOnly(["reactions"])
+          && resource.data.completedAt != null
+          && next.size() <= 1
+          && (next.size() == 0
+            || (next[0].keys().hasOnly(["emoji", "byUserId", "at"])
+              && next[0].byUserId == request.auth.uid
+              && next[0].emoji in ["👏", "🔥", "🎉", "💪", "❤️", "🙌", "⭐", "🚀"]
+              && next[0].at is number));
+      }
       allow read: if isOwner(uid) || mutualPartner();
       allow write: if isOwner(uid);
+      allow update: if mutualPartner() && onlyOwnReaction();
     }
 
     match /tasks/{id} {
