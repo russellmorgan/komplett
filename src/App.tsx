@@ -7,7 +7,7 @@ import { TimerProvider, useTimerContext } from "./data/timer";
 import { formatMmSs, remainingMs } from "./domain/timer";
 import { History, Partner } from "./screens";
 import { Completed } from "./screens/Completed";
-import { ListsNav } from "./screens/ListsNav";
+import { Lists } from "./screens/Lists";
 import { Settings } from "./screens/Settings";
 import { SignIn } from "./screens/SignIn";
 import { Tasks } from "./screens/Tasks";
@@ -25,6 +25,7 @@ function Shell({ user }: { user: AuthUser }) {
   useReminders(useTasks(user.uid));
 
   const screens = [
+    { path: "/lists", label: "Lists", element: <Lists user={user} /> },
     { path: "/completed", label: "Completed", element: <Completed user={user} /> },
     { path: "/timer", label: "Timer", element: <Timer user={user} /> },
     { path: "/history", label: "History", element: <History /> },
@@ -36,7 +37,9 @@ function Shell({ user }: { user: AuthUser }) {
       <BrowserRouter>
         <div className="shell">
           <nav className="nav">
-            <ListsNav user={user} />
+            <NavLink to="/" end>
+              Tasks
+            </NavLink>
             <TimerPill />
             {screens.map((screen) => (
               <NavLink key={screen.path} to={screen.path}>

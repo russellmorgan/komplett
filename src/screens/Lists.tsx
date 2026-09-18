@@ -13,9 +13,9 @@ import {
 import { LIST_COLORS, type ListColor, sortByOrder } from "../domain/lists";
 import { movedSortOrder, nextSortOrder } from "../domain/tasks";
 
-// Sidebar: Inbox, top-level lists, and folders (with their lists nested). Create/rename/
+// Lists screen: Inbox, top-level lists, and folders (with their lists nested). Create/rename/
 // delete/reorder/move-to-folder/color live here; task rows link back via a plain <select>.
-export function ListsNav({ user }: { user: AuthUser }) {
+export function Lists({ user }: { user: AuthUser }) {
   const lists = useLists(user.uid);
   const folders = useFolders(user.uid);
   const topLists = sortByOrder(lists.filter((l) => !l.isInbox && l.folderId === null));
@@ -49,8 +49,9 @@ export function ListsNav({ user }: { user: AuthUser }) {
   }
 
   return (
-    <div className="lists-nav">
-      <NavLink to="/" end>
+    <div className="lists">
+      <h1>Lists</h1>
+      <NavLink to="/" end className="list-name">
         Inbox
       </NavLink>
 
@@ -66,42 +67,46 @@ export function ListsNav({ user }: { user: AuthUser }) {
       ))}
 
       <button type="button" onClick={() => createList(null)}>
-        + List
+        + New list
       </button>
 
       {sortedFolders.map((folder, i) => {
         const folderLists = sortByOrder(lists.filter((l) => l.folderId === folder.id));
         return (
           <div key={folder.id} className="folder">
-            <span>{folder.name}</span>
-            <button
-              type="button"
-              disabled={i === 0}
-              onClick={() => moveFolder(i, -1)}
-              aria-label="Move folder up"
-            >
-              ↑
-            </button>
-            <button
-              type="button"
-              disabled={i === sortedFolders.length - 1}
-              onClick={() => moveFolder(i, 1)}
-              aria-label="Move folder down"
-            >
-              ↓
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                const name = window.prompt("Rename folder", folder.name);
-                if (name?.trim()) updateFolder(folder.id, { name: name.trim() });
-              }}
-            >
-              Rename
-            </button>
-            <button type="button" onClick={() => deleteFolder(folder.id)}>
-              Delete
-            </button>
+            <div className="list-row">
+              <strong>{folder.name}</strong>
+              <span className="move">
+                <button
+                  type="button"
+                  disabled={i === 0}
+                  onClick={() => moveFolder(i, -1)}
+                  aria-label="Move folder up"
+                >
+                  ↑
+                </button>
+                <button
+                  type="button"
+                  disabled={i === sortedFolders.length - 1}
+                  onClick={() => moveFolder(i, 1)}
+                  aria-label="Move folder down"
+                >
+                  ↓
+                </button>
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  const name = window.prompt("Rename folder", folder.name);
+                  if (name?.trim()) updateFolder(folder.id, { name: name.trim() });
+                }}
+              >
+                Rename
+              </button>
+              <button type="button" onClick={() => deleteFolder(folder.id)}>
+                Delete
+              </button>
+            </div>
             {folderLists.map((list, j) => (
               <ListRow
                 key={list.id}
@@ -113,14 +118,14 @@ export function ListsNav({ user }: { user: AuthUser }) {
               />
             ))}
             <button type="button" onClick={() => createList(folder.id)}>
-              + List
+              + New list in {folder.name}
             </button>
           </div>
         );
       })}
 
       <button type="button" onClick={createFolder}>
-        + Folder
+        + New folder
       </button>
     </div>
   );
@@ -141,7 +146,11 @@ function ListRow({
 }) {
   return (
     <div className="list-row">
-      <NavLink to={`/list/${list.id}`} style={{ color: `var(--list-${list.color})` }}>
+      <NavLink
+        to={`/list/${list.id}`}
+        className="list-name"
+        style={{ color: `var(--list-${list.color})` }}
+      >
         {list.name}
       </NavLink>
       <select
@@ -167,22 +176,24 @@ function ListRow({
           </option>
         ))}
       </select>
-      <button
-        type="button"
-        disabled={first}
-        onClick={() => onMove(-1)}
-        aria-label={`Move ${list.name} up`}
-      >
-        ↑
-      </button>
-      <button
-        type="button"
-        disabled={last}
-        onClick={() => onMove(1)}
-        aria-label={`Move ${list.name} down`}
-      >
-        ↓
-      </button>
+      <span className="move">
+        <button
+          type="button"
+          disabled={first}
+          onClick={() => onMove(-1)}
+          aria-label={`Move ${list.name} up`}
+        >
+          ↑
+        </button>
+        <button
+          type="button"
+          disabled={last}
+          onClick={() => onMove(1)}
+          aria-label={`Move ${list.name} down`}
+        >
+          ↓
+        </button>
+      </span>
       <button
         type="button"
         onClick={() => {

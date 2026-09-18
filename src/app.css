@@ -165,24 +165,42 @@ h1 {
   display: inline-flex;
 }
 
-.lists-nav {
+.list-header {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+}
+.list-header h1 {
+  margin: 0;
+}
+
+/* Lists screen: one row per list/folder, name first, controls wrap on narrow screens. */
+.lists {
   display: grid;
-  gap: var(--space-1);
-  font-size: var(--text-sm);
+  gap: var(--space-3);
+  max-width: 40rem;
 }
 .list-row {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+.move {
+  display: inline-flex;
   gap: var(--space-1);
 }
-.list-row a {
-  flex: 1;
+.list-name {
+  flex: 1 0 8rem;
+  font-weight: 600;
 }
 .folder {
   display: grid;
-  gap: var(--space-1);
+  gap: var(--space-2);
   padding-left: var(--space-3);
-  border-left: 1px solid var(--color-border);
+  border-left: 2px solid var(--color-border);
 }
 
 /* Timer */

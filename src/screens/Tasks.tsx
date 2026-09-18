@@ -1,5 +1,5 @@
 import { type FormEvent, useRef, useState } from "react";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import type { AuthUser } from "../data/auth";
 import { useLists } from "../data/lists";
 import { addTask, deleteTask, updateTask, useTasks } from "../data/tasks";
@@ -19,6 +19,7 @@ export function Tasks({ user }: { user: AuthUser }) {
   const listId = paramListId ?? inboxListId(user.uid);
   const lists = useLists(user.uid);
   const currentList = lists.find((l) => l.id === listId);
+  const navigate = useNavigate();
   const all = useTasks(user.uid);
   const active = activeTasks(all, listId);
   const completed = completedTasks(all, listId);
@@ -54,7 +55,24 @@ export function Tasks({ user }: { user: AuthUser }) {
 
   return (
     <>
-      <h1>{currentList?.isInbox === false ? currentList.name : "Inbox"}</h1>
+      <div className="list-header">
+        <h1 style={currentList && { color: `var(--list-${currentList.color})` }}>
+          {currentList?.isInbox === false ? currentList.name : "Inbox"}
+        </h1>
+        <select
+          aria-label="Switch list"
+          value={listId}
+          onChange={(e) =>
+            navigate(e.target.value === inboxListId(user.uid) ? "/" : `/list/${e.target.value}`)
+          }
+        >
+          {lists.map((l) => (
+            <option key={l.id} value={l.id}>
+              {l.name}
+            </option>
+          ))}
+        </select>
+      </div>
       <form onSubmit={add} className="add-task">
         <input
           placeholder="Add a task"
