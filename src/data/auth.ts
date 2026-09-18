@@ -10,7 +10,7 @@ import {
 } from "firebase/auth";
 import { doc, getDoc, runTransaction } from "firebase/firestore";
 import { useEffect, useState } from "react";
-import { inboxList, initialUser } from "../domain/user";
+import { inboxList, inboxListId, initialUser } from "../domain/user";
 import { auth, db } from "./firebase";
 
 const EMAIL_KEY = "komplett:emailForSignIn";
@@ -71,6 +71,6 @@ async function ensureUserDocs(u: FirebaseUser) {
   await runTransaction(db, async (tx) => {
     if ((await tx.get(userRef)).exists()) return;
     tx.set(userRef, initialUser({ displayName: u.displayName, email: u.email ?? "" }));
-    tx.set(doc(db, "lists", `${u.uid}-inbox`), inboxList(u.uid));
+    tx.set(doc(db, "lists", inboxListId(u.uid)), inboxList(u.uid));
   });
 }

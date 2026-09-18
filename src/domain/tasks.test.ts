@@ -21,7 +21,7 @@ describe("activeTasks", () => {
   it("keeps only uncompleted tasks of the list, sorted by sortOrder", () => {
     const tasks = [
       task({ id: "b", sortOrder: 2 }),
-      task({ id: "done", sortOrder: 0, completedAt: 1 }),
+      task({ id: "completed", sortOrder: 0, completedAt: 1 }),
       task({ id: "other", sortOrder: 0, listId: "work" }),
       task({ id: "a", sortOrder: 1 }),
     ];

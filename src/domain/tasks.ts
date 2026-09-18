@@ -20,6 +20,22 @@ export type Task = {
   updatedAt: number;
 };
 
+export function newTask(
+  fields: Pick<Task, "ownerId" | "listId" | "title" | "sortOrder">,
+  now: number,
+): Omit<Task, "id"> {
+  return {
+    ...fields,
+    note: "",
+    dueDate: null,
+    reminderAt: null,
+    repeat: null,
+    completedAt: null,
+    createdAt: now,
+    updatedAt: now,
+  };
+}
+
 export function activeTasks(tasks: Task[], listId: string): Task[] {
   return tasks
     .filter((t) => t.listId === listId && t.completedAt === null)
@@ -35,8 +51,8 @@ export function nextSortOrder(tasks: Task[]): number {
 export function movedSortOrder(sorted: Task[], index: number, direction: -1 | 1): number | null {
   const target = index + direction;
   if (target < 0 || target >= sorted.length) return null;
-  const near = sorted[target]?.sortOrder as number;
-  const far = sorted[target + direction]?.sortOrder;
-  if (far === undefined) return near + direction;
-  return (near + far) / 2;
+  const neighbour = sorted[target]?.sortOrder as number;
+  const beyond = sorted[target + direction]?.sortOrder;
+  if (beyond === undefined) return neighbour + direction;
+  return (neighbour + beyond) / 2;
 }

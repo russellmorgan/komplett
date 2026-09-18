@@ -1,11 +1,13 @@
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useRef, useState } from "react";
 import type { AuthUser } from "../data/auth";
-import { addTask, deleteTask, inboxListId, updateTask, useTasks } from "../data/tasks";
-import { activeTasks, movedSortOrder, type Task } from "../domain/tasks";
+import { addTask, deleteTask, updateTask, useTasks } from "../data/tasks";
+import { activeTasks, movedSortOrder, nextSortOrder, type Task } from "../domain/tasks";
+import { inboxListId } from "../domain/user";
 
 export function Tasks({ user }: { user: AuthUser }) {
   const listId = inboxListId(user.uid);
-  const active = activeTasks(useTasks(user.uid), listId);
+  const all = useTasks(user.uid);
+  const active = activeTasks(all, listId);
   const [title, setTitle] = useState("");
   const [lastCompleted, setLastCompleted] = useState<Task | null>(null);
 
@@ -13,7 +15,9 @@ export function Tasks({ user }: { user: AuthUser }) {
     e.preventDefault();
     const trimmed = title.trim();
     if (!trimmed) return;
-    addTask(user.uid, listId, trimmed, active);
+    // Order against every task in the list, completed ones included, so nothing interleaves later.
+    const sortOrder = nextSortOrder(all.filter((t) => t.listId === listId));
+    addTask({ ownerId: user.uid, listId, title: trimmed, sortOrder });
     setTitle("");
   }
 
@@ -81,8 +85,11 @@ function TaskRow({
   last: boolean;
 }) {
   const [draft, setDraft] = useState<string | null>(null);
+  // Escape unmounts the input, which fires blur; this stops that blur committing the cancelled edit.
+  const cancelled = useRef(false);
 
   function commit() {
+    if (cancelled.current) return;
     const title = draft?.trim();
     if (title && title !== task.title) updateTask(task.id, { title });
     setDraft(null);
@@ -97,7 +104,14 @@ function TaskRow({
         aria-label={`Complete ${task.title}`}
       />
       {draft === null ? (
-        <button type="button" className="task-title" onClick={() => setDraft(task.title)}>
+        <button
+          type="button"
+          className="task-title"
+          onClick={() => {
+            cancelled.current = false;
+            setDraft(task.title);
+          }}
+        >
           {task.title}
         </button>
       ) : (
@@ -108,8 +122,11 @@ function TaskRow({
           onChange={(e) => setDraft(e.target.value)}
           onBlur={commit}
           onKeyDown={(e) => {
-            if (e.key === "Enter") commit();
-            if (e.key === "Escape") setDraft(null);
+            if (e.key === "Enter") e.currentTarget.blur();
+            if (e.key === "Escape") {
+              cancelled.current = true;
+              setDraft(null);
+            }
           }}
           aria-label="Task title"
         />

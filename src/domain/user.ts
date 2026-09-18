@@ -29,6 +29,10 @@ export function initialUser(profile: { displayName: string | null; email: string
   };
 }
 
+export function inboxListId(uid: string) {
+  return `${uid}-inbox`;
+}
+
 export function inboxList(ownerId: string): List {
   return { ownerId, folderId: null, name: "Inbox", color: "slate", sortOrder: 0, isInbox: true };
 }

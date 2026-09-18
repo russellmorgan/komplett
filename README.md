@@ -25,7 +25,7 @@ Production builds need a real Firebase project on the **Spark plan** (never Blaz
 
 1. [console.firebase.google.com](https://console.firebase.google.com) → **Add project**. Decline Google Analytics.
 2. **Build → Authentication → Get started → Sign-in method**: enable **Google** (pick a support email) and **Email/Password** with the **Email link (passwordless sign-in)** toggle on.
-3. **Build → Firestore Database → Create database** in production mode. `.firebaserc` already points at the project; `pnpm firebase login` once (if the CLI complains about an unknown alias, `pnpm firebase use default`), then `pnpm ship` publishes rules and hosting.
+3. **Build → Firestore Database → Create database** in production mode. Put your project id in `.firebaserc` (alias `default`); `pnpm firebase login` once (if the CLI complains about an unknown alias, `pnpm firebase use default`), then `pnpm ship` publishes rules and hosting.
 4. **Project settings (gear) → Your apps → Add app → Web**. Copy `apiKey`, `authDomain`, `projectId`, `appId` into `.env` (see [.env.example](.env.example)).
 5. **Authentication → Settings → Authorised domains**: add every domain the app is served from (`localhost` and the Hosting domains are pre-listed; add any custom domain). Magic links only work from listed domains.
 
