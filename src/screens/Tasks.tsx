@@ -1,8 +1,11 @@
 import { type FormEvent, useRef, useState } from "react";
 import type { AuthUser } from "../data/auth";
+import { useReminders } from "../data/reminders";
 import { addTask, deleteTask, updateTask, useTasks } from "../data/tasks";
+import { completePatch } from "../domain/repeat";
 import { activeTasks, movedSortOrder, nextSortOrder, type Task } from "../domain/tasks";
 import { inboxListId } from "../domain/user";
+import { TaskDetail } from "./TaskDetail";
 
 export function Tasks({ user }: { user: AuthUser }) {
   const listId = inboxListId(user.uid);
@@ -10,6 +13,9 @@ export function Tasks({ user }: { user: AuthUser }) {
   const active = activeTasks(all, listId);
   const [title, setTitle] = useState("");
   const [lastCompleted, setLastCompleted] = useState<Task | null>(null);
+  const [openId, setOpenId] = useState<string | null>(null);
+  const open = all.find((t) => t.id === openId);
+  useReminders(all);
 
   function add(e: FormEvent) {
     e.preventDefault();
@@ -58,15 +64,17 @@ export function Tasks({ user }: { user: AuthUser }) {
             key={task.id}
             task={task}
             onComplete={() => {
-              updateTask(task.id, { completedAt: Date.now() });
-              setLastCompleted(task);
+              updateTask(task.id, completePatch(task, Date.now()));
+              if (!task.repeat) setLastCompleted(task);
             }}
+            onOpen={() => setOpenId(task.id)}
             onMove={(direction) => move(i, direction)}
             first={i === 0}
             last={i === active.length - 1}
           />
         ))}
       </ul>
+      {open && <TaskDetail task={open} onClose={() => setOpenId(null)} />}
     </>
   );
 }
@@ -74,12 +82,14 @@ export function Tasks({ user }: { user: AuthUser }) {
 function TaskRow({
   task,
   onComplete,
+  onOpen,
   onMove,
   first,
   last,
 }: {
   task: Task;
   onComplete: () => void;
+  onOpen: () => void;
   onMove: (direction: -1 | 1) => void;
   first: boolean;
   last: boolean;
@@ -131,6 +141,9 @@ function TaskRow({
           aria-label="Task title"
         />
       )}
+      <button type="button" onClick={onOpen} aria-label="Details">
+        {task.dueDate ?? "…"}
+      </button>
       <button type="button" disabled={first} onClick={() => onMove(-1)} aria-label="Move up">
         ↑
       </button>

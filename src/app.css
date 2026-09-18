@@ -142,3 +142,25 @@ h1 {
 .task-title:hover {
   border-color: var(--color-border);
 }
+
+.task-detail {
+  display: grid;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+.task-detail header {
+  display: flex;
+  justify-content: space-between;
+}
+.task-detail label {
+  display: grid;
+  gap: 0.25rem;
+}
+.task-detail fieldset {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.task-detail fieldset label {
+  display: inline-flex;
+}
