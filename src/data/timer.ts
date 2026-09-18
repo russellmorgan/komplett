@@ -65,6 +65,7 @@ function periodEnded(title: string, sound: boolean) {
   if (sound) beep();
 }
 
+const PENDING_KEY = "komplett:pendingSession";
 export type PendingSession = ReturnType<typeof focusSummary>;
 
 type TimerContextValue = {
@@ -83,8 +84,13 @@ export function TimerProvider({ uid, children }: { uid: string; children: ReactN
   const [state, dispatch] = useTimer();
   const settings = useUserDoc(uid)?.settings;
   const [pending, setPending] = useState<PendingSession | null>(() =>
-    state.phase === "focusDone" ? focusSummary(state, Date.now()) : null,
+    JSON.parse(localStorage.getItem(PENDING_KEY) ?? "null"),
   );
+  // Persisted so a reload during the auto-break still asks for the note.
+  useEffect(() => {
+    if (pending) localStorage.setItem(PENDING_KEY, JSON.stringify(pending));
+    else localStorage.removeItem(PENDING_KEY);
+  }, [pending]);
   const prev = useRef(state);
 
   useEffect(() => {

@@ -62,7 +62,10 @@ export function timerReducer(state: TimerState, action: TimerAction): TimerState
       return state.phase === "break" ? initialTimer : state;
     case "tick":
       if (!running || state.pausedAt !== null || remainingMs(state, action.now) > 0) return state;
-      return state.phase === "focus" ? focusDone(state, action.now, false) : initialTimer;
+      // Deadline, not tick time: a late tick (reload, throttled tab) must not inflate the session.
+      return state.phase === "focus"
+        ? focusDone(state, (state.startedAt as number) + state.pausedMs + state.durationMs, false)
+        : initialTimer;
     case "startBreak":
       return state.phase === "focusDone" ? period("break", action.now, action.breakMinutes) : state;
     case "skipBreak":

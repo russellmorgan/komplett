@@ -179,3 +179,15 @@ describe("formatMmSs", () => {
     expect(formatMmSs(0)).toBe("0:00");
   });
 });
+
+describe("late tick", () => {
+  it("ends focus at its deadline, not at the tick time", () => {
+    const s = timerReducer(initialTimer, { type: "start", now: 0, focusMinutes: 25 });
+    const done = timerReducer(s, { type: "tick", now: 3 * 60 * 60_000 });
+    expect(done.phase).toBe("focusDone");
+    expect(focusSummary(done, 3 * 60 * 60_000)).toMatchObject({
+      endedAt: 25 * 60_000,
+      focusMinutes: 25,
+    });
+  });
+});

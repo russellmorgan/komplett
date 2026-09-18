@@ -1,6 +1,9 @@
 import { type AuthUser, signOut } from "../data/auth";
 import { updateSettings, useUserDoc } from "../data/user";
 
+// Native min/max only validate on submit; clamp on blur so 0/NaN never reaches the user doc.
+const minutes = (v: string) => Math.min(180, Math.max(1, Math.round(Number(v)) || 1));
+
 export function Settings({ user }: { user: AuthUser }) {
   const doc = useUserDoc(user.uid);
 
@@ -17,7 +20,7 @@ export function Settings({ user }: { user: AuthUser }) {
               min={1}
               max={180}
               defaultValue={doc.settings.focusMinutes}
-              onBlur={(e) => updateSettings(user.uid, { focusMinutes: Number(e.target.value) })}
+              onBlur={(e) => updateSettings(user.uid, { focusMinutes: minutes(e.target.value) })}
             />
           </label>
           <label>
@@ -27,7 +30,7 @@ export function Settings({ user }: { user: AuthUser }) {
               min={1}
               max={180}
               defaultValue={doc.settings.breakMinutes}
-              onBlur={(e) => updateSettings(user.uid, { breakMinutes: Number(e.target.value) })}
+              onBlur={(e) => updateSettings(user.uid, { breakMinutes: minutes(e.target.value) })}
             />
           </label>
           <label>
