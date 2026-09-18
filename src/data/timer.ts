@@ -12,12 +12,14 @@ import {
 import {
   focusSummary,
   initialTimer,
+  type LinkedTask,
   remainingMs,
   type TimerAction,
   type TimerState,
   timerReducer,
 } from "../domain/timer";
 import type { Settings } from "../domain/user";
+import { requestNotificationPermission } from "./reminders";
 import { useUserDoc } from "./user";
 
 const KEY = "komplett:timer";
@@ -74,6 +76,7 @@ type TimerContextValue = {
   settings: Settings | undefined;
   pending: PendingSession | null; // a finished focus awaiting its note
   clearPending: () => void;
+  startFocus: (task?: LinkedTask) => void; // from Timer or from a task row
 };
 
 const TimerContext = createContext<TimerContextValue | null>(null);
@@ -111,7 +114,24 @@ export function TimerProvider({ uid, children }: { uid: string; children: ReactN
 
   return createElement(
     TimerContext.Provider,
-    { value: { state, dispatch, settings, pending, clearPending: () => setPending(null) } },
+    {
+      value: {
+        state,
+        dispatch,
+        settings,
+        pending,
+        clearPending: () => setPending(null),
+        startFocus: (task) => {
+          requestNotificationPermission();
+          dispatch({
+            type: "start",
+            now: Date.now(),
+            focusMinutes: settings?.focusMinutes ?? 25,
+            task,
+          });
+        },
+      },
+    },
     children,
   );
 }

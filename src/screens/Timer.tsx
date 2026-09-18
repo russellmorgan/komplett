@@ -1,6 +1,5 @@
 import { useState } from "react";
 import type { AuthUser } from "../data/auth";
-import { requestNotificationPermission } from "../data/reminders";
 import { addSession } from "../data/sessions";
 import { useTimerContext } from "../data/timer";
 import { formatMmSs, remainingMs } from "../domain/timer";
@@ -8,16 +7,17 @@ import { formatMmSs, remainingMs } from "../domain/timer";
 const LABEL = { idle: "Ready", focus: "Focus", focusDone: "Focus done", break: "Break" };
 
 export function Timer({ user }: { user: AuthUser }) {
-  const { state, dispatch, settings, pending, clearPending } = useTimerContext();
-  const [note, setNote] = useState("");
+  const { state, dispatch, settings, pending, clearPending, startFocus } = useTimerContext();
+  const [note, setNote] = useState<string | null>(null);
+  const noteText = note ?? pending?.taskTitle ?? "";
   const now = Date.now();
   const running = state.phase === "focus" || state.phase === "break";
   const paused = state.pausedAt !== null;
 
   const save = async () => {
     if (!pending) return;
-    await addSession({ ownerId: user.uid, taskId: null, taskTitle: "", note, ...pending });
-    setNote("");
+    await addSession({ ownerId: user.uid, note: noteText, ...pending });
+    setNote(null);
     clearPending();
     dispatch({ type: "noteSaved" });
   };
@@ -33,10 +33,7 @@ export function Timer({ user }: { user: AuthUser }) {
             type="button"
             className="primary"
             disabled={!settings}
-            onClick={() => {
-              requestNotificationPermission();
-              dispatch({ type: "start", now, focusMinutes: settings?.focusMinutes ?? 25 });
-            }}
+            onClick={() => startFocus()}
           >
             Start focus
           </button>
@@ -69,10 +66,10 @@ export function Timer({ user }: { user: AuthUser }) {
           }}
         >
           <p className="muted">
-            {pending.focusMinutes} min focus{pending.endedEarly ? " (stopped early)" : ""}. What did
-            you do?
+            {pending.focusMinutes} min focus{pending.endedEarly ? " (stopped early)" : ""}
+            {pending.taskTitle && ` on “${pending.taskTitle}”`}. What did you do?
           </p>
-          <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={3} />
+          <textarea value={noteText} onChange={(e) => setNote(e.target.value)} rows={3} />
           <button type="submit" className="primary">
             Save session
           </button>
