@@ -8,6 +8,13 @@ service cloud.firestore {
       allow read, write: if isOwner(uid);
     }
 
+    match /tasks/{id} {
+      function inAList() { return request.resource.data.listId is string; }
+      allow read, delete: if isOwner(resource.data.ownerId);
+      allow create: if isOwner(request.resource.data.ownerId) && inAList();
+      allow update: if isOwner(resource.data.ownerId) && isOwner(request.resource.data.ownerId) && inAList();
+    }
+
     match /lists/{id} {
       allow read: if isOwner(resource.data.ownerId);
       allow create: if isOwner(request.resource.data.ownerId);

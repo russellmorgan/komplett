@@ -1,5 +1,7 @@
 # Komplett
 
+Live: https://komplett-2987f.web.app
+
 To-do list + pomodoro timer + accountability partner, for a handful of friends. Domain vocabulary is in [CONTEXT.md](CONTEXT.md); spec and tickets are GitHub issues #1–#12.
 
 ## Local development
@@ -12,6 +14,7 @@ pnpm dev      # Auth + Firestore emulators (UI at http://localhost:4000) and Vit
 pnpm test     # Vitest, domain module only
 pnpm lint     # Biome + tsc
 pnpm build    # production bundle in dist/
+pnpm ship     # build, then publish dist/ and firestore.rules to Firebase (needs `pnpm firebase login`)
 ```
 
 `pnpm dev` always talks to the local emulators under the fake project `demo-komplett`; no Firebase project is needed. In the emulator, "Sign in with Google" opens a fake account picker, and magic links are printed to the terminal instead of being emailed.
@@ -22,9 +25,9 @@ Production builds need a real Firebase project on the **Spark plan** (never Blaz
 
 1. [console.firebase.google.com](https://console.firebase.google.com) → **Add project**. Decline Google Analytics.
 2. **Build → Authentication → Get started → Sign-in method**: enable **Google** (pick a support email) and **Email/Password** with the **Email link (passwordless sign-in)** toggle on.
-3. **Build → Firestore Database → Create database** in production mode, then deploy the rules: `pnpm firebase deploy --only firestore:rules` (after `pnpm firebase login` and `pnpm firebase use <project-id>`).
+3. **Build → Firestore Database → Create database** in production mode. Put your project id in `.firebaserc` (alias `default`); `pnpm firebase login` once (if the CLI complains about an unknown alias, `pnpm firebase use default`), then `pnpm ship` publishes rules and hosting.
 4. **Project settings (gear) → Your apps → Add app → Web**. Copy `apiKey`, `authDomain`, `projectId`, `appId` into `.env` (see [.env.example](.env.example)).
-5. **Authentication → Settings → Authorised domains**: add every domain the app is served from (the Hosting domain is added automatically; add `localhost` if you run `pnpm preview` against production). Magic links only work from listed domains.
+5. **Authentication → Settings → Authorised domains**: add every domain the app is served from (`localhost` and the Hosting domains are pre-listed; add any custom domain). Magic links only work from listed domains.
 
 ## Layout
 

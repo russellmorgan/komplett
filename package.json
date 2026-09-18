@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "lint": "biome check . && tsc -b",
-    "format": "biome format --write ."
+    "format": "biome format --write .",
+    "ship": "pnpm build && firebase deploy --only hosting,firestore:rules"
   },
   "dependencies": {
     "firebase": "^12.19.0",
