@@ -1,7 +1,8 @@
 import { BrowserRouter, NavLink, Route, Routes } from "react-router";
 import { useAuthUser } from "./data/auth";
-import { History, Partner, Settings, Tasks, Timer } from "./screens";
+import { History, Partner, Settings, Timer } from "./screens";
 import { SignIn } from "./screens/SignIn";
+import { Tasks } from "./screens/Tasks";
 
 export function App() {
   const user = useAuthUser();
@@ -9,7 +10,7 @@ export function App() {
   if (user === null) return <SignIn />;
 
   const screens = [
-    { path: "/", label: "Tasks", element: <Tasks /> },
+    { path: "/", label: "Tasks", element: <Tasks user={user} /> },
     { path: "/timer", label: "Timer", element: <Timer /> },
     { path: "/history", label: "History", element: <History /> },
     { path: "/partner", label: "Partner", element: <Partner /> },
