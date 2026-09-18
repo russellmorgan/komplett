@@ -1,11 +1,16 @@
 import { type FormEvent, useRef, useState } from "react";
+import { useParams } from "react-router";
 import type { AuthUser } from "../data/auth";
+import { useLists } from "../data/lists";
 import { addTask, deleteTask, updateTask, useTasks } from "../data/tasks";
 import { activeTasks, movedSortOrder, nextSortOrder, type Task } from "../domain/tasks";
 import { inboxListId } from "../domain/user";
 
 export function Tasks({ user }: { user: AuthUser }) {
-  const listId = inboxListId(user.uid);
+  const { listId: paramListId } = useParams();
+  const listId = paramListId ?? inboxListId(user.uid);
+  const lists = useLists(user.uid);
+  const currentList = lists.find((l) => l.id === listId);
   const all = useTasks(user.uid);
   const active = activeTasks(all, listId);
   const [title, setTitle] = useState("");
@@ -29,7 +34,7 @@ export function Tasks({ user }: { user: AuthUser }) {
 
   return (
     <>
-      <h1>Inbox</h1>
+      <h1>{currentList?.isInbox === false ? currentList.name : "Inbox"}</h1>
       <form onSubmit={add} className="add-task">
         <input
           placeholder="Add a task"
@@ -57,6 +62,7 @@ export function Tasks({ user }: { user: AuthUser }) {
           <TaskRow
             key={task.id}
             task={task}
+            lists={lists}
             onComplete={() => {
               updateTask(task.id, { completedAt: Date.now() });
               setLastCompleted(task);
@@ -73,12 +79,14 @@ export function Tasks({ user }: { user: AuthUser }) {
 
 function TaskRow({
   task,
+  lists,
   onComplete,
   onMove,
   first,
   last,
 }: {
   task: Task;
+  lists: ReturnType<typeof useLists>;
   onComplete: () => void;
   onMove: (direction: -1 | 1) => void;
   first: boolean;
@@ -137,6 +145,17 @@ function TaskRow({
       <button type="button" disabled={last} onClick={() => onMove(1)} aria-label="Move down">
         ↓
       </button>
+      <select
+        aria-label={`Move ${task.title} to list`}
+        value={task.listId}
+        onChange={(e) => updateTask(task.id, { listId: e.target.value })}
+      >
+        {lists.map((l) => (
+          <option key={l.id} value={l.id}>
+            {l.name}
+          </option>
+        ))}
+      </select>
       <button type="button" onClick={() => deleteTask(task.id)} aria-label="Delete">
         ×
       </button>
