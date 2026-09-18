@@ -2,7 +2,6 @@ import { type FormEvent, useRef, useState } from "react";
 import { useParams } from "react-router";
 import type { AuthUser } from "../data/auth";
 import { useLists } from "../data/lists";
-import { useReminders } from "../data/reminders";
 import { addTask, deleteTask, updateTask, useTasks } from "../data/tasks";
 import { completePatch } from "../domain/repeat";
 import {
@@ -36,7 +35,6 @@ export function Tasks({ user }: { user: AuthUser }) {
   }
   const [openId, setOpenId] = useState<string | null>(null);
   const open = all.find((t) => t.id === openId);
-  useReminders(all);
 
   function add(e: FormEvent) {
     e.preventDefault();

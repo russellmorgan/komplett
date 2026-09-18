@@ -93,3 +93,9 @@ describe("completePatch", () => {
     });
   });
 });
+
+it("weekly with no days selected does not advance", () => {
+  expect(nextOccurrence({ kind: "weekly", days: [] }, "2026-03-10", "2026-03-10")).toBe(
+    "2026-03-10",
+  );
+});

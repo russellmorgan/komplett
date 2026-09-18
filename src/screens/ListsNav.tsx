@@ -10,7 +10,7 @@ import {
   useFolders,
   useLists,
 } from "../data/lists";
-import { LIST_COLORS, sortByOrder } from "../domain/lists";
+import { LIST_COLORS, type ListColor, sortByOrder } from "../domain/lists";
 import { movedSortOrder, nextSortOrder } from "../domain/tasks";
 
 // Sidebar: Inbox, top-level lists, and folders (with their lists nested). Create/rename/
@@ -141,11 +141,13 @@ function ListRow({
 }) {
   return (
     <div className="list-row">
-      <NavLink to={`/list/${list.id}`}>{list.name}</NavLink>
+      <NavLink to={`/list/${list.id}`} style={{ color: `var(--list-${list.color})` }}>
+        {list.name}
+      </NavLink>
       <select
         aria-label={`${list.name} color`}
         value={list.color}
-        onChange={(e) => updateList(list.id, { color: e.target.value })}
+        onChange={(e) => updateList(list.id, { color: e.target.value as ListColor })}
       >
         {LIST_COLORS.map((c) => (
           <option key={c} value={c}>

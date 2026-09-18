@@ -42,7 +42,7 @@ export function nextOccurrence(repeat: Repeat, fromDate: string, today: string):
     ms += DAY;
     if (matches(repeat, new Date(ms), from)) return toDate(ms);
   }
-  return toDate(ms); // empty weekly day set: fall through rather than loop forever
+  return fromDate; // empty weekly day set: nothing matches, stay put
 }
 
 export function advanceTask(task: Task, now: number): Pick<Task, "dueDate" | "reminderAt"> {
