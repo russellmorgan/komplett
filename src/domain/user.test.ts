@@ -6,6 +6,7 @@ describe("initialUser", () => {
     expect(initialUser({ displayName: "Russell", email: "r@example.com" })).toEqual({
       displayName: "Russell",
       email: "r@example.com",
+      photoURL: null,
       partnerId: null,
       accountabilityTaskId: null,
       settings: { focusMinutes: 25, breakMinutes: 5, soundEnabled: true },

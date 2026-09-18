@@ -31,6 +31,18 @@ export function Partner({ user }: { user: AuthUser }) {
         </select>
       </label>
       {people.length === 0 && <p className="muted">Nobody else has signed in yet.</p>}
+      <ul className="people">
+        {people.map((p) => (
+          <li key={p.uid} className={p.uid === partnerId ? "picked" : undefined}>
+            <Avatar person={p} />
+            <span>
+              {p.displayName}
+              <br />
+              <span className="muted">{p.email}</span>
+            </span>
+          </li>
+        ))}
+      </ul>
 
       <div className="shared-pair">
         <SharedCard
@@ -40,10 +52,9 @@ export function Partner({ user }: { user: AuthUser }) {
         />
         {partnerId === null ? (
           <p className="muted">No partner set — choose someone above to see their task.</p>
-        ) : !mutual ? (
+        ) : partner === undefined ? null : !mutual ? (
           <p className="muted">
-            {partner?.displayName ?? "Your partner"} hasn’t picked you back yet, so their task isn’t
-            visible.
+            {partner.displayName} hasn’t picked you back yet, so their task isn’t visible.
           </p>
         ) : (
           <SharedCard
@@ -85,5 +96,13 @@ function SharedCard({
         </p>
       )}
     </section>
+  );
+}
+
+function Avatar({ person }: { person: { displayName: string; photoURL: string | null } }) {
+  return person.photoURL ? (
+    <img className="avatar" src={person.photoURL} alt="" />
+  ) : (
+    <span className="avatar">{person.displayName.slice(0, 1).toUpperCase()}</span>
   );
 }

@@ -51,7 +51,7 @@ export function useSharedTaskSync(uid: string, user: User | undefined, tasks: Ta
 }
 
 // Everyone who has signed in, for picking a partner.
-export type Person = { uid: string; displayName: string; email: string };
+export type Person = Pick<User, "displayName" | "email" | "photoURL"> & { uid: string };
 export function useAllUsers(): Person[] {
   const [people, setPeople] = useState<Person[]>([]);
   useEffect(
@@ -62,7 +62,13 @@ export function useAllUsers(): Person[] {
           setPeople(
             snap.docs.map((d) => {
               const u = d.data() as User;
-              return { uid: d.id, displayName: u.displayName, email: u.email };
+              // photoURL is missing on docs created before it was stored
+              return {
+                uid: d.id,
+                displayName: u.displayName,
+                email: u.email,
+                photoURL: u.photoURL ?? null,
+              };
             }),
           ),
         console.error,

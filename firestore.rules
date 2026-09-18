@@ -11,13 +11,16 @@ service cloud.firestore {
       allow write: if isOwner(uid);
     }
 
-    // Readable by the owner and by anyone who has picked the owner as their partner.
+    // Readable by the owner and by their partner, only while both have picked each other — so
+    // changing partner revokes the previous partner's access at once.
     match /sharedTasks/{uid} {
-      function pickedAsPartner() {
+      function userDoc(id) { return get(/databases/$(database)/documents/users/$(id)).data; }
+      function mutualPartner() {
         return signedIn()
-          && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.partnerId == uid;
+          && userDoc(request.auth.uid).partnerId == uid
+          && userDoc(uid).partnerId == request.auth.uid;
       }
-      allow read: if isOwner(uid) || pickedAsPartner();
+      allow read: if isOwner(uid) || mutualPartner();
       allow write: if isOwner(uid);
     }
 
