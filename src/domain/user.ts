@@ -7,6 +7,7 @@ export type Settings = { focusMinutes: number; breakMinutes: number; soundEnable
 export type User = {
   displayName: string;
   email: string;
+  photoURL: string | null;
   partnerId: string | null;
   accountabilityTaskId: string | null;
   settings: Settings;
@@ -21,10 +22,15 @@ export type List = {
   isInbox: boolean;
 };
 
-export function initialUser(profile: { displayName: string | null; email: string }): User {
+export function initialUser(profile: {
+  displayName: string | null;
+  email: string;
+  photoURL?: string | null;
+}): User {
   return {
     displayName: profile.displayName || profile.email.split("@")[0] || profile.email,
     email: profile.email,
+    photoURL: profile.photoURL ?? null,
     partnerId: null,
     accountabilityTaskId: null,
     settings: { focusMinutes: 25, breakMinutes: 5, soundEnabled: true },

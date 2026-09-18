@@ -4,8 +4,24 @@ service cloud.firestore {
     function signedIn() { return request.auth != null; }
     function isOwner(uid) { return signedIn() && request.auth.uid == uid; }
 
+    // Any signed-in user may read user docs (the Partner page lists everyone); only the owner writes.
+    // ponytail: Firestore can't hide fields on read, so settings/partnerId are visible to friends too.
     match /users/{uid} {
-      allow read, write: if isOwner(uid);
+      allow read: if signedIn();
+      allow write: if isOwner(uid);
+    }
+
+    // Readable by the owner and by their partner, only while both have picked each other — so
+    // changing partner revokes the previous partner's access at once.
+    match /sharedTasks/{uid} {
+      function userDoc(id) { return get(/databases/$(database)/documents/users/$(id)).data; }
+      function mutualPartner() {
+        return signedIn()
+          && userDoc(request.auth.uid).partnerId == uid
+          && userDoc(uid).partnerId == request.auth.uid;
+      }
+      allow read: if isOwner(uid) || mutualPartner();
+      allow write: if isOwner(uid);
     }
 
     match /tasks/{id} {
