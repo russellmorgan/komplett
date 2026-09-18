@@ -30,6 +30,6 @@ Production builds need a real Firebase project on the **Spark plan** (never Blaz
 
 - `src/domain/` — pure functions, no React or Firebase. The tested seam.
 - `src/data/` — the only place `firebase/*` may be imported (Biome fails the build otherwise). Components use its hooks and functions.
-- `src/screens/` — one component per screen.
+- `src/screens/` — screen components.
 - `src/tokens.css` — every color, font, spacing and radius; components never hardcode values.
 - `firestore.rules` — security rules; `firebase.json` — emulator config.

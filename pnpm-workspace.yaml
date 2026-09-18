@@ -1,6 +1,7 @@
+# Native/postinstall scripts we deliberately don't run (re2 is optional for firebase-tools).
 allowBuilds:
-  '@firebase/util': set this to true or false
-  protobufjs: set this to true or false
-  re2: set this to true or false
+  '@firebase/util': false
+  protobufjs: false
+  re2: false
 minimumReleaseAgeExclude:
   - firebase-tools@15.30.2

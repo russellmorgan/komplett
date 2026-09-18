@@ -38,7 +38,7 @@ h1 {
   font-size: var(--text-sm);
 }
 
-/* App shell: bottom tabs by default, sidebar at desktop width. */
+/* App shell: bottom tabs by default, sidebar at desktop width (1024px; media queries cannot read tokens). */
 .shell {
   min-height: 100dvh;
   display: flex;

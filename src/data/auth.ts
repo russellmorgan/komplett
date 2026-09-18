@@ -22,9 +22,18 @@ export function useAuthUser(): AuthUser | null | undefined {
   const [user, setUser] = useState<AuthUser | null | undefined>(undefined);
   useEffect(
     () =>
-      onAuthStateChanged(auth, async (u) => {
-        if (u) await ensureUserDocs(u);
-        setUser(u ? { uid: u.uid, displayName: u.displayName, email: u.email } : null);
+      onAuthStateChanged(auth, async (firebaseUser) => {
+        // A failed doc write must not strand the app on the blank loading state.
+        if (firebaseUser) await ensureUserDocs(firebaseUser).catch(console.error);
+        setUser(
+          firebaseUser
+            ? {
+                uid: firebaseUser.uid,
+                displayName: firebaseUser.displayName,
+                email: firebaseUser.email,
+              }
+            : null,
+        );
       }),
     [],
   );

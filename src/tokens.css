@@ -42,7 +42,6 @@
 
   --nav-size: 14rem;
   --tab-height: 3.5rem;
-  --bp-desktop: 1024px;
 }
 
 @media (prefers-color-scheme: dark) {

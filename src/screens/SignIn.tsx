@@ -3,19 +3,26 @@ import { sendMagicLink, signInWithGoogle } from "../data/auth";
 
 export function SignIn() {
   const [email, setEmail] = useState("");
-  const [sent, setSent] = useState(false);
+  const [status, setStatus] = useState<string | null>(null);
 
-  async function submit(e: FormEvent) {
+  function run(action: () => Promise<unknown>, done: string | null) {
+    setStatus(null);
+    action().then(
+      () => setStatus(done),
+      (err: Error) => setStatus(err.message),
+    );
+  }
+
+  function submit(e: FormEvent) {
     e.preventDefault();
-    await sendMagicLink(email);
-    setSent(true);
+    run(() => sendMagicLink(email), "Check your inbox for the sign-in link.");
   }
 
   return (
     <div className="signin">
       <form onSubmit={submit}>
         <h1>Komplett</h1>
-        <button type="button" className="primary" onClick={signInWithGoogle}>
+        <button type="button" className="primary" onClick={() => run(signInWithGoogle, null)}>
           Sign in with Google
         </button>
         <p className="muted">or get a magic link by email</p>
@@ -27,7 +34,7 @@ export function SignIn() {
           onChange={(e) => setEmail(e.target.value)}
         />
         <button type="submit">Email me a link</button>
-        {sent && <p className="muted">Check your inbox for the sign-in link.</p>}
+        {status && <p className="muted">{status}</p>}
       </form>
     </div>
   );
