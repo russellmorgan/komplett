@@ -2,8 +2,11 @@ import { type FormEvent, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import type { AuthUser } from "../data/auth";
 import { useLists } from "../data/lists";
+import { useSessions } from "../data/sessions";
 import { addTask, deleteTask, updateTask, useTasks } from "../data/tasks";
+import { useTimerContext } from "../data/timer";
 import { completePatch } from "../domain/repeat";
+import { taskStats } from "../domain/sessions";
 import {
   activeTasks,
   completedTasks,
@@ -20,6 +23,17 @@ export function Tasks({ user }: { user: AuthUser }) {
   const lists = useLists(user.uid);
   const currentList = lists.find((l) => l.id === listId);
   const navigate = useNavigate();
+  const sessions = useSessions(user.uid);
+  const { state: timer, startFocus } = useTimerContext();
+  // ponytail: one pomodoro at a time; a running one has to finish or be stopped first.
+  const startPomodoro = (task: Task) => {
+    if (timer.phase !== "idle") {
+      alert("A pomodoro is already running. Stop it from the Timer first.");
+      return;
+    }
+    startFocus({ id: task.id, title: task.title });
+    navigate("/timer");
+  };
   const all = useTasks(user.uid);
   const active = activeTasks(all, listId);
   const completed = completedTasks(all, listId);
@@ -106,6 +120,7 @@ export function Tasks({ user }: { user: AuthUser }) {
               if (!task.repeat) setLastCompleted(task);
             }}
             onOpen={() => setOpenId(task.id)}
+            onStart={() => startPomodoro(task)}
             onMove={(direction) => move(i, direction)}
             first={i === 0}
             last={i === active.length - 1}
@@ -135,7 +150,14 @@ export function Tasks({ user }: { user: AuthUser }) {
           ))}
         </ul>
       )}
-      {open && <TaskDetail task={open} onClose={() => setOpenId(null)} />}
+      {open && (
+        <TaskDetail
+          task={open}
+          stats={taskStats(sessions, open.id)}
+          onStart={() => startPomodoro(open)}
+          onClose={() => setOpenId(null)}
+        />
+      )}
     </>
   );
 }
@@ -145,6 +167,7 @@ function TaskRow({
   lists,
   onComplete,
   onOpen,
+  onStart,
   onMove,
   first,
   last,
@@ -153,6 +176,7 @@ function TaskRow({
   lists: ReturnType<typeof useLists>;
   onComplete: () => void;
   onOpen: () => void;
+  onStart: () => void;
   onMove: (direction: -1 | 1) => void;
   first: boolean;
   last: boolean;
@@ -206,6 +230,9 @@ function TaskRow({
       )}
       <button type="button" onClick={onOpen} aria-label="Details">
         {task.dueDate ?? "…"}
+      </button>
+      <button type="button" onClick={onStart} aria-label={`Start pomodoro on ${task.title}`}>
+        ▶
       </button>
       <button type="button" disabled={first} onClick={() => onMove(-1)} aria-label="Move up">
         ↑

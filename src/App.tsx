@@ -5,8 +5,9 @@ import { useReminders } from "./data/reminders";
 import { useTasks } from "./data/tasks";
 import { TimerProvider, useTimerContext } from "./data/timer";
 import { formatMmSs, remainingMs } from "./domain/timer";
-import { History, Partner } from "./screens";
+import { Partner } from "./screens";
 import { Completed } from "./screens/Completed";
+import { History } from "./screens/History";
 import { Lists } from "./screens/Lists";
 import { Settings } from "./screens/Settings";
 import { SignIn } from "./screens/SignIn";
@@ -28,7 +29,7 @@ function Shell({ user }: { user: AuthUser }) {
     { path: "/lists", label: "Lists", element: <Lists user={user} /> },
     { path: "/completed", label: "Completed", element: <Completed user={user} /> },
     { path: "/timer", label: "Timer", element: <Timer user={user} /> },
-    { path: "/history", label: "History", element: <History /> },
+    { path: "/history", label: "History", element: <History user={user} /> },
     { path: "/partner", label: "Partner", element: <Partner /> },
     { path: "/settings", label: "Settings", element: <Settings user={user} /> },
   ];

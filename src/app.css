@@ -203,6 +203,13 @@ h1 {
   border-left: 2px solid var(--color-border);
 }
 
+.session {
+  flex-wrap: wrap;
+}
+.session .task-title {
+  flex-basis: 100%;
+}
+
 /* Timer */
 .timer-clock {
   font-family: var(--font-mono);
