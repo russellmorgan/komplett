@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { activeTasks, movedSortOrder, nextSortOrder, type Task } from "./tasks";
+import { activeTasks, completedTasks, movedSortOrder, nextSortOrder, type Task } from "./tasks";
 
 const task = (over: Partial<Task>): Task => ({
   id: "t",
@@ -26,6 +26,19 @@ describe("activeTasks", () => {
       task({ id: "a", sortOrder: 1 }),
     ];
     expect(activeTasks(tasks, "inbox").map((t) => t.id)).toEqual(["a", "b"]);
+  });
+});
+
+describe("completedTasks", () => {
+  it("keeps only completed tasks, newest completedAt first, optionally scoped to a list", () => {
+    const tasks = [
+      task({ id: "old", completedAt: 1 }),
+      task({ id: "new", completedAt: 3 }),
+      task({ id: "active" }),
+      task({ id: "other-list", listId: "work", completedAt: 2 }),
+    ];
+    expect(completedTasks(tasks).map((t) => t.id)).toEqual(["new", "other-list", "old"]);
+    expect(completedTasks(tasks, "inbox").map((t) => t.id)).toEqual(["new", "old"]);
   });
 });
 

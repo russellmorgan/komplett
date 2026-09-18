@@ -40,3 +40,7 @@ export function updateTask(id: string, patch: Partial<Omit<Task, "id" | "ownerId
 export function deleteTask(id: string) {
   return deleteDoc(doc(tasks, id));
 }
+
+export function deleteTasks(ids: string[]) {
+  return Promise.all(ids.map((id) => deleteDoc(doc(tasks, id))));
+}
