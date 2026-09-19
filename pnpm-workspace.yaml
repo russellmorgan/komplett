@@ -1,6 +1,11 @@
+packages:
+  - electron
+
 # Native/postinstall scripts we deliberately don't run (re2 is optional for firebase-tools).
 allowBuilds:
   '@firebase/util': false
+  electron: true
+  electron-winstaller: true
   protobufjs: false
   re2: false
 minimumReleaseAgeExclude:
