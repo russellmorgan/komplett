@@ -36,7 +36,7 @@ Personal to-do + pomodoro + accountability app for a handful of friends. Spec an
 
 - Every task is in exactly one list; every list is in at most one folder; folders don't nest.
 - Only one accountability task per user; the shared task mirrors it and stays visible as done until replaced.
-- Reactions are cleared when the accountability task changes.
+- Reactions belong to one completion: cleared when the accountability task changes or when it is completed again.
 - A running timer lives in localStorage only; Firestore holds finished sessions.
 - Firebase stays on the Spark plan. Never Blaze, never a card on file.
 - `firebase/*` imports exist only in the data module (lint-enforced).
