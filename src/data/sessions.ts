@@ -1,4 +1,4 @@
-import { collection, doc, onSnapshot, query, setDoc, where } from "firebase/firestore";
+import { collection, deleteDoc, doc, onSnapshot, query, setDoc, where } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { newSession, type Session } from "../domain/sessions";
 import { db } from "./firebase";
@@ -22,4 +22,8 @@ export function useSessions(uid: string): Session[] {
 
 export function addSession(fields: Parameters<typeof newSession>[0]) {
   return setDoc(doc(sessions), newSession(fields));
+}
+
+export function deleteSession(id: string) {
+  return deleteDoc(doc(sessions, id));
 }

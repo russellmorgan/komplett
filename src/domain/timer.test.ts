@@ -25,6 +25,7 @@ describe("timerReducer transitions", () => {
       pausedMs: 0,
       durationMs: 25 * MIN,
       endedEarly: false,
+      task: null,
     });
   });
   it("tick: focus -> focusDone when remaining <= 0", () => {
@@ -148,6 +149,8 @@ describe("focusSummary", () => {
       endedAt: 1000 + 25 * MIN,
       focusMinutes: 25,
       endedEarly: false,
+      taskId: null,
+      taskTitle: "",
     });
   });
   it("excludes paused time from focusMinutes", () => {
@@ -168,6 +171,8 @@ describe("focusSummary", () => {
       endedAt: 1000 + 10 * MIN,
       focusMinutes: 10,
       endedEarly: true,
+      taskId: null,
+      taskTitle: "",
     });
   });
 });
@@ -189,5 +194,18 @@ describe("late tick", () => {
       endedAt: 25 * 60_000,
       focusMinutes: 25,
     });
+  });
+});
+
+describe("linked task", () => {
+  it("start carries the task through to focusSummary", () => {
+    const task = { id: "t1", title: "Write report" };
+    const s = timerReducer(initialTimer, { type: "start", now: 0, focusMinutes: 25, task });
+    const done = timerReducer(s, { type: "stop", now: 60_000 });
+    expect(focusSummary(done, 60_000)).toMatchObject({ taskId: "t1", taskTitle: "Write report" });
+  });
+  it("start without a task yields null id and empty title", () => {
+    const s = timerReducer(initialTimer, { type: "start", now: 0, focusMinutes: 25 });
+    expect(focusSummary(s, 0)).toMatchObject({ taskId: null, taskTitle: "" });
   });
 });

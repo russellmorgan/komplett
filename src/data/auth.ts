@@ -70,7 +70,10 @@ async function ensureUserDocs(u: FirebaseUser) {
   if ((await getDoc(userRef)).exists()) return;
   await runTransaction(db, async (tx) => {
     if ((await tx.get(userRef)).exists()) return;
-    tx.set(userRef, initialUser({ displayName: u.displayName, email: u.email ?? "" }));
+    tx.set(
+      userRef,
+      initialUser({ displayName: u.displayName, email: u.email ?? "", photoURL: u.photoURL }),
+    );
     tx.set(doc(db, "lists", inboxListId(u.uid)), inboxList(u.uid));
   });
 }

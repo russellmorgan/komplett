@@ -2,12 +2,15 @@ import { BrowserRouter, Navigate, NavLink, Route, Routes, useParams } from "reac
 import { type AuthUser, useAuthUser } from "./data/auth";
 import { useLists } from "./data/lists";
 import { useReminders } from "./data/reminders";
+import { useSharedTaskSync } from "./data/shared";
 import { useTasks } from "./data/tasks";
 import { TimerProvider, useTimerContext } from "./data/timer";
+import { useUserDoc } from "./data/user";
 import { formatMmSs, remainingMs } from "./domain/timer";
-import { History, Partner } from "./screens";
 import { Completed } from "./screens/Completed";
+import { History } from "./screens/History";
 import { Lists } from "./screens/Lists";
+import { Partner } from "./screens/Partner";
 import { Settings } from "./screens/Settings";
 import { SignIn } from "./screens/SignIn";
 import { Tasks } from "./screens/Tasks";
@@ -22,14 +25,16 @@ export function App() {
 
 function Shell({ user }: { user: AuthUser }) {
   // Reminders fire on every screen, not just Tasks.
-  useReminders(useTasks(user.uid));
+  const tasks = useTasks(user.uid);
+  useReminders(tasks);
+  useSharedTaskSync(user.uid, useUserDoc(user.uid), tasks);
 
   const screens = [
     { path: "/lists", label: "Lists", element: <Lists user={user} /> },
     { path: "/completed", label: "Completed", element: <Completed user={user} /> },
     { path: "/timer", label: "Timer", element: <Timer user={user} /> },
-    { path: "/history", label: "History", element: <History /> },
-    { path: "/partner", label: "Partner", element: <Partner /> },
+    { path: "/history", label: "History", element: <History user={user} /> },
+    { path: "/partner", label: "Partner", element: <Partner user={user} /> },
     { path: "/settings", label: "Settings", element: <Settings user={user} /> },
   ];
   return (

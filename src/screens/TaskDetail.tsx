@@ -9,7 +9,21 @@ function toLocalInput(ms: number): string {
   return new Date(ms - new Date().getTimezoneOffset() * 60_000).toISOString().slice(0, 16);
 }
 
-export function TaskDetail({ task, onClose }: { task: Task; onClose: () => void }) {
+export function TaskDetail({
+  task,
+  stats,
+  isAccountability,
+  onSetAccountability,
+  onStart,
+  onClose,
+}: {
+  task: Task;
+  stats: { count: number; minutes: number };
+  isAccountability: boolean;
+  onSetAccountability: () => void;
+  onStart: () => void;
+  onClose: () => void;
+}) {
   const save = (patch: Partial<Task>) => updateTask(task.id, patch);
   const repeat = task.repeat;
 
@@ -33,6 +47,19 @@ export function TaskDetail({ task, onClose }: { task: Task; onClose: () => void 
           ×
         </button>
       </header>
+      <p className="muted">
+        {stats.count} session{stats.count === 1 ? "" : "s"}, {stats.minutes} min focus{" "}
+        <button type="button" onClick={onStart}>
+          Start pomodoro
+        </button>{" "}
+        {isAccountability ? (
+          <span>Shared with partner</span>
+        ) : (
+          <button type="button" onClick={onSetAccountability}>
+            Set as accountability task
+          </button>
+        )}
+      </p>
       <label>
         Due
         <input

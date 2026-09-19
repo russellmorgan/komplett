@@ -9,10 +9,13 @@ export type TimerState = {
   pausedMs: number; // total ms of earlier pauses in this period
   durationMs: number;
   endedEarly: boolean;
+  task: LinkedTask | null; // the task this focus is for, copied so it outlives the task
 };
 
+export type LinkedTask = { id: string; title: string };
+
 export type TimerAction =
-  | { type: "start"; now: number; focusMinutes: number }
+  | { type: "start"; now: number; focusMinutes: number; task?: LinkedTask }
   | { type: "pause"; now: number }
   | { type: "resume"; now: number }
   | { type: "stop"; now: number }
@@ -30,10 +33,16 @@ export const initialTimer: TimerState = {
   pausedMs: 0,
   durationMs: 0,
   endedEarly: false,
+  task: null,
 };
 
-function period(phase: Phase, now: number, minutes: number): TimerState {
-  return { ...initialTimer, phase, startedAt: now, durationMs: minutes * MIN };
+function period(
+  phase: Phase,
+  now: number,
+  minutes: number,
+  task: LinkedTask | null = null,
+): TimerState {
+  return { ...initialTimer, phase, startedAt: now, durationMs: minutes * MIN, task };
 }
 
 function focusDone(state: TimerState, now: number, endedEarly: boolean): TimerState {
@@ -50,7 +59,9 @@ export function timerReducer(state: TimerState, action: TimerAction): TimerState
   const running = state.phase === "focus" || state.phase === "break";
   switch (action.type) {
     case "start":
-      return state.phase === "idle" ? period("focus", action.now, action.focusMinutes) : state;
+      return state.phase === "idle"
+        ? period("focus", action.now, action.focusMinutes, action.task ?? null)
+        : state;
     case "pause":
       return running && state.pausedAt === null ? { ...state, pausedAt: action.now } : state;
     case "resume":
@@ -80,12 +91,21 @@ export function timerReducer(state: TimerState, action: TimerAction): TimerState
 export function focusSummary(
   state: TimerState,
   now: number,
-): { startedAt: number; endedAt: number; focusMinutes: number; endedEarly: boolean } {
+): {
+  startedAt: number;
+  endedAt: number;
+  focusMinutes: number;
+  endedEarly: boolean;
+  taskId: string | null;
+  taskTitle: string;
+} {
   const startedAt = state.startedAt ?? now;
   const endedAt = state.pausedAt ?? now;
   return {
     startedAt,
     endedAt,
+    taskId: state.task?.id ?? null,
+    taskTitle: state.task?.title ?? "",
     focusMinutes: Math.round((endedAt - startedAt - state.pausedMs) / MIN),
     endedEarly: state.endedEarly,
   };
