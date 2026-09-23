@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { type Session, sessionsNewestFirst, taskStats } from "./sessions";
+import { type Session, sessionsNewestFirst, taskStats, totalStats } from "./sessions";
 
 const session = (over: Partial<Session>): Session => ({
   id: "s",
@@ -34,5 +34,16 @@ describe("taskStats", () => {
     ];
     expect(taskStats(all, "t1")).toEqual({ count: 2, minutes: 35 });
     expect(taskStats(all, "none")).toEqual({ count: 0, minutes: 0 });
+  });
+});
+
+describe("totalStats", () => {
+  it("counts and sums minutes across all sessions", () => {
+    const all = [
+      session({ id: "a", focusMinutes: 25 }),
+      session({ id: "b", focusMinutes: 10 }),
+    ];
+    expect(totalStats(all)).toEqual({ count: 2, minutes: 35 });
+    expect(totalStats([])).toEqual({ count: 0, minutes: 0 });
   });
 });
