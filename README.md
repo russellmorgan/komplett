@@ -29,6 +29,18 @@ Production builds need a real Firebase project on the **Spark plan** (never Blaz
 4. **Project settings (gear) → Your apps → Add app → Web**. Copy `apiKey`, `authDomain`, `projectId`, `appId` into `.env` (see [.env.example](.env.example)).
 5. **Authentication → Settings → Authorised domains**: add every domain the app is served from (`localhost` and the Hosting domains are pre-listed; add any custom domain). Magic links only work from listed domains.
 
+## Desktop app (Electron)
+
+`electron/` is a sibling package that wraps the production build (`dist/`) in a native window — no changes to the web app's data or UI code. Native notifications for timer end and reminders work automatically: Electron implements the same web `Notification` API the app already uses.
+
+```bash
+pnpm build          # build dist/ first
+pnpm electron       # run the desktop shell against dist/
+pnpm electron:dist  # build dist/, then produce an installer for the current OS (electron-builder)
+```
+
+Closing the window quits the app on Windows/Linux; on macOS it stays running in the dock (standard behavior), matching each platform's convention.
+
 ## Layout
 
 - `src/domain/` — pure functions, no React or Firebase. The tested seam.
