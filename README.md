@@ -41,6 +41,8 @@ pnpm electron:dist  # build dist/, then produce an installer for the current OS 
 
 Closing the window quits the app on Windows/Linux; on macOS it stays running in the dock (standard behavior), matching each platform's convention.
 
+The main process serves `dist/` over `http://localhost:41847` rather than loading `index.html` as a `file:` URL: the bundle references `/assets/*` absolutely, `BrowserRouter` needs real paths, and Firebase auth only trusts an authorised domain — `localhost` is one by default, so no Firebase console change is needed. The port is fixed so the origin (and with it the signed-in session and the Firestore cache) survives a restart; a single-instance lock stops a second launch fighting over it.
+
 ## Layout
 
 - `src/domain/` — pure functions, no React or Firebase. The tested seam.
