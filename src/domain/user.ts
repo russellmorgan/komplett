@@ -2,7 +2,14 @@ import type { ListColor } from "./lists";
 
 // Pure shapes for the documents created on first sign-in. No React, no Firebase.
 
-export type Settings = { focusMinutes: number; breakMinutes: number; soundEnabled: boolean };
+export type ChimeId = "bell" | "woodblock" | "glass" | "pulse" | "soft";
+
+export type Settings = {
+  focusMinutes: number;
+  breakMinutes: number;
+  soundEnabled: boolean;
+  chime?: ChimeId; // absent on users created before chimes existed; means "bell"
+};
 
 export type User = {
   displayName: string;

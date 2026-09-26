@@ -53,18 +53,19 @@ export function nextSortOrder(items: { sortOrder: number }[]): number {
   return Math.max(0, ...items.map((t) => t.sortOrder)) + 1;
 }
 
-// New sortOrder for sorted[index] moved one step up (-1) or down (1); null if already at that edge.
-// Works for any sortOrder-carrying item (tasks, lists, folders) — sort the list first.
+// New sortOrder for sorted[from] dropped at position `to` (index in the list as it will read after
+// the move); null if nothing moves. Works for any sortOrder-carrying item (tasks, lists, folders) — sort first.
 // ponytail: midpoint floats lose precision after ~50 moves between the same two neighbours; renumber if it ever happens.
 export function movedSortOrder<T extends { sortOrder: number }>(
   sorted: T[],
-  index: number,
-  direction: -1 | 1,
+  from: number,
+  to: number,
 ): number | null {
-  const target = index + direction;
-  if (target < 0 || target >= sorted.length) return null;
-  const neighbour = sorted[target]?.sortOrder as number;
-  const beyond = sorted[target + direction]?.sortOrder;
-  if (beyond === undefined) return neighbour + direction;
-  return (neighbour + beyond) / 2;
+  if (from === to || to < 0 || to >= sorted.length || !sorted[from]) return null;
+  const rest = sorted.filter((_, i) => i !== from);
+  const before = rest[to - 1]?.sortOrder;
+  const after = rest[to]?.sortOrder;
+  if (before === undefined) return (after as number) - 1;
+  if (after === undefined) return before + 1;
+  return (before + after) / 2;
 }
