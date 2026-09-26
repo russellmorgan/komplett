@@ -53,18 +53,21 @@ describe("nextSortOrder", () => {
 
 describe("movedSortOrder", () => {
   const sorted = [task({ sortOrder: 1 }), task({ sortOrder: 2 }), task({ sortOrder: 3 })];
-  it("moves up to the midpoint of the two tasks above", () => {
-    expect(movedSortOrder(sorted, 2, -1)).toBe(1.5);
-  });
-  it("moves down to the midpoint of the two tasks below", () => {
+  it("moves one step to the midpoint of the new neighbours", () => {
+    expect(movedSortOrder(sorted, 2, 1)).toBe(1.5);
     expect(movedSortOrder(sorted, 0, 1)).toBe(2.5);
   });
-  it("moves to before the first / after the last when there is only one neighbour", () => {
-    expect(movedSortOrder(sorted, 1, -1)).toBe(0);
-    expect(movedSortOrder(sorted, 1, 1)).toBe(4);
+  it("drags across several rows", () => {
+    expect(movedSortOrder(sorted, 2, 0)).toBe(0);
+    expect(movedSortOrder(sorted, 0, 2)).toBe(4);
   });
-  it("returns null at the edges", () => {
+  it("moves to before the first / after the last when there is only one neighbour", () => {
+    expect(movedSortOrder(sorted, 1, 0)).toBe(0);
+    expect(movedSortOrder(sorted, 1, 2)).toBe(4);
+  });
+  it("returns null when nothing moves or the target is out of range", () => {
+    expect(movedSortOrder(sorted, 1, 1)).toBeNull();
     expect(movedSortOrder(sorted, 0, -1)).toBeNull();
-    expect(movedSortOrder(sorted, 2, 1)).toBeNull();
+    expect(movedSortOrder(sorted, 2, 3)).toBeNull();
   });
 });

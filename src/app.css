@@ -565,8 +565,18 @@ input.switch:checked {
 }
 .dots {
   display: grid;
-  grid-template-columns: repeat(29, minmax(0, 1fr)); /* DOT_COLS in domain/dots.ts */
+  grid-template-columns: repeat(var(--cols, 29), minmax(0, 1fr)); /* --cols set from gridOf() */
   gap: clamp(2px, 0.5vw, 5px);
+}
+button.dots {
+  width: 100%;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+button.dots:disabled {
+  opacity: 1;
 }
 .dots span {
   aspect-ratio: 1;
@@ -689,7 +699,7 @@ button.big.small {
   margin-top: -12px;
 }
 .done-rows .task-row,
-.rows .task-row:not(:has(.reorder)) {
+.rows .task-row:not(:has(.grip)) {
   grid-template-columns: 22px minmax(0, 1fr) auto;
   padding-left: 0;
 }
@@ -733,13 +743,34 @@ button.row-title:hover {
   align-items: center;
   gap: var(--space-2);
 }
-.reorder {
-  display: grid;
+/* Drag-to-reorder (src/reorder.tsx): grip handle plus drop markers on rows. */
+button.grip {
+  min-width: 30px;
+  min-height: var(--tap);
   margin-left: -6px;
+  padding: 0;
+  border: 0;
+  color: var(--color-text-faint);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
 }
-.reorder button {
-  min-height: 22px;
-  min-width: 28px;
+button.grip:hover {
+  color: var(--color-text);
+  background: transparent;
+}
+[data-drag="self"] {
+  opacity: 0.4;
+}
+[data-drag="before"] {
+  box-shadow: inset 0 2px 0 var(--color-text);
+}
+[data-drag="after"] {
+  box-shadow: inset 0 -2px 0 var(--color-text);
+}
+section[data-drag="before"],
+section[data-drag="after"] {
+  box-shadow: inset 0 0 0 2px var(--color-text);
 }
 .due {
   font-size: var(--text-xs);
@@ -877,8 +908,8 @@ textarea.title-input {
   gap: 12px;
   padding: 8px 0;
 }
-.lists > * + * > .list-row,
-.folder-lists > * + * > .list-row {
+.list-group > * > .list-row,
+.folder-lists .list-group > * + * > .list-row {
   border-top: 1px solid var(--color-border);
 }
 .folder-row {
@@ -1087,4 +1118,208 @@ label.setting {
 }
 .narrow > button {
   justify-self: start;
+}
+
+/* Folder lists: no rule above a folder's first list (the folder heading is the rule). */
+.folder-lists .list-group > :first-child > .list-row {
+  border-top: 0;
+}
+
+/* Chime picker */
+.chimes {
+  display: grid;
+  margin: 0;
+  padding: 0 0 12px;
+  border: 0;
+}
+.chime {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-2);
+  border-top: 1px solid var(--color-border);
+}
+.chime .person {
+  display: flex;
+  min-height: 48px;
+  border: 0;
+  font-size: 15px;
+  font-weight: 400;
+}
+.chime .person[aria-pressed="true"] {
+  font-weight: 600;
+}
+.chime .chip {
+  min-height: 36px;
+}
+
+/* Timer: toolbar, focus mode, View popover, panels */
+body.hide-nav .header {
+  display: none;
+}
+.timer-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  margin-top: calc(-1 * clamp(20px, 3vw, 40px));
+}
+.timer.focus {
+  min-height: calc(100dvh - 124px);
+  align-content: center;
+}
+.exit-focus {
+  position: fixed;
+  top: 24px;
+  right: var(--space-gutter);
+  z-index: 20;
+  border-color: var(--color-border);
+  color: var(--color-text-muted);
+}
+.exit-focus:hover {
+  border-color: var(--color-text);
+  color: var(--color-text);
+  background: transparent;
+}
+.view-panel {
+  /* Top layer via the popover API; pinned under the toolbar rather than centered. */
+  inset: 170px var(--space-gutter) auto auto;
+  width: min(calc(100% - 2 * var(--space-gutter)), 340px);
+  max-height: calc(100dvh - 190px);
+  overflow-y: auto;
+  margin: 0;
+  padding: 20px;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--color-field);
+  color: var(--color-text);
+  box-shadow: var(--shadow-pop);
+}
+.view-panel:popover-open {
+  display: grid;
+  gap: 16px;
+}
+.view-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+.view-head strong {
+  font-size: 17px;
+}
+.chips.even {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.chips.four {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.chips.even .chip {
+  justify-content: center;
+  background: var(--color-bg);
+}
+.chips.even .chip[aria-pressed="true"] {
+  background: var(--color-text);
+}
+.view-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 0;
+  border-top: 1px solid var(--color-border);
+  font-size: 15px;
+  cursor: pointer;
+}
+.panels {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  gap: 16px;
+  align-items: start;
+}
+.panel-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.panel-tools {
+  display: flex;
+  margin-left: auto;
+}
+.panel-tools .grip {
+  margin-left: 0;
+}
+.panel .rows {
+  border-bottom: 0;
+}
+.panel .task-row {
+  grid-template-columns: 22px minmax(0, 1fr) auto;
+  padding-left: 0;
+}
+.panel .toast {
+  margin-top: 0;
+}
+.add-bar.inset {
+  padding: 4px 4px 4px 16px;
+  background: var(--color-bg);
+}
+.stats.three {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+.stats.three > :last-child {
+  justify-items: end;
+  text-align: right;
+}
+.today-row {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: baseline;
+  padding: 11px 0;
+  border-top: 1px solid var(--color-border);
+}
+.today-row .row-title {
+  min-height: 0;
+}
+.shared-line {
+  display: grid;
+  gap: 4px;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border);
+}
+.shared-line strong {
+  font-size: 17px;
+}
+.avatar.inverse {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  background: var(--color-text);
+  color: var(--color-on-text);
+  font-size: 18px;
+}
+.panel-head .row-title {
+  min-height: 0;
+}
+.underline {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.hidden-panels {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: -12px;
+}
+button.dashed {
+  border-style: dashed;
+  border-color: var(--color-border);
+}
+button.dashed:hover {
+  border-style: solid;
+  border-color: var(--color-text);
+  background: transparent;
 }

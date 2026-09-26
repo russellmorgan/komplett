@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { DOT_COLS, DOT_ROWS, dotMatrix } from "./dots";
+import { dotMatrix, gridOf } from "./dots";
+
+const { cols: DOT_COLS, rows: DOT_ROWS } = gridOf("Standard");
 
 // Render rows 2..8 (the glyph band) as a string of #/. for readable assertions.
 const band = (dots: ReturnType<typeof dotMatrix>) =>
@@ -25,6 +27,16 @@ describe("dotMatrix", () => {
     const on = dotMatrix(60_000, 0.5, true).filter((d) => d !== "off").length;
     const off = dotMatrix(60_000, 0.5, false).filter((d) => d !== "off").length;
     expect(on - off).toBe(3); // two colon dots + the progress head
+  });
+
+  it("scales glyphs by k and leaves the progress row dark when progress is null", () => {
+    const { cols, rows } = gridOf("Fine");
+    const dots = dotMatrix(25 * 60_000, null, false, "Fine");
+    expect(dots).toHaveLength(cols * rows);
+    // Fine doubles each font pixel: 4× the lit dots of Standard (colon off in both).
+    const standard = dotMatrix(25 * 60_000, null, false).filter((d) => d === "on").length;
+    expect(dots.filter((d) => d === "on")).toHaveLength(standard * 4);
+    expect(dots.some((d) => d === "done" || d === "head")).toBe(false);
   });
 
   it("fills the progress row proportionally", () => {

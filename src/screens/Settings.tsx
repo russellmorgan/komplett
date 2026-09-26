@@ -1,6 +1,8 @@
 import { type AuthUser, signOut } from "../data/auth";
+import { CHIME_IDS, CHIMES, playChime } from "../data/chime";
 import { MODES, THEMES, useAppearance } from "../data/theme";
 import { updateSettings, useUserDoc } from "../data/user";
+import { Icon } from "../icons";
 
 // Native min/max only validate on submit; clamp so 0/NaN never reaches the user doc.
 const minutes = (v: string | number) => Math.min(180, Math.max(1, Math.round(Number(v)) || 1));
@@ -71,6 +73,26 @@ export function Settings({ user }: { user: AuthUser }) {
               onChange={(e) => updateSettings(user.uid, { soundEnabled: e.target.checked })}
             />
           </label>
+          {doc.settings.soundEnabled && (
+            <fieldset className="chimes" aria-label="Chime sound">
+              {CHIME_IDS.map((id) => (
+                <div className="chime" key={id}>
+                  <button
+                    type="button"
+                    className="person"
+                    aria-pressed={(doc.settings.chime ?? "bell") === id}
+                    onClick={() => updateSettings(user.uid, { chime: id })}
+                  >
+                    <span className="radio" />
+                    {CHIMES[id].name}
+                  </button>
+                  <button type="button" className="chip" onClick={() => playChime(id)}>
+                    <Icon name="play" size={10} /> Preview
+                  </button>
+                </div>
+              ))}
+            </fieldset>
+          )}
         </section>
       )}
       <section className="card flush">

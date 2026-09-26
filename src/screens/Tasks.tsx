@@ -17,6 +17,7 @@ import {
 } from "../domain/tasks";
 import { inboxListId } from "../domain/user";
 import { Icon } from "../icons";
+import { Grip, useReorder } from "../reorder";
 import { TaskDetail } from "./TaskDetail";
 
 // Local calendar date as YYYY-MM-DD, `offset` days from today.
@@ -80,11 +81,11 @@ export function Tasks({ user }: { user: AuthUser }) {
     setTitle("");
   }
 
-  function move(index: number, direction: -1 | 1) {
-    const sortOrder = movedSortOrder(active, index, direction);
-    const task = active[index];
+  const reorder = useReorder(active.length, (from, to) => {
+    const sortOrder = movedSortOrder(active, from, to);
+    const task = active[from];
     if (sortOrder !== null && task) updateTask(task.id, { sortOrder });
-  }
+  });
 
   return (
     <div className={open ? "tasks-layout open" : "tasks-layout"}>
@@ -138,27 +139,14 @@ export function Tasks({ user }: { user: AuthUser }) {
             const due = dueLabel(task.dueDate);
             const now = timer.task?.id === task.id && timer.phase !== "idle";
             return (
-              <li key={task.id} className={task.id === openId ? "task-row selected" : "task-row"}>
-                <span className="reorder">
-                  <button
-                    type="button"
-                    className="ghost"
-                    disabled={i === 0}
-                    onClick={() => move(i, -1)}
-                    aria-label={`Move ${task.title} up`}
-                  >
-                    <Icon name="up" size={12} />
-                  </button>
-                  <button
-                    type="button"
-                    className="ghost"
-                    disabled={i === active.length - 1}
-                    onClick={() => move(i, 1)}
-                    aria-label={`Move ${task.title} down`}
-                  >
-                    <Icon name="down" size={12} />
-                  </button>
-                </span>
+              <li
+                key={task.id}
+                {...reorder.row(i)}
+                className={task.id === openId ? "task-row selected" : "task-row"}
+              >
+                <button {...reorder.handle(i, task.title)}>
+                  <Grip />
+                </button>
                 <input
                   type="checkbox"
                   className="check"
