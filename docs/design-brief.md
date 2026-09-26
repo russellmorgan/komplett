@@ -49,13 +49,13 @@ The app works, but it's essentially unstyled: system fonts, native form controls
    - A state label (Ready / Focus / Break / Focus done), plus the linked task if there is one.
    - A big mm:ss clock.
    - Controls: Start focus, Pause/Resume, Stop, Skip break.
-   - When a focus period ends, a note form appears: "25 min focus on 'X'. What did you do?", with a text field prefilled with the task title and a "Save session" button.
+   - When a focus period ends, a note form appears: "25 min focus on 'X'. What did you do?", with a text field prefilled with the task title and a "Save session" button. Variants: "25 min focus (stopped early) on 'X'" when stopped early, and no "on 'X'" (empty prefill) when no task is linked.
    - This is the emotional center of the app, and it deserves the most visual care.
 7. **History:** focus sessions, newest first. Each shows the date/time, minutes, "(stopped early)" if applicable, the task title, the note, and a delete button.
 8. **Partner:**
    - "Your partner" picker, plus a list of everyone who has signed in (avatar or initial, name, email). The picked person is highlighted.
    - **Two cards side by side:** "Your shared task" and "{Partner}'s shared task". Each shows the title and a status: "Due {date}", "In progress", or "Done ✓".
-   - When the partner's task is done, an emoji reaction picker appears (fixed set, one reaction per person, replaceable).
+   - When the partner's task is done, an emoji reaction picker appears (fixed set, one reaction per person, replaceable). Reactions already received show as a small row of emoji on each shared-task card.
    - Empty states:
      - You have no shared task yet.
      - You have no partner.
