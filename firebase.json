@@ -1,6 +1,7 @@
 {
   "firestore": { "rules": "firestore.rules" },
   "hosting": {
+    "site": "komplett-2987f",
     "public": "dist",
     "ignore": ["firebase.json", "**/.*"],
     "rewrites": [{ "source": "**", "destination": "/index.html" }]
