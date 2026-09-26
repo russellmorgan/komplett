@@ -23,7 +23,7 @@ Personal to-do + pomodoro + accountability app for a handful of friends. Spec an
 | **Break** | The rest period after focus (default 5 min). Not recorded. | pause |
 | **Session** | One recorded focus period: note, minutes, start/end, `endedEarly`, optional linked task plus a copied `taskTitle`. | pomodoro, entry |
 | **Note** | On a task: plain-text reference. On a session: what was done (defaults to the task title). | description, comment |
-| **History** | Chronological list of sessions. | log, journal |
+| **History** | Chronological list of sessions, headed by a totals summary (session count, focus time, tasks completed). | log, journal |
 | **Partner** | The one user you've picked for accountability. Picking is one-way; both must pick each other for mutual visibility. | buddy, friend |
 | **Accountability task** | The single task you've chosen to share with your partner. | shared task (see below), commitment |
 | **Shared task** | The projected document (`title`, `dueDate`, `completedAt`, `reactions`) your partner reads. Derived from the accountability task; never edited directly. | — |
