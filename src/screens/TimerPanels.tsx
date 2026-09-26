@@ -79,7 +79,8 @@ function upNext(tasks: Task[]): Task[] {
 function UpNext({ user, ...card }: PanelProps) {
   const all = useTasks(user.uid);
   const open = upNext(all);
-  const { state, startFocus } = useTimerContext();
+  const { state, pending, startFocus } = useTimerContext();
+  const busy = state.phase !== "idle" || pending !== null;
   const [draft, setDraft] = useState("");
   const [last, setLast] = useState<Task | null>(null);
 
@@ -143,8 +144,8 @@ function UpNext({ user, ...card }: PanelProps) {
                 type="button"
                 className={now ? "play now" : "play"}
                 aria-label={`Focus on ${task.title}`}
-                disabled={state.phase !== "idle"}
-                title={state.phase !== "idle" ? "Stop the current pomodoro first" : undefined}
+                disabled={busy}
+                title={busy ? "Finish the current pomodoro and its note first" : undefined}
                 onClick={() => startFocus({ id: task.id, title: task.title })}
               >
                 <Icon name="play" size={10} />

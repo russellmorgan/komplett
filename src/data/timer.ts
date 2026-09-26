@@ -44,9 +44,15 @@ export function useTimer(): [TimerState, Dispatch<TimerAction>] {
   }, [state]);
 
   const running = (state.phase === "focus" || state.phase === "break") && state.pausedAt === null;
+  // tick leaves state untouched until the period ends, so bump a clock to re-render the countdown.
+  const [, setClock] = useState(0);
   useEffect(() => {
     if (!running) return;
-    const id = setInterval(() => dispatch({ type: "tick", now: Date.now() }), 1000);
+    const id = setInterval(() => {
+      const now = Date.now();
+      setClock(now);
+      dispatch({ type: "tick", now });
+    }, 1000);
     return () => clearInterval(id);
   }, [running]);
 
@@ -113,6 +119,7 @@ export function TimerProvider({ uid, children }: { uid: string; children: ReactN
         pending,
         clearPending: () => setPending(null),
         startFocus: (task) => {
+          if (pending) return; // a new focus would overwrite the unsaved one
           requestNotificationPermission();
           dispatch({
             type: "start",

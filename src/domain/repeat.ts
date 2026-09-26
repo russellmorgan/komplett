@@ -25,11 +25,16 @@ function matches(repeat: Repeat, d: Date, from: Date): boolean {
       return repeat.days.includes(d.getUTCDay());
     case "monthly":
       return d.getUTCDate() === Math.min(repeat.dayOfMonth, daysInMonth(d));
-    case "yearly":
+    case "yearly": {
+      // The anchor keeps Feb 29 from settling on Feb 28 after one non-leap year.
+      const [month, day] = repeat.anchor
+        ? repeat.anchor.split("-").map(Number)
+        : [from.getUTCMonth() + 1, from.getUTCDate()];
       return (
-        d.getUTCMonth() === from.getUTCMonth() &&
-        d.getUTCDate() === Math.min(from.getUTCDate(), daysInMonth(d))
+        d.getUTCMonth() === (month as number) - 1 &&
+        d.getUTCDate() === Math.min(day as number, daysInMonth(d))
       );
+    }
   }
 }
 
@@ -47,7 +52,8 @@ export function nextOccurrence(repeat: Repeat, fromDate: string, today: string):
 
 export function advanceTask(task: Task, now: number): Pick<Task, "dueDate" | "reminderAt"> {
   if (!task.repeat) throw new Error("advanceTask on a non-repeating task");
-  const today = toDate(now);
+  // Local calendar date: due dates are picked and shown in local time, not UTC.
+  const today = new Date(now).toLocaleDateString("en-CA");
   const from = task.dueDate ?? today;
   const dueDate = nextOccurrence(task.repeat, from, today);
   const delta = toMs(dueDate) - toMs(from);
@@ -58,5 +64,7 @@ export function advanceTask(task: Task, now: number): Pick<Task, "dueDate" | "re
 }
 
 export function completePatch(task: Task, now: number): Partial<Task> {
-  return task.repeat ? advanceTask(task, now) : { completedAt: now };
+  // A weekly repeat with no days never recurs, so completing it just completes it.
+  const recurs = task.repeat && !(task.repeat.kind === "weekly" && task.repeat.days.length === 0);
+  return recurs ? advanceTask(task, now) : { completedAt: now };
 }

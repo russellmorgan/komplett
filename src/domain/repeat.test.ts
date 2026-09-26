@@ -99,3 +99,14 @@ it("weekly with no days selected does not advance", () => {
     "2026-03-10",
   );
 });
+
+describe("review fixes", () => {
+  it("yearly anchor keeps Feb 29 across a non-leap year", () => {
+    const r = { kind: "yearly" as const, anchor: "02-29" };
+    expect(nextOccurrence(r, "2031-02-28", "2031-02-28")).toBe("2032-02-29");
+  });
+  it("weekly with no days completes instead of staying put", () => {
+    const t = { repeat: { kind: "weekly", days: [] }, dueDate: "2026-01-01" } as never;
+    expect(completePatch(t, 7)).toEqual({ completedAt: 7 });
+  });
+});

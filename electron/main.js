@@ -1,5 +1,5 @@
 const path = require("node:path");
-const { app, BrowserWindow } = require("electron");
+const { app, BrowserWindow, dialog } = require("electron");
 const { createServer } = require("./serve");
 
 // A fixed port keeps the origin stable across launches, so the signed-in session, localStorage
@@ -36,7 +36,12 @@ if (!app.requestSingleInstanceLock()) {
   app.setAppUserModelId("app.komplett.desktop");
 
   app.whenReady().then(() => {
-    createServer(distDir).listen(PORT, "localhost", createWindow);
+    createServer(distDir)
+      .on("error", (err) => {
+        dialog.showErrorBox("Komplett can't start", `Port ${PORT} is unavailable: ${err.message}`);
+        app.quit();
+      })
+      .listen(PORT, "localhost", createWindow);
   });
 
   // macOS convention: closing the window doesn't quit the app (it stays in the dock).

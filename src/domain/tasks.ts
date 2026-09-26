@@ -1,7 +1,8 @@
 // Pure task logic. No React, no Firebase. Timestamps are epoch milliseconds.
 
 export type Repeat =
-  | { kind: "daily" | "weekdays" | "yearly" }
+  | { kind: "daily" | "weekdays" }
+  | { kind: "yearly"; anchor?: string } // MM-DD; absent on old tasks, which follow the due date
   | { kind: "weekly"; days: number[] }
   | { kind: "monthly"; dayOfMonth: number };
 

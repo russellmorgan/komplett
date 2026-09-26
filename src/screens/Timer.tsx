@@ -70,9 +70,10 @@ export function Timer({ user }: { user: AuthUser }) {
   ).split(" ");
   const cut = Math.max(1, Math.ceil(words.length / 3));
 
-  const save = async (takeBreak: boolean) => {
+  const save = (takeBreak: boolean) => {
     if (!pending) return;
-    await addSession({ ownerId: user.uid, note: noteText, ...pending });
+    // Not awaited: offline the write only resolves on server ack, but it's already in the local cache.
+    addSession({ ownerId: user.uid, note: noteText, ...pending }).catch(console.error);
     setNote(null);
     clearPending();
     dispatch(

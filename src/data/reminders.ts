@@ -29,6 +29,7 @@ export function useReminders(tasks: Task[]) {
       const delay = Math.min(Math.max(0, t.reminderAt - Date.now()), 2 ** 31 - 1);
       return [
         setTimeout(() => {
+          if (Date.now() < (t.reminderAt as number)) return; // clamped delay; rescheduled later
           const now = fired();
           if (now.includes(key)) return;
           localStorage.setItem(FIRED_KEY, JSON.stringify([...now, key].slice(-200)));

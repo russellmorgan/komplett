@@ -52,7 +52,9 @@ export function TaskDetail({
           ? { kind, days: [new Date().getDay()] }
           : kind === "monthly"
             ? { kind, dayOfMonth: Number(task.dueDate?.slice(8) ?? new Date().getDate()) }
-            : { kind: kind as "daily" | "weekdays" | "yearly" };
+            : kind === "yearly"
+              ? { kind, anchor: (task.dueDate ?? new Date().toLocaleDateString("en-CA")).slice(5) }
+              : { kind: kind as "daily" | "weekdays" };
     save({ repeat: r });
   }
 

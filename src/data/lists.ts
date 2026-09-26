@@ -12,7 +12,7 @@ import {
 import { useEffect, useState } from "react";
 import { type Folder, newFolder, newList } from "../domain/lists";
 import type { List } from "../domain/user";
-import { db } from "./firebase";
+import { auth, db } from "./firebase";
 
 const lists = collection(db, "lists");
 const folders = collection(db, "folders");
@@ -56,10 +56,13 @@ export function updateList(id: string, patch: Partial<Omit<List, "ownerId" | "is
   return updateDoc(doc(lists, id), patch);
 }
 
+// Queries must filter on ownerId or the security rules reject them.
+const mine = () => where("ownerId", "==", auth.currentUser?.uid ?? "");
+
 // Deleting a list also deletes its tasks.
 export async function deleteList(id: string) {
   const batch = writeBatch(db);
-  const owned = await getDocs(query(tasks, where("listId", "==", id)));
+  const owned = await getDocs(query(tasks, mine(), where("listId", "==", id)));
   for (const d of owned.docs) batch.delete(d.ref);
   batch.delete(doc(lists, id));
   return batch.commit();
@@ -76,7 +79,7 @@ export function updateFolder(id: string, patch: Partial<Omit<Folder, "ownerId">>
 // Deleting a folder keeps its lists, lifted to the top level.
 export async function deleteFolder(id: string) {
   const batch = writeBatch(db);
-  const owned = await getDocs(query(lists, where("folderId", "==", id)));
+  const owned = await getDocs(query(lists, mine(), where("folderId", "==", id)));
   for (const d of owned.docs) batch.update(d.ref, { folderId: null });
   batch.delete(doc(folders, id));
   return batch.commit();
