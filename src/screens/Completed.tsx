@@ -1,7 +1,8 @@
 import type { AuthUser } from "../data/auth";
 import { useLists } from "../data/lists";
-import { deleteTask, deleteTasks, useTasks } from "../data/tasks";
+import { deleteTask, deleteTasks, updateTask, useTasks } from "../data/tasks";
 import { completedTasks } from "../domain/tasks";
+import { Icon } from "../icons";
 
 export function Completed({ user }: { user: AuthUser }) {
   const all = useTasks(user.uid);
@@ -14,34 +15,54 @@ export function Completed({ user }: { user: AuthUser }) {
   }
 
   return (
-    <>
-      <h1>Completed</h1>
+    <div className="stack">
+      <h1>
+        Completed <span className="faint">{completed.length}</span>
+      </h1>
+      <ul className="rows">
+        {completed.map((task) => {
+          const list = lists.find((l) => l.id === task.listId);
+          return (
+            <li className="task-row" key={task.id}>
+              <input
+                type="checkbox"
+                className="check"
+                checked={true}
+                onChange={() => updateTask(task.id, { completedAt: null })}
+                aria-label={`Un-complete ${task.title}`}
+              />
+              <span className="row-title">
+                <span>{task.title}</span>
+                <span className="muted list-tag">
+                  <span
+                    className="swatch"
+                    style={{ background: `var(--list-${list?.color ?? "slate"})` }}
+                  />
+                  {list?.name ?? task.listId}
+                </span>
+              </span>
+              <button
+                type="button"
+                className="ghost icon"
+                onClick={() => {
+                  if (confirm(`Permanently delete “${task.title}”? This cannot be undone.`)) {
+                    deleteTask(task.id);
+                  }
+                }}
+                aria-label={`Delete ${task.title}`}
+              >
+                <Icon name="trash" size={15} />
+              </button>
+            </li>
+          );
+        })}
+        {completed.length === 0 && <li className="empty">Nothing completed yet.</li>}
+      </ul>
       {completed.length > 0 && (
-        <button type="button" onClick={clearAll}>
+        <button type="button" className="outline" onClick={clearAll}>
           Clear all completed
         </button>
       )}
-      <ul className="tasks">
-        {completed.map((task) => (
-          <li className="task" key={task.id}>
-            <span className="task-title">{task.title}</span>
-            <span className="muted">
-              {lists.find((l) => l.id === task.listId)?.name ?? task.listId}
-            </span>
-            <button
-              type="button"
-              onClick={() => {
-                if (confirm(`Permanently delete “${task.title}”? This cannot be undone.`)) {
-                  deleteTask(task.id);
-                }
-              }}
-              aria-label={`Delete ${task.title}`}
-            >
-              ×
-            </button>
-          </li>
-        ))}
-      </ul>
-    </>
+    </div>
   );
 }

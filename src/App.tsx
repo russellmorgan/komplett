@@ -1,4 +1,14 @@
-import { BrowserRouter, Navigate, NavLink, Route, Routes, useParams } from "react-router";
+import { useState } from "react";
+import {
+  BrowserRouter,
+  Link,
+  Navigate,
+  NavLink,
+  Route,
+  Routes,
+  useLocation,
+  useParams,
+} from "react-router";
 import { type AuthUser, useAuthUser } from "./data/auth";
 import { useLists } from "./data/lists";
 import { useReminders } from "./data/reminders";
@@ -7,6 +17,7 @@ import { useTasks } from "./data/tasks";
 import { TimerProvider, useTimerContext } from "./data/timer";
 import { useUserDoc } from "./data/user";
 import { formatMmSs, remainingMs } from "./domain/timer";
+import { Icon } from "./icons";
 import { Completed } from "./screens/Completed";
 import { History } from "./screens/History";
 import { Lists } from "./screens/Lists";
@@ -30,28 +41,19 @@ function Shell({ user }: { user: AuthUser }) {
   useSharedTaskSync(user.uid, useUserDoc(user.uid), tasks);
 
   const screens = [
+    { path: "/timer", label: "Timer", element: <Timer user={user} /> },
     { path: "/lists", label: "Lists", element: <Lists user={user} /> },
     { path: "/completed", label: "Completed", element: <Completed user={user} /> },
-    { path: "/timer", label: "Timer", element: <Timer user={user} /> },
     { path: "/history", label: "History", element: <History user={user} /> },
     { path: "/partner", label: "Partner", element: <Partner user={user} /> },
     { path: "/settings", label: "Settings", element: <Settings user={user} /> },
   ];
+  const links = [{ path: "/", label: "Tasks" }, ...screens];
   return (
     <TimerProvider uid={user.uid}>
       <BrowserRouter>
         <div className="shell">
-          <nav className="nav">
-            <NavLink to="/" end>
-              Tasks
-            </NavLink>
-            <TimerPill />
-            {screens.map((screen) => (
-              <NavLink key={screen.path} to={screen.path}>
-                {screen.label}
-              </NavLink>
-            ))}
-          </nav>
+          <Header links={links} />
           <main>
             <Routes>
               <Route path="/" element={<Tasks user={user} />} />
@@ -67,15 +69,53 @@ function Shell({ user }: { user: AuthUser }) {
   );
 }
 
-// Countdown visible on every screen while focus or break is running.
+// Inline nav on wide screens; a menu button with a dropdown below 720px (CSS decides which shows).
+function Header({ links }: { links: { path: string; label: string }[] }) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const { pathname } = useLocation();
+  const nav = (className: string) => (
+    <nav className={className}>
+      {links.map((l) => (
+        <NavLink key={l.path} to={l.path} end onClick={() => setMenuOpen(false)}>
+          {l.label}
+        </NavLink>
+      ))}
+    </nav>
+  );
+  return (
+    <header className="header">
+      <span className="wordmark">
+        Kom<span>plett</span>
+      </span>
+      <div className="header-actions">
+        {nav("nav")}
+        {pathname !== "/timer" && <TimerPill />}
+        <button
+          type="button"
+          className="menu-button"
+          aria-label="Menu"
+          aria-expanded={menuOpen}
+          onClick={() => setMenuOpen(!menuOpen)}
+        >
+          <Icon name="menu" size={18} />
+        </button>
+      </div>
+      {menuOpen && nav("menu")}
+    </header>
+  );
+}
+
+// Countdown visible on every other screen while focus or break is running.
 function TimerPill() {
   const { state } = useTimerContext();
   if (state.phase !== "focus" && state.phase !== "break") return null;
+  const paused = state.pausedAt !== null;
   return (
-    <span className="timer-pill">
-      {state.pausedAt !== null ? "⏸ " : ""}
-      {state.phase === "focus" ? "Focus" : "Break"} {formatMmSs(remainingMs(state, Date.now()))}
-    </span>
+    <Link to="/timer" className="timer-pill" aria-label="Back to timer">
+      <span className={paused ? "pill-dot paused" : "pill-dot"} />
+      {paused ? "Paused" : state.phase === "focus" ? "Focus" : "Break"}{" "}
+      {formatMmSs(remainingMs(state, Date.now()))}
+    </Link>
   );
 }
 

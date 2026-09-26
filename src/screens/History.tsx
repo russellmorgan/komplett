@@ -3,6 +3,7 @@ import { deleteSession, useSessions } from "../data/sessions";
 import { useTasks } from "../data/tasks";
 import { sessionsNewestFirst, totalStats } from "../domain/sessions";
 import { completedTasks } from "../domain/tasks";
+import { Icon } from "../icons";
 
 const when = (ms: number) =>
   new Date(ms).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
@@ -21,34 +22,47 @@ export function History({ user }: { user: AuthUser }) {
   const { count, minutes } = totalStats(allSessions);
   const completedCount = completedTasks(useTasks(user.uid)).length;
   return (
-    <>
+    <div className="stack">
       <h1>History</h1>
-      <p className="muted">
-        {count} session{count === 1 ? "" : "s"} · {asHours(minutes)} focused · {completedCount}{" "}
-        task{completedCount === 1 ? "" : "s"} completed
-      </p>
-      {sessions.length === 0 && <p className="muted">No focus sessions yet.</p>}
-      <ul className="tasks">
+      <div className="stats big-stats">
+        <div>
+          <strong>{count}</strong>
+          <span>session{count === 1 ? "" : "s"}</span>
+        </div>
+        <div>
+          <strong>{asHours(minutes)}</strong>
+          <span>focused</span>
+        </div>
+        <div>
+          <strong>{completedCount}</strong>
+          <span>task{completedCount === 1 ? "" : "s"} completed</span>
+        </div>
+      </div>
+      <ul className="rows">
         {sessions.map((s) => (
-          <li className="task session" key={s.id}>
+          <li className="session-row" key={s.id}>
             <span className="muted">{when(s.startedAt)}</span>
-            <span>
-              {s.focusMinutes} min{s.endedEarly ? " (stopped early)" : ""}
-              {s.taskTitle && <> · {s.taskTitle}</>}
+            <span className="row-title">
+              <strong>{s.note || s.taskTitle || "Focus"}</strong>
+              {s.taskTitle && s.note && <span className="muted">{s.taskTitle}</span>}
             </span>
-            {s.note && <span className="task-title">{s.note}</span>}
+            <span className="num">
+              {s.focusMinutes} min{s.endedEarly ? " (stopped early)" : ""}
+            </span>
             <button
               type="button"
+              className="ghost icon"
               onClick={() => {
                 if (confirm("Delete this session? This cannot be undone.")) deleteSession(s.id);
               }}
               aria-label="Delete session"
             >
-              ×
+              <Icon name="trash" size={15} />
             </button>
           </li>
         ))}
+        {sessions.length === 0 && <li className="empty">No focus sessions yet.</li>}
       </ul>
-    </>
+    </div>
   );
 }
