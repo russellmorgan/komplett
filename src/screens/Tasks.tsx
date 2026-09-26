@@ -1,5 +1,5 @@
-import { type FormEvent, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router";
+import { type FormEvent, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router";
 import type { AuthUser } from "../data/auth";
 import { useLists } from "../data/lists";
 import { useSessions } from "../data/sessions";
@@ -16,7 +16,23 @@ import {
   type Task,
 } from "../domain/tasks";
 import { inboxListId } from "../domain/user";
+import { Icon } from "../icons";
 import { TaskDetail } from "./TaskDetail";
+
+// Local calendar date as YYYY-MM-DD, `offset` days from today.
+const localDate = (offset = 0) =>
+  new Date(Date.now() + offset * 86_400_000).toLocaleDateString("en-CA");
+
+function dueLabel(date: string | null): string {
+  if (!date) return "";
+  if (date === localDate()) return "Today";
+  if (date === localDate(1)) return "Tomorrow";
+  if (date < localDate()) return "Overdue";
+  return new Date(`${date}T00:00`).toLocaleDateString(undefined, {
+    day: "numeric",
+    month: "short",
+  });
+}
 
 export function Tasks({ user }: { user: AuthUser }) {
   const { listId: paramListId } = useParams();
@@ -52,6 +68,7 @@ export function Tasks({ user }: { user: AuthUser }) {
   }
   const [openId, setOpenId] = useState<string | null>(null);
   const open = all.find((t) => t.id === openId);
+  const listName = currentList?.isInbox === false ? currentList.name : "Inbox";
 
   function add(e: FormEvent) {
     e.preventDefault();
@@ -70,194 +87,148 @@ export function Tasks({ user }: { user: AuthUser }) {
   }
 
   return (
-    <>
-      <div className="list-header">
-        <h1 style={currentList && { color: `var(--list-${currentList.color})` }}>
-          {currentList?.isInbox === false ? currentList.name : "Inbox"}
-        </h1>
-        <select
-          aria-label="Switch list"
-          value={listId}
-          onChange={(e) =>
-            navigate(e.target.value === inboxListId(user.uid) ? "/" : `/list/${e.target.value}`)
-          }
-        >
-          {lists.map((l) => (
-            <option key={l.id} value={l.id}>
-              {l.name}
-            </option>
-          ))}
-        </select>
-      </div>
-      <form onSubmit={add} className="add-task">
-        <input
-          placeholder="Add a task"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          aria-label="New task title"
-        />
-      </form>
-      {lastCompleted && (
-        <p className="muted">
-          Completed “{lastCompleted.title}”{" "}
-          <button
-            type="button"
-            onClick={() => {
-              updateTask(lastCompleted.id, { completedAt: null });
-              setLastCompleted(null);
-            }}
-          >
-            Undo
-          </button>
-        </p>
-      )}
-      <ul className="tasks">
-        {active.map((task, i) => (
-          <TaskRow
-            key={task.id}
-            task={task}
-            lists={lists}
-            onComplete={() => {
-              updateTask(task.id, completePatch(task, Date.now()));
-              if (!task.repeat) setLastCompleted(task);
-            }}
-            onOpen={() => setOpenId(task.id)}
-            onStart={() => startPomodoro(task)}
-            onMove={(direction) => move(i, direction)}
-            first={i === 0}
-            last={i === active.length - 1}
+    <div className={open ? "tasks-layout open" : "tasks-layout"}>
+      <div className="stack">
+        <div className="stack-tight">
+          <h1>
+            {listName} <span className="faint">{active.length}</span>
+          </h1>
+          <nav className="chips" aria-label="Lists">
+            {lists.map((l) => (
+              <Link
+                key={l.id}
+                to={l.isInbox ? "/" : `/list/${l.id}`}
+                className="chip"
+                aria-current={l.id === listId ? "page" : undefined}
+              >
+                <span className="swatch" style={{ background: `var(--list-${l.color})` }} />
+                {l.name}
+              </Link>
+            ))}
+          </nav>
+        </div>
+        <form onSubmit={add} className="add-bar">
+          <input
+            placeholder={`Add a task to ${listName}`}
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            aria-label="New task title"
           />
-        ))}
-      </ul>
-      <label className="muted">
-        <input
-          type="checkbox"
-          checked={showCompleted}
-          onChange={(e) => toggleShowCompleted(e.target.checked)}
-        />{" "}
-        Show completed
-      </label>
-      {showCompleted && (
-        <ul className="tasks">
-          {completed.map((task) => (
-            <li className="task" key={task.id}>
-              <input
-                type="checkbox"
-                checked={true}
-                onChange={() => updateTask(task.id, { completedAt: null })}
-                aria-label={`Un-complete ${task.title}`}
-              />
-              <span className="task-title">{task.title}</span>
-            </li>
-          ))}
+          <button type="submit" className="ink icon" aria-label="Add">
+            <Icon name="plus" size={12} />
+          </button>
+        </form>
+        {lastCompleted && (
+          <div className="toast">
+            <span>Completed “{lastCompleted.title}”</span>
+            <button
+              type="button"
+              className="primary"
+              onClick={() => {
+                updateTask(lastCompleted.id, { completedAt: null });
+                setLastCompleted(null);
+              }}
+            >
+              Undo
+            </button>
+          </div>
+        )}
+        <ul className="rows">
+          {active.map((task, i) => {
+            const due = dueLabel(task.dueDate);
+            const now = timer.task?.id === task.id && timer.phase !== "idle";
+            return (
+              <li key={task.id} className={task.id === openId ? "task-row selected" : "task-row"}>
+                <span className="reorder">
+                  <button
+                    type="button"
+                    className="ghost"
+                    disabled={i === 0}
+                    onClick={() => move(i, -1)}
+                    aria-label={`Move ${task.title} up`}
+                  >
+                    <Icon name="up" size={12} />
+                  </button>
+                  <button
+                    type="button"
+                    className="ghost"
+                    disabled={i === active.length - 1}
+                    onClick={() => move(i, 1)}
+                    aria-label={`Move ${task.title} down`}
+                  >
+                    <Icon name="down" size={12} />
+                  </button>
+                </span>
+                <input
+                  type="checkbox"
+                  className="check"
+                  checked={false}
+                  onChange={() => {
+                    updateTask(task.id, completePatch(task, Date.now()));
+                    if (!task.repeat) setLastCompleted(task);
+                  }}
+                  aria-label={`Complete ${task.title}`}
+                />
+                <button type="button" className="row-title" onClick={() => setOpenId(task.id)}>
+                  <span className={now ? "strong" : undefined}>{task.title}</span>
+                  {task.note && <span className="muted">{task.note}</span>}
+                </button>
+                <span className={due === "Overdue" ? "due overdue" : "due"}>{due}</span>
+                <button
+                  type="button"
+                  className={now ? "play now" : "play"}
+                  onClick={() => startPomodoro(task)}
+                  aria-label={`Start pomodoro on ${task.title}`}
+                >
+                  <Icon name="play" size={10} />
+                </button>
+              </li>
+            );
+          })}
+          {active.length === 0 && <li className="empty">Nothing left in {listName}.</li>}
         </ul>
-      )}
+        <label className="switch-row">
+          <input
+            type="checkbox"
+            className="switch"
+            checked={showCompleted}
+            onChange={(e) => toggleShowCompleted(e.target.checked)}
+          />
+          Show completed <span className="muted">{completed.length}</span>
+        </label>
+        {showCompleted && (
+          <ul className="rows done-rows">
+            {completed.map((task) => (
+              <li className="task-row" key={task.id}>
+                <input
+                  type="checkbox"
+                  className="check"
+                  checked={true}
+                  onChange={() => updateTask(task.id, { completedAt: null })}
+                  aria-label={`Un-complete ${task.title}`}
+                />
+                <span className="row-title struck">{task.title}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
       {open && (
         <TaskDetail
+          key={open.id}
           task={open}
+          lists={lists}
           stats={taskStats(sessions, open.id)}
           isAccountability={me?.accountabilityTaskId === open.id}
           onSetAccountability={() => setAccountabilityTask(user.uid, open.id)}
           onStart={() => startPomodoro(open)}
+          onDelete={() => {
+            setOpenId(null);
+            deleteTask(open.id);
+          }}
           onClose={() => setOpenId(null)}
         />
       )}
-    </>
-  );
-}
-
-function TaskRow({
-  task,
-  lists,
-  onComplete,
-  onOpen,
-  onStart,
-  onMove,
-  first,
-  last,
-}: {
-  task: Task;
-  lists: ReturnType<typeof useLists>;
-  onComplete: () => void;
-  onOpen: () => void;
-  onStart: () => void;
-  onMove: (direction: -1 | 1) => void;
-  first: boolean;
-  last: boolean;
-}) {
-  const [draft, setDraft] = useState<string | null>(null);
-  // Escape unmounts the input, which fires blur; this stops that blur committing the cancelled edit.
-  const cancelled = useRef(false);
-
-  function commit() {
-    if (cancelled.current) return;
-    const title = draft?.trim();
-    if (title && title !== task.title) updateTask(task.id, { title });
-    setDraft(null);
-  }
-
-  return (
-    <li className="task">
-      <input
-        type="checkbox"
-        checked={false}
-        onChange={onComplete}
-        aria-label={`Complete ${task.title}`}
-      />
-      {draft === null ? (
-        <button
-          type="button"
-          className="task-title"
-          onClick={() => {
-            cancelled.current = false;
-            setDraft(task.title);
-          }}
-        >
-          {task.title}
-        </button>
-      ) : (
-        <input
-          // biome-ignore lint/a11y/noAutofocus: the user just clicked the title to edit it
-          autoFocus
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          onBlur={commit}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") e.currentTarget.blur();
-            if (e.key === "Escape") {
-              cancelled.current = true;
-              setDraft(null);
-            }
-          }}
-          aria-label="Task title"
-        />
-      )}
-      <button type="button" onClick={onOpen} aria-label="Details">
-        {task.dueDate ?? "…"}
-      </button>
-      <button type="button" onClick={onStart} aria-label={`Start pomodoro on ${task.title}`}>
-        ▶
-      </button>
-      <button type="button" disabled={first} onClick={() => onMove(-1)} aria-label="Move up">
-        ↑
-      </button>
-      <button type="button" disabled={last} onClick={() => onMove(1)} aria-label="Move down">
-        ↓
-      </button>
-      <select
-        aria-label={`Move ${task.title} to list`}
-        value={task.listId}
-        onChange={(e) => updateTask(task.id, { listId: e.target.value })}
-      >
-        {lists.map((l) => (
-          <option key={l.id} value={l.id}>
-            {l.name}
-          </option>
-        ))}
-      </select>
-      <button type="button" onClick={() => deleteTask(task.id)} aria-label="Delete">
-        ×
-      </button>
-    </li>
+    </div>
   );
 }

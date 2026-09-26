@@ -1,31 +1,48 @@
+import { useState } from "react";
+import type { useLists } from "../data/lists";
 import { requestNotificationPermission } from "../data/reminders";
 import { updateTask } from "../data/tasks";
 import type { Repeat, Task } from "../domain/tasks";
+import { Icon } from "../icons";
 
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const REPEATS = [
+  ["", "Never"],
+  ["daily", "Daily"],
+  ["weekdays", "Weekdays"],
+  ["weekly", "Weekly"],
+  ["monthly", "Monthly"],
+  ["yearly", "Yearly"],
+] as const;
 
 // datetime-local wants local wall-clock time; reminderAt is UTC ms.
 function toLocalInput(ms: number): string {
   return new Date(ms - new Date().getTimezoneOffset() * 60_000).toISOString().slice(0, 16);
 }
 
+// Keyed by task id in Tasks, so uncontrolled fields (title, note) reset when another task opens.
 export function TaskDetail({
   task,
+  lists,
   stats,
   isAccountability,
   onSetAccountability,
   onStart,
+  onDelete,
   onClose,
 }: {
   task: Task;
+  lists: ReturnType<typeof useLists>;
   stats: { count: number; minutes: number };
   isAccountability: boolean;
   onSetAccountability: () => void;
   onStart: () => void;
+  onDelete: () => void;
   onClose: () => void;
 }) {
   const save = (patch: Partial<Task>) => updateTask(task.id, patch);
   const repeat = task.repeat;
+  const [armed, setArmed] = useState(false); // Delete is permanent: first click arms, second deletes.
 
   function setKind(kind: string) {
     const r: Repeat | null =
@@ -40,36 +57,59 @@ export function TaskDetail({
   }
 
   return (
-    <aside className="task-detail">
-      <header>
-        <strong>{task.title}</strong>
-        <button type="button" onClick={onClose} aria-label="Close">
-          ×
+    <aside className="card task-detail" aria-label="Task details">
+      <div className="detail-head">
+        <textarea
+          className="title-input"
+          aria-label="Task title"
+          rows={2}
+          defaultValue={task.title}
+          onBlur={(e) => {
+            const title = e.target.value.trim();
+            if (title && title !== task.title) save({ title });
+          }}
+        />
+        <button type="button" className="ghost icon" onClick={onClose} aria-label="Close">
+          <Icon name="close" size={16} />
         </button>
-      </header>
-      <p className="muted">
-        {stats.count} session{stats.count === 1 ? "" : "s"}, {stats.minutes} min focus{" "}
-        <button type="button" onClick={onStart}>
+      </div>
+      <div className="stats ruled">
+        <div>
+          <strong>{stats.count}</strong>
+          <span>session{stats.count === 1 ? "" : "s"}</span>
+        </div>
+        <div>
+          <strong>{stats.minutes}</strong>
+          <span>min focused</span>
+        </div>
+      </div>
+      <div className="button-row">
+        <button type="button" className="big small" onClick={onStart}>
+          <span className="big-icon">
+            <Icon name="play" size={10} />
+          </span>
           Start pomodoro
-        </button>{" "}
+        </button>
         {isAccountability ? (
-          <span>Shared with partner</span>
+          <span className="badge">
+            <Icon name="check" size={12} /> Shared with partner
+          </span>
         ) : (
-          <button type="button" onClick={onSetAccountability}>
+          <button type="button" className="outline" onClick={onSetAccountability}>
             Set as accountability task
           </button>
         )}
-      </p>
-      <label>
-        Due
+      </div>
+      <label className="field">
+        <span>Due</span>
         <input
           type="date"
           value={task.dueDate ?? ""}
           onChange={(e) => save({ dueDate: e.target.value || null })}
         />
       </label>
-      <label>
-        Reminder
+      <label className="field">
+        <span>Reminder</span>
         <input
           type="datetime-local"
           value={task.reminderAt === null ? "" : toLocalInput(task.reminderAt)}
@@ -80,61 +120,90 @@ export function TaskDetail({
           }}
         />
       </label>
-      <label>
-        Note
+      <label className="field">
+        <span>List</span>
+        <select value={task.listId} onChange={(e) => save({ listId: e.target.value })}>
+          {lists.map((l) => (
+            <option key={l.id} value={l.id}>
+              {l.name}
+            </option>
+          ))}
+        </select>
+      </label>
+      <div className="field">
+        <span>Repeat</span>
+        <div className="chips">
+          {REPEATS.map(([kind, label]) => (
+            <button
+              key={kind}
+              type="button"
+              className="chip"
+              aria-pressed={(repeat?.kind ?? "") === kind}
+              onClick={() => setKind(kind)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        {repeat?.kind === "weekly" && (
+          <div className="days">
+            {DAYS.map((name, d) => {
+              const on = repeat.days.includes(d);
+              return (
+                <button
+                  key={name}
+                  type="button"
+                  aria-pressed={on}
+                  onClick={() => {
+                    const days = on
+                      ? repeat.days.filter((x) => x !== d)
+                      : [...repeat.days, d].sort();
+                    save({ repeat: { kind: "weekly", days } });
+                  }}
+                >
+                  {name}
+                </button>
+              );
+            })}
+          </div>
+        )}
+        {repeat?.kind === "monthly" && (
+          <label className="inline-field">
+            Day of month
+            <input
+              type="number"
+              min={1}
+              max={31}
+              value={repeat.dayOfMonth}
+              onChange={(e) => {
+                const dayOfMonth = Number(e.target.value);
+                if (dayOfMonth >= 1 && dayOfMonth <= 31)
+                  save({ repeat: { kind: "monthly", dayOfMonth } });
+              }}
+            />
+          </label>
+        )}
+      </div>
+      <label className="field">
+        <span>Note</span>
         <textarea
+          rows={4}
+          placeholder="Anything worth remembering"
           defaultValue={task.note}
           onBlur={(e) => {
             if (e.target.value !== task.note) save({ note: e.target.value });
           }}
         />
       </label>
-      <label>
-        Repeat
-        <select value={repeat?.kind ?? ""} onChange={(e) => setKind(e.target.value)}>
-          <option value="">Never</option>
-          <option value="daily">Daily</option>
-          <option value="weekdays">Weekdays</option>
-          <option value="weekly">Weekly</option>
-          <option value="monthly">Monthly</option>
-          <option value="yearly">Yearly</option>
-        </select>
-      </label>
-      {repeat?.kind === "weekly" && (
-        <fieldset>
-          {DAYS.map((name, d) => (
-            <label key={name}>
-              <input
-                type="checkbox"
-                checked={repeat.days.includes(d)}
-                onChange={(e) => {
-                  const days = e.target.checked
-                    ? [...repeat.days, d].sort()
-                    : repeat.days.filter((x) => x !== d);
-                  save({ repeat: { kind: "weekly", days } });
-                }}
-              />
-              {name}
-            </label>
-          ))}
-        </fieldset>
-      )}
-      {repeat?.kind === "monthly" && (
-        <label>
-          Day of month
-          <input
-            type="number"
-            min={1}
-            max={31}
-            value={repeat.dayOfMonth}
-            onChange={(e) => {
-              const dayOfMonth = Number(e.target.value);
-              if (dayOfMonth >= 1 && dayOfMonth <= 31)
-                save({ repeat: { kind: "monthly", dayOfMonth } });
-            }}
-          />
-        </label>
-      )}
+      <button
+        type="button"
+        className={armed ? "danger" : "outline"}
+        onClick={() => (armed ? onDelete() : setArmed(true))}
+        onBlur={() => setArmed(false)}
+      >
+        <Icon name="trash" size={15} />
+        {armed ? "Confirm delete" : "Delete"}
+      </button>
     </aside>
   );
 }
