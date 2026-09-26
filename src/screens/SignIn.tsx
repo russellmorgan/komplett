@@ -21,7 +21,9 @@ export function SignIn() {
   return (
     <div className="signin">
       <form onSubmit={submit}>
-        <h1>Komplett</h1>
+        <h1 className="wordmark">
+          Kom<span>plett</span>
+        </h1>
         <button type="button" className="primary" onClick={() => run(signInWithGoogle, null)}>
           Sign in with Google
         </button>
@@ -33,7 +35,9 @@ export function SignIn() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
-        <button type="submit">Email me a link</button>
+        <button type="submit" className="outline">
+          Email me a link
+        </button>
         {status && <p className="muted">{status}</p>}
       </form>
     </div>

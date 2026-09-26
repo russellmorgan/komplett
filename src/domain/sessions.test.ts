@@ -39,10 +39,7 @@ describe("taskStats", () => {
 
 describe("totalStats", () => {
   it("counts and sums minutes across all sessions", () => {
-    const all = [
-      session({ id: "a", focusMinutes: 25 }),
-      session({ id: "b", focusMinutes: 10 }),
-    ];
+    const all = [session({ id: "a", focusMinutes: 25 }), session({ id: "b", focusMinutes: 10 })];
     expect(totalStats(all)).toEqual({ count: 2, minutes: 35 });
     expect(totalStats([])).toEqual({ count: 0, minutes: 0 });
   });

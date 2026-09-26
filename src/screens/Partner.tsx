@@ -2,6 +2,7 @@ import type { AuthUser } from "../data/auth";
 import { setReaction, useAllUsers, useSharedTask } from "../data/shared";
 import { setPartner, useUserDoc } from "../data/user";
 import { REACTION_EMOJI, type SharedTask } from "../domain/shared";
+import { Icon } from "../icons";
 
 export function Partner({ user }: { user: AuthUser }) {
   const me = useUserDoc(user.uid);
@@ -12,63 +13,69 @@ export function Partner({ user }: { user: AuthUser }) {
   const mine = useSharedTask(user.uid);
   const theirs = useSharedTask(mutual ? partnerId : null);
 
+  const choices = [
+    { uid: "", displayName: "No partner", email: "Work solo for now", photoURL: null },
+    ...people,
+  ];
   return (
-    <>
+    <div className="stack">
       <h1>Partner</h1>
-      <label>
-        Your partner{" "}
-        <select
-          value={partnerId ?? ""}
-          onChange={(e) => setPartner(user.uid, e.target.value || null)}
-          aria-label="Choose partner"
-        >
-          <option value="">No partner</option>
-          {people.map((p) => (
-            <option key={p.uid} value={p.uid}>
-              {p.displayName} ({p.email})
-            </option>
-          ))}
-        </select>
-      </label>
-      {people.length === 0 && <p className="muted">Nobody else has signed in yet.</p>}
-      <ul className="people">
-        {people.map((p) => (
-          <li key={p.uid} className={p.uid === partnerId ? "picked" : undefined}>
-            <Avatar person={p} />
-            <span>
-              {p.displayName}
-              <br />
-              <span className="muted">{p.email}</span>
-            </span>
-          </li>
-        ))}
-      </ul>
-
-      <div className="shared-pair">
-        <SharedCard
-          heading="Your shared task"
-          shared={mine}
-          empty="Pick a task and choose “Set as accountability task” in its details."
-        />
-        {partnerId === null ? (
-          <p className="muted">No partner set — choose someone above to see their task.</p>
-        ) : partner === undefined ? null : !mutual ? (
-          <p className="muted">
-            {partner.displayName} hasn’t picked you back yet, so their task isn’t visible.
-          </p>
-        ) : (
+      <div className="card-grid">
+        <section className="card">
+          <h2>Your partner</h2>
+          <div className="rows">
+            {choices.map((p) => {
+              const on = (partnerId ?? "") === p.uid;
+              return (
+                <button
+                  key={p.uid}
+                  type="button"
+                  aria-pressed={on}
+                  className="person"
+                  onClick={() => setPartner(user.uid, p.uid || null)}
+                >
+                  <Avatar person={p} />
+                  <span className="row-title">
+                    <strong>{p.displayName}</strong>
+                    <span className="muted">{p.email}</span>
+                  </span>
+                  <span className="radio" />
+                </button>
+              );
+            })}
+          </div>
+          {people.length === 0 && <p className="muted">Nobody else has signed in yet.</p>}
+        </section>
+        <div className="stack">
           <SharedCard
-            heading={`${partner.displayName}’s shared task`}
-            shared={theirs}
-            empty="They haven’t set an accountability task yet."
-            onReact={(shared, emoji) =>
-              setReaction(partnerId, shared, user.uid, emoji).catch(console.error)
-            }
-            myUid={user.uid}
+            heading="Your shared task"
+            shared={mine}
+            empty="Pick a task and choose “Set as accountability task” in its details."
           />
-        )}
+          {partnerId === null ? (
+            <section className="card">
+              <p className="muted">No partner set — choose someone to see their task.</p>
+            </section>
+          ) : partner === undefined ? null : !mutual ? (
+            <section className="card">
+              <p className="muted">
+                {partner.displayName} hasn’t picked you back yet, so their task isn’t visible.
+              </p>
+            </section>
+          ) : (
+            <SharedCard
+              heading={`${partner.displayName}’s shared task`}
+              shared={theirs}
+              empty="They haven’t set an accountability task yet."
+              onReact={(shared, emoji) =>
+                setReaction(partnerId, shared, user.uid, emoji).catch(console.error)
+              }
+              myUid={user.uid}
+            />
+          )}
+        </div>
       </div>
-    </>
+    </div>
   );
 }
 
@@ -87,20 +94,23 @@ function SharedCard({
 }) {
   const mine = shared?.reactions.find((r) => r.byUserId === myUid)?.emoji;
   return (
-    <section className="shared-card">
-      <h2>{heading}</h2>
+    <section className="card shared-card">
+      <span className="muted">{heading}</span>
       {shared === undefined ? null : shared === null ? (
         <p className="muted">{empty}</p>
       ) : (
-        <div>
-          <span className="task-title">{shared.title}</span>
-          <br />
-          <span className="muted">
-            {shared.completedAt !== null
-              ? "Done ✓"
-              : shared.dueDate
-                ? `Due ${shared.dueDate}`
-                : "In progress"}
+        <>
+          <span className="shared-title">{shared.title}</span>
+          <span className="shared-status">
+            {shared.completedAt !== null ? (
+              <>
+                <Icon name="check" size={12} /> Done
+              </>
+            ) : shared.dueDate ? (
+              `Due ${shared.dueDate}`
+            ) : (
+              "In progress"
+            )}
           </span>
           {shared.reactions.length > 0 && (
             <span className="reactions" title="Reactions">
@@ -124,7 +134,7 @@ function SharedCard({
               ))}
             </fieldset>
           )}
-        </div>
+        </>
       )}
     </section>
   );
@@ -134,6 +144,6 @@ function Avatar({ person }: { person: { displayName: string; photoURL: string | 
   return person.photoURL ? (
     <img className="avatar" src={person.photoURL} alt="" />
   ) : (
-    <span className="avatar">{person.displayName.slice(0, 1).toUpperCase()}</span>
+    <span className="avatar">{person.displayName.slice(0, 1).toUpperCase() || "–"}</span>
   );
 }

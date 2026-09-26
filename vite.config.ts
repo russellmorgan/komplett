@@ -13,8 +13,8 @@ export default defineConfig({
         name: "Komplett",
         short_name: "Komplett",
         description: "Personal to-do, pomodoro, and accountability app.",
-        theme_color: "#3b5bdb",
-        background_color: "#ffffff",
+        theme_color: "#dbd7cb",
+        background_color: "#dbd7cb",
         display: "standalone",
         start_url: "./",
         icons: [

@@ -19,6 +19,7 @@ import {
   timerReducer,
 } from "../domain/timer";
 import type { Settings } from "../domain/user";
+import { playChime } from "./chime";
 import { requestNotificationPermission } from "./reminders";
 import { useUserDoc } from "./user";
 
@@ -52,19 +53,9 @@ export function useTimer(): [TimerState, Dispatch<TimerAction>] {
   return [state, dispatch];
 }
 
-function beep() {
-  const ctx = new AudioContext();
-  const osc = ctx.createOscillator();
-  osc.frequency.value = 880;
-  osc.connect(ctx.destination);
-  osc.start();
-  osc.stop(ctx.currentTime + 0.3);
-  osc.onended = () => ctx.close();
-}
-
-function periodEnded(title: string, sound: boolean) {
+function periodEnded(title: string, settings: Settings | undefined) {
   if ("Notification" in window && Notification.permission === "granted") new Notification(title);
-  if (sound) beep();
+  if (settings?.soundEnabled ?? true) playChime(settings?.chime);
 }
 
 const PENDING_KEY = "komplett:pendingSession";
@@ -104,11 +95,11 @@ export function TimerProvider({ uid, children }: { uid: string; children: ReactN
     if (was.phase === "focus" && state.phase === "focusDone") {
       setPending(focusSummary(state, now));
       if (!state.endedEarly) {
-        periodEnded("Focus done — take a break", settings?.soundEnabled ?? true);
+        periodEnded("Focus done — take a break", settings);
         dispatch({ type: "startBreak", now, breakMinutes: settings?.breakMinutes ?? 5 });
       }
     } else if (was.phase === "break" && state.phase === "idle" && remainingMs(was, now) === 0) {
-      periodEnded("Break over", settings?.soundEnabled ?? true);
+      periodEnded("Break over", settings);
     }
   }, [state, dispatch, settings]);
 

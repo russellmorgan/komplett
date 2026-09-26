@@ -1,11 +1,20 @@
-/* Every color, font, spacing and radius in the app comes from here. Components never hardcode values. */
+/* Every color, font, spacing and radius in the app comes from here. Components never hardcode values.
+ *
+ * Themes: <html data-theme="…"> picks a palette; each color is light-dark(light, dark).
+ * Mode:   <html data-mode="light|dark"> forces one side; absent = follow the OS (color-scheme below).
+ * New theme = copy the [data-theme="orange"] block, rename it, change the values, add it to THEMES
+ * in src/data/theme.ts. Any token a theme leaves out falls back to Paper. */
 :root {
-  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color-scheme: light dark;
+
+  --font-sans: "Archivo", "Helvetica Neue", system-ui, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  --text-xs: 0.8125rem;
   --text-sm: 0.875rem;
   --text-md: 1rem;
   --text-lg: 1.25rem;
-  --text-xl: 1.75rem;
+  --text-xl: clamp(2.125rem, 5vw, 3.5rem);
+  --text-clock: clamp(1.5rem, 3.2vw, 2.375rem);
 
   --space-1: 0.25rem;
   --space-2: 0.5rem;
@@ -13,44 +22,74 @@
   --space-4: 1rem;
   --space-6: 1.5rem;
   --space-8: 2rem;
+  --space-gutter: clamp(20px, 5vw, 64px);
 
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 16px;
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-lg: 0;
   --radius-full: 999px;
+  --radius-dot: 0;
 
-  --color-bg: #ffffff;
-  --color-surface: #f6f6f7;
-  --color-border: #e2e2e6;
-  --color-text: #1a1a1f;
-  --color-text-muted: #6b6b76;
-  --color-accent: #3b5bdb;
+  --border-width: 1.5px;
+  --tap: 44px;
+  --content-width: 1180px;
+  --shadow-pop: 0 24px 48px -20px rgba(40, 35, 20, 0.35);
+
+  /* Paper (default theme). */
+  --color-bg: light-dark(#dbd7cb, #141412);
+  --color-surface: light-dark(#cfcbbf, #1e1d1a);
+  --color-field: light-dark(#ebe8df, #2a2925);
+  --color-border: light-dark(#bdb9ad, #3a3833);
+  --color-text: light-dark(#0f0f0f, #ebe8df);
+  --color-on-text: light-dark(#dbd7cb, #141412); /* text on a --color-text fill (inverse blocks) */
+  --color-text-muted: light-dark(#6e6b62, #a29f95);
+  --color-text-faint: light-dark(#8f8c82, #6e6b62);
+  --color-accent: #f2362c;
+  --color-accent-hover: #e02a20;
   --color-accent-text: #ffffff;
-  --color-danger: #d6336c;
+  --color-danger: light-dark(#c42a20, #ff6a5f);
+  --color-dot-off: light-dark(#c9c5b9, #262521);
 
-  /* List accent palette: lists store the token name ("rose"), never the hex. */
-  --list-slate: #64748b;
-  --list-rose: #e11d48;
-  --list-orange: #ea580c;
-  --list-amber: #d97706;
-  --list-green: #16a34a;
-  --list-teal: #0d9488;
-  --list-sky: #0284c7;
-  --list-indigo: #4f46e5;
-  --list-violet: #7c3aed;
-  --list-pink: #db2777;
-
-  --nav-size: 14rem;
-  --tab-height: 3.5rem;
+  /* List accent palette: lists store the token name ("rose"), never the hex. Mid-tones read on both. */
+  --list-slate: light-dark(#475569, #94a3b8);
+  --list-rose: light-dark(#e11d48, #fb7185);
+  --list-orange: light-dark(#ea580c, #fb923c);
+  --list-amber: light-dark(#b45309, #fbbf24);
+  --list-green: light-dark(#15803d, #4ade80);
+  --list-teal: light-dark(#0f766e, #2dd4bf);
+  --list-sky: light-dark(#0369a1, #38bdf8);
+  --list-indigo: light-dark(#4338ca, #818cf8);
+  --list-violet: light-dark(#6d28d9, #a78bfa);
+  --list-pink: light-dark(#be185d, #f472b6);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-bg: #121216;
-    --color-surface: #1c1c22;
-    --color-border: #2c2c35;
-    --color-text: #ededf0;
-    --color-text-muted: #9a9aa6;
-    --color-accent: #6b8afd;
-  }
+:root[data-mode="light"] {
+  color-scheme: light;
+}
+:root[data-mode="dark"] {
+  color-scheme: dark;
+}
+
+/* Orange: from "Komplett Orange" in the design project. */
+:root[data-theme="orange"] {
+  --font-sans: "Rubik", system-ui, sans-serif;
+  --radius-sm: 12px;
+  --radius-md: 20px;
+  --radius-lg: 32px;
+  --radius-dot: 999px;
+  --shadow-pop: 0 24px 44px -24px rgba(110, 50, 0, 0.6);
+
+  --color-bg: light-dark(#fe8002, #1c1209);
+  --color-surface: light-dark(#fff8ef, #2a1c0e);
+  --color-field: light-dark(#ffeedd, #3a2714);
+  --color-border: light-dark(#ffd0a0, #4a321a);
+  --color-text: light-dark(#262626, #fff8ef);
+  --color-on-text: light-dark(#fff8ef, #262626);
+  --color-text-muted: light-dark(#6b5a48, #c9a883);
+  --color-text-faint: light-dark(#9a4a00, #8a6f55);
+  --color-accent: light-dark(#262626, #fe8002);
+  --color-accent-hover: light-dark(#000000, #fd982f);
+  --color-accent-text: light-dark(#fff8ef, #262626);
+  --color-danger: light-dark(#b3261e, #ff8a80);
+  --color-dot-off: light-dark(#fd982f, #3a2714);
 }

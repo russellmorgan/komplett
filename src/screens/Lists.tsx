@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { NavLink } from "react-router";
 import type { AuthUser } from "../data/auth";
 import {
@@ -12,9 +13,11 @@ import {
 } from "../data/lists";
 import { LIST_COLORS, type ListColor, sortByOrder } from "../domain/lists";
 import { movedSortOrder, nextSortOrder } from "../domain/tasks";
+import { Icon } from "../icons";
+import { Grip, useReorder } from "../reorder";
 
 // Lists screen: Inbox, top-level lists, and folders (with their lists nested). Create/rename/
-// delete/reorder/move-to-folder/color live here; task rows link back via a plain <select>.
+// delete/reorder/move-to-folder/color live here, behind each row's edit button.
 export function Lists({ user }: { user: AuthUser }) {
   const lists = useLists(user.uid);
   const folders = useFolders(user.uid);
@@ -36,97 +39,97 @@ export function Lists({ user }: { user: AuthUser }) {
     addFolder(user.uid, name.trim(), nextSortOrder(folders));
   }
 
-  function moveFolder(index: number, direction: -1 | 1) {
-    const sortOrder = movedSortOrder(sortedFolders, index, direction);
-    const folder = sortedFolders[index];
+  const folderReorder = useReorder(sortedFolders.length, (from, to) => {
+    const sortOrder = movedSortOrder(sortedFolders, from, to);
+    const folder = sortedFolders[from];
     if (sortOrder !== null && folder) updateFolder(folder.id, { sortOrder });
-  }
-
-  function moveList(siblings: typeof lists, index: number, direction: -1 | 1) {
-    const sortOrder = movedSortOrder(siblings, index, direction);
-    const list = siblings[index];
-    if (sortOrder !== null && list) updateList(list.id, { sortOrder });
-  }
+  });
 
   return (
-    <div className="lists">
+    <div className="stack">
       <h1>Lists</h1>
-      <NavLink to="/" end className="list-name">
-        Inbox
-      </NavLink>
+      <section className="card lists">
+        <div className="list-row">
+          <span />
+          <span className="swatch big" style={{ background: "var(--list-slate)" }} />
+          <NavLink to="/" end className="list-name">
+            Inbox
+          </NavLink>
+        </div>
+        <ListGroup lists={topLists} folders={folders} />
 
-      {topLists.map((list, i) => (
-        <ListRow
-          key={list.id}
-          list={list}
-          folders={folders}
-          first={i === 0}
-          last={i === topLists.length - 1}
-          onMove={(dir) => moveList(topLists, i, dir)}
-        />
+        <div>
+          {sortedFolders.map((folder, i) => {
+            const folderLists = sortByOrder(lists.filter((l) => l.folderId === folder.id));
+            return (
+              <div key={folder.id} className="folder" {...folderReorder.row(i)}>
+                <div className="folder-row">
+                  <button {...folderReorder.handle(i, `folder ${folder.name}`)}>
+                    <Grip />
+                  </button>
+                  <span className="folder-name">{folder.name}</span>
+                  <button
+                    type="button"
+                    className="ghost icon"
+                    aria-label={`Rename folder ${folder.name}`}
+                    onClick={() => {
+                      const name = window.prompt("Rename folder", folder.name);
+                      if (name?.trim()) updateFolder(folder.id, { name: name.trim() });
+                    }}
+                  >
+                    <Icon name="edit" size={15} />
+                  </button>
+                  <button
+                    type="button"
+                    className="ghost icon"
+                    aria-label={`Delete folder ${folder.name}`}
+                    title="Delete folder, keep its lists"
+                    onClick={() => deleteFolder(folder.id)}
+                  >
+                    <Icon name="trash" size={15} />
+                  </button>
+                </div>
+                <div className="folder-lists">
+                  <ListGroup lists={folderLists} folders={folders} />
+                  <button type="button" className="link" onClick={() => createList(folder.id)}>
+                    <Icon name="plus" size={12} /> New list in {folder.name}
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+      <div className="button-row">
+        <button type="button" className="outline" onClick={() => createList(null)}>
+          <Icon name="plus" size={12} /> New list
+        </button>
+        <button type="button" className="outline" onClick={createFolder}>
+          <Icon name="plus" size={12} /> New folder
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// One run of sibling lists (top level, or one folder's), reorderable among themselves.
+function ListGroup({
+  lists,
+  folders,
+}: {
+  lists: ReturnType<typeof useLists>;
+  folders: ReturnType<typeof useFolders>;
+}) {
+  const reorder = useReorder(lists.length, (from, to) => {
+    const sortOrder = movedSortOrder(lists, from, to);
+    const list = lists[from];
+    if (sortOrder !== null && list) updateList(list.id, { sortOrder });
+  });
+  return (
+    <div className="list-group">
+      {lists.map((list, i) => (
+        <ListRow key={list.id} list={list} folders={folders} reorder={reorder} index={i} />
       ))}
-
-      <button type="button" onClick={() => createList(null)}>
-        + New list
-      </button>
-
-      {sortedFolders.map((folder, i) => {
-        const folderLists = sortByOrder(lists.filter((l) => l.folderId === folder.id));
-        return (
-          <div key={folder.id} className="folder">
-            <div className="list-row">
-              <strong>{folder.name}</strong>
-              <span className="move">
-                <button
-                  type="button"
-                  disabled={i === 0}
-                  onClick={() => moveFolder(i, -1)}
-                  aria-label="Move folder up"
-                >
-                  ↑
-                </button>
-                <button
-                  type="button"
-                  disabled={i === sortedFolders.length - 1}
-                  onClick={() => moveFolder(i, 1)}
-                  aria-label="Move folder down"
-                >
-                  ↓
-                </button>
-              </span>
-              <button
-                type="button"
-                onClick={() => {
-                  const name = window.prompt("Rename folder", folder.name);
-                  if (name?.trim()) updateFolder(folder.id, { name: name.trim() });
-                }}
-              >
-                Rename
-              </button>
-              <button type="button" onClick={() => deleteFolder(folder.id)}>
-                Delete
-              </button>
-            </div>
-            {folderLists.map((list, j) => (
-              <ListRow
-                key={list.id}
-                list={list}
-                folders={folders}
-                first={j === 0}
-                last={j === folderLists.length - 1}
-                onMove={(dir) => moveList(folderLists, j, dir)}
-              />
-            ))}
-            <button type="button" onClick={() => createList(folder.id)}>
-              + New list in {folder.name}
-            </button>
-          </div>
-        );
-      })}
-
-      <button type="button" onClick={createFolder}>
-        + New folder
-      </button>
     </div>
   );
 }
@@ -134,83 +137,88 @@ export function Lists({ user }: { user: AuthUser }) {
 function ListRow({
   list,
   folders,
-  first,
-  last,
-  onMove,
+  reorder,
+  index,
 }: {
   list: ReturnType<typeof useLists>[number];
   folders: ReturnType<typeof useFolders>;
-  first: boolean;
-  last: boolean;
-  onMove: (direction: -1 | 1) => void;
+  reorder: ReturnType<typeof useReorder>;
+  index: number;
 }) {
+  const [editing, setEditing] = useState(false);
   return (
-    <div className="list-row">
-      <NavLink
-        to={`/list/${list.id}`}
-        className="list-name"
-        style={{ color: `var(--list-${list.color})` }}
-      >
-        {list.name}
-      </NavLink>
-      <select
-        aria-label={`${list.name} color`}
-        value={list.color}
-        onChange={(e) => updateList(list.id, { color: e.target.value as ListColor })}
-      >
-        {LIST_COLORS.map((c) => (
-          <option key={c} value={c}>
-            {c}
-          </option>
-        ))}
-      </select>
-      <select
-        aria-label={`Move ${list.name} to folder`}
-        value={list.folderId ?? ""}
-        onChange={(e) => updateList(list.id, { folderId: e.target.value || null })}
-      >
-        <option value="">No folder</option>
-        {folders.map((f) => (
-          <option key={f.id} value={f.id}>
-            {f.name}
-          </option>
-        ))}
-      </select>
-      <span className="move">
+    <div {...reorder.row(index)}>
+      <div className="list-row">
+        <button {...reorder.handle(index, list.name)}>
+          <Grip />
+        </button>
+        <span className="swatch big" style={{ background: `var(--list-${list.color})` }} />
+        <NavLink to={`/list/${list.id}`} className="list-name">
+          {list.name}
+        </NavLink>
         <button
           type="button"
-          disabled={first}
-          onClick={() => onMove(-1)}
-          aria-label={`Move ${list.name} up`}
+          className="ghost icon"
+          aria-label={`Edit ${list.name}`}
+          aria-expanded={editing}
+          onClick={() => setEditing(!editing)}
         >
-          ↑
+          <Icon name="edit" size={15} />
         </button>
-        <button
-          type="button"
-          disabled={last}
-          onClick={() => onMove(1)}
-          aria-label={`Move ${list.name} down`}
-        >
-          ↓
-        </button>
-      </span>
-      <button
-        type="button"
-        onClick={() => {
-          const name = window.prompt("Rename list", list.name);
-          if (name?.trim()) updateList(list.id, { name: name.trim() });
-        }}
-      >
-        Rename
-      </button>
-      <button
-        type="button"
-        onClick={() => {
-          if (window.confirm(`Delete "${list.name}" and all its tasks?`)) deleteList(list.id);
-        }}
-      >
-        Delete
-      </button>
+      </div>
+      {editing && (
+        <div className="list-edit">
+          <label className="field">
+            <span>Name</span>
+            <input
+              defaultValue={list.name}
+              onBlur={(e) => {
+                const name = e.target.value.trim();
+                if (name && name !== list.name) updateList(list.id, { name });
+              }}
+            />
+          </label>
+          <div className="field">
+            <span>Color</span>
+            <div className="swatches">
+              {LIST_COLORS.map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  aria-label={`Color ${c}`}
+                  aria-pressed={list.color === c}
+                  onClick={() => updateList(list.id, { color: c as ListColor })}
+                >
+                  <span className="swatch" style={{ background: `var(--list-${c})` }} />
+                </button>
+              ))}
+            </div>
+          </div>
+          <label className="field">
+            <span>Folder</span>
+            <select
+              value={list.folderId ?? ""}
+              onChange={(e) => updateList(list.id, { folderId: e.target.value || null })}
+            >
+              <option value="">No folder</option>
+              {folders.map((f) => (
+                <option key={f.id} value={f.id}>
+                  {f.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <button
+            type="button"
+            className="outline"
+            onClick={() => {
+              if (window.confirm(`Delete "${list.name}" and all its tasks?`)) deleteList(list.id);
+            }}
+          >
+            <Icon name="trash" size={15} /> Delete list
+          </button>
+        </div>
+      )}
     </div>
   );
 }
