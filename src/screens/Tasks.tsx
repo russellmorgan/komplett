@@ -16,6 +16,7 @@ import {
   type Task,
 } from "../domain/tasks";
 import { inboxListId } from "../domain/user";
+import { fadeOut } from "../fade";
 import { Icon } from "../icons";
 import { Grip, useReorder } from "../reorder";
 import { TaskDetail } from "./TaskDetail";
@@ -156,10 +157,12 @@ export function Tasks({ user }: { user: AuthUser }) {
                   type="checkbox"
                   className="check"
                   checked={false}
-                  onChange={() => {
-                    updateTask(task.id, completePatch(task, Date.now()));
-                    if (!task.repeat) setLastCompleted(task);
-                  }}
+                  onChange={(e) =>
+                    fadeOut(task.repeat ? null : e.currentTarget.closest("li"), () => {
+                      updateTask(task.id, completePatch(task, Date.now()));
+                      if (!task.repeat) setLastCompleted(task);
+                    })
+                  }
                   aria-label={`Complete ${task.title}`}
                 />
                 <button type="button" className="row-title" onClick={() => setOpenId(task.id)}>
@@ -185,7 +188,12 @@ export function Tasks({ user }: { user: AuthUser }) {
             type="checkbox"
             className="switch"
             checked={showCompleted}
-            onChange={(e) => toggleShowCompleted(e.target.checked)}
+            onChange={(e) => {
+              const on = e.target.checked;
+              fadeOut(on ? null : document.querySelector(".done-rows"), () =>
+                toggleShowCompleted(on),
+              );
+            }}
           />
           Show completed <span className="muted">{completed.length}</span>
         </label>
@@ -197,7 +205,11 @@ export function Tasks({ user }: { user: AuthUser }) {
                   type="checkbox"
                   className="check"
                   checked={true}
-                  onChange={() => updateTask(task.id, { completedAt: null })}
+                  onChange={(e) =>
+                    fadeOut(e.currentTarget.closest("li"), () =>
+                      updateTask(task.id, { completedAt: null }),
+                    )
+                  }
                   aria-label={`Un-complete ${task.title}`}
                 />
                 <span className="row-title struck">{task.title}</span>

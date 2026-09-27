@@ -259,9 +259,6 @@ input.switch:checked {
   display: grid;
   gap: 18px;
 }
-.narrow {
-  max-width: 640px;
-}
 .card {
   display: grid;
   gap: 18px;
@@ -716,6 +713,7 @@ button.big.small {
   min-width: 0;
   min-height: var(--tap);
   align-content: center;
+  justify-content: stretch;
   justify-items: start;
   padding: 0;
   border: 0;
@@ -1116,7 +1114,7 @@ label.setting {
 .stepper input::-webkit-inner-spin-button {
   -webkit-appearance: none;
 }
-.narrow > button {
+.start {
   justify-self: start;
 }
 

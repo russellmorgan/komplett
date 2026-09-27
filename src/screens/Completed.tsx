@@ -2,6 +2,7 @@ import type { AuthUser } from "../data/auth";
 import { useLists } from "../data/lists";
 import { deleteTask, deleteTasks, updateTask, useTasks } from "../data/tasks";
 import { completedTasks } from "../domain/tasks";
+import { fadeOut } from "../fade";
 import { Icon } from "../icons";
 
 export function Completed({ user }: { user: AuthUser }) {
@@ -28,7 +29,11 @@ export function Completed({ user }: { user: AuthUser }) {
                 type="checkbox"
                 className="check"
                 checked={true}
-                onChange={() => updateTask(task.id, { completedAt: null })}
+                onChange={(e) =>
+                  fadeOut(e.currentTarget.closest("li"), () =>
+                    updateTask(task.id, { completedAt: null }),
+                  )
+                }
                 aria-label={`Un-complete ${task.title}`}
               />
               <span className="row-title">

@@ -43,7 +43,7 @@ const DEFAULT: TimerView = {
   shown: PRESETS.Everything as Item[],
   density: "Standard",
   focus: false,
-  details: true,
+  details: false,
   order: ["upnext", "today", "partner"],
 };
 

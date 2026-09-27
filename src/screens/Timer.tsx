@@ -5,6 +5,7 @@ import { useTimerContext } from "../data/timer";
 import { ITEMS, type Item, PANELS, PRESETS, useTimerView } from "../data/timerView";
 import { DENSITIES, type Density, dotMatrix, gridOf } from "../domain/dots";
 import { formatMmSs, remainingMs } from "../domain/timer";
+import { fadeOut } from "../fade";
 import { Icon } from "../icons";
 import { useReorder } from "../reorder";
 import { TimerPanel } from "./TimerPanels";
@@ -55,9 +56,8 @@ export function Timer({ user }: { user: AuthUser }) {
 
   const total = state.phase === "idle" ? (settings?.focusMinutes ?? 25) * 60_000 : state.durationMs;
   const left = state.phase === "idle" ? total : remainingMs(state, now);
-  const colon = !running || paused || Math.ceil(left / 1000) % 2 === 0;
   const progress = has("progress") ? (total ? 1 - left / total : 0) : null;
-  const dots = dotMatrix(left, progress, colon, view.density);
+  const dots = dotMatrix(left, progress, true, view.density);
   const gridStyle = { "--cols": gridOf(view.density).cols } as CSSProperties;
   const togglePause = () => {
     if (state.phase === "idle") startFocus();
@@ -100,7 +100,12 @@ export function Timer({ user }: { user: AuthUser }) {
             type="button"
             className={view.details ? "ink" : "outline"}
             aria-pressed={view.details}
-            onClick={() => setView({ details: !view.details })}
+            onClick={() =>
+              fadeOut(
+                view.details ? document.querySelectorAll(".panels, .hidden-panels") : null,
+                () => setView({ details: !view.details }),
+              )
+            }
           >
             Details
           </button>
@@ -114,11 +119,12 @@ export function Timer({ user }: { user: AuthUser }) {
             shown={view.shown}
             density={view.density}
             onToggle={(k) =>
-              setView({
-                shown: view.shown.includes(k)
-                  ? view.shown.filter((x) => x !== k)
-                  : [...view.shown, k],
-              })
+              view.shown.includes(k)
+                ? fadeOut(
+                    document.querySelectorAll(".panels > *")[(panels as string[]).indexOf(k)],
+                    () => setView({ shown: view.shown.filter((x) => x !== k) }),
+                  )
+                : setView({ shown: [...view.shown, k] })
             }
             set={setView}
           />

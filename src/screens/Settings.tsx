@@ -12,7 +12,7 @@ export function Settings({ user }: { user: AuthUser }) {
   const [appearance, setAppearance] = useAppearance();
 
   return (
-    <div className="stack narrow">
+    <div className="stack">
       <div className="stack-tight">
         <h1>Settings</h1>
         <span className="muted">Signed in as {user.email}</span>
@@ -132,7 +132,7 @@ export function Settings({ user }: { user: AuthUser }) {
           </fieldset>
         </div>
       </section>
-      <button type="button" className="outline" onClick={signOut}>
+      <button type="button" className="outline start" onClick={signOut}>
         Sign out
       </button>
     </div>

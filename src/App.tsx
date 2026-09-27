@@ -48,7 +48,8 @@ function Shell({ user }: { user: AuthUser }) {
     { path: "/partner", label: "Partner", element: <Partner user={user} /> },
     { path: "/settings", label: "Settings", element: <Settings user={user} /> },
   ];
-  const links = [{ path: "/", label: "Tasks" }, ...screens];
+  const links: { path: string; label: string }[] = [...screens];
+  links.splice(1, 0, { path: "/", label: "Tasks" });
   return (
     <TimerProvider uid={user.uid}>
       <BrowserRouter>
@@ -84,9 +85,9 @@ function Header({ links }: { links: { path: string; label: string }[] }) {
   );
   return (
     <header className="header">
-      <span className="wordmark">
+      <Link to="/timer" className="wordmark" onClick={() => setMenuOpen(false)}>
         Kom<span>plett</span>
-      </span>
+      </Link>
       <div className="header-actions">
         {nav("nav")}
         {pathname !== "/timer" && <TimerPill />}

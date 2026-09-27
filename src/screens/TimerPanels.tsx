@@ -11,6 +11,7 @@ import { completePatch } from "../domain/repeat";
 import type { SharedTask } from "../domain/shared";
 import { nextSortOrder, type Task } from "../domain/tasks";
 import { inboxListId } from "../domain/user";
+import { fadeOut } from "../fade";
 import { Icon } from "../icons";
 import { Grip, type useReorder } from "../reorder";
 
@@ -49,7 +50,7 @@ function PanelCard({
             className="ghost icon"
             aria-label={`Hide ${label}`}
             title="Hide"
-            onClick={onHide}
+            onClick={(e) => fadeOut(e.currentTarget.closest(".panel"), onHide)}
           >
             <Icon name="close" size={14} />
           </button>

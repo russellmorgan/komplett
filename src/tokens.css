@@ -36,19 +36,19 @@
   --shadow-pop: 0 24px 48px -20px rgba(40, 35, 20, 0.35);
 
   /* Paper (default theme). */
-  --color-bg: light-dark(#dbd7cb, #141412);
-  --color-surface: light-dark(#cfcbbf, #1e1d1a);
-  --color-field: light-dark(#ebe8df, #2a2925);
-  --color-border: light-dark(#bdb9ad, #3a3833);
-  --color-text: light-dark(#0f0f0f, #ebe8df);
-  --color-on-text: light-dark(#dbd7cb, #141412); /* text on a --color-text fill (inverse blocks) */
-  --color-text-muted: light-dark(#6e6b62, #a29f95);
-  --color-text-faint: light-dark(#8f8c82, #6e6b62);
+  --color-bg: light-dark(#dbd7cb, #1f1e1b);
+  --color-surface: light-dark(#cfcbbf, #292824);
+  --color-field: light-dark(#ebe8df, #34332e);
+  --color-border: light-dark(#bdb9ad, #46443e);
+  --color-text: light-dark(#0f0f0f, #cfccc2);
+  --color-on-text: light-dark(#dbd7cb, #1f1e1b); /* text on a --color-text fill (inverse blocks) */
+  --color-text-muted: light-dark(#6e6b62, #96938a);
+  --color-text-faint: light-dark(#8f8c82, #76736b);
   --color-accent: #f2362c;
   --color-accent-hover: #e02a20;
   --color-accent-text: #ffffff;
   --color-danger: light-dark(#c42a20, #ff6a5f);
-  --color-dot-off: light-dark(#c9c5b9, #262521);
+  --color-dot-off: light-dark(#c9c5b9, #312f2b);
 
   /* List accent palette: lists store the token name ("rose"), never the hex. Mid-tones read on both. */
   --list-slate: light-dark(#475569, #94a3b8);
@@ -79,17 +79,17 @@
   --radius-dot: 999px;
   --shadow-pop: 0 24px 44px -24px rgba(110, 50, 0, 0.6);
 
-  --color-bg: light-dark(#fe8002, #1c1209);
-  --color-surface: light-dark(#fff8ef, #2a1c0e);
-  --color-field: light-dark(#ffeedd, #3a2714);
-  --color-border: light-dark(#ffd0a0, #4a321a);
-  --color-text: light-dark(#262626, #fff8ef);
+  --color-bg: light-dark(#fe8002, #261b11);
+  --color-surface: light-dark(#fff8ef, #33251a);
+  --color-field: light-dark(#ffeedd, #402f20);
+  --color-border: light-dark(#ffd0a0, #523d28);
+  --color-text: light-dark(#262626, #e3d9cb);
   --color-on-text: light-dark(#fff8ef, #262626);
-  --color-text-muted: light-dark(#6b5a48, #c9a883);
+  --color-text-muted: light-dark(#6b5a48, #b89c7c);
   --color-text-faint: light-dark(#9a4a00, #8a6f55);
   --color-accent: light-dark(#262626, #fe8002);
   --color-accent-hover: light-dark(#000000, #fd982f);
   --color-accent-text: light-dark(#fff8ef, #262626);
   --color-danger: light-dark(#b3261e, #ff8a80);
-  --color-dot-off: light-dark(#fd982f, #3a2714);
+  --color-dot-off: light-dark(#fd982f, #402f20);
 }
