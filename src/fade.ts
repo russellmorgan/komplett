@@ -6,7 +6,7 @@ export function fadeOut(els: Element | Iterable<Element> | null | undefined, the
   Promise.all(
     list.map((el) => {
       (el as HTMLElement).style.pointerEvents = "none";
-      return el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 300, fill: "forwards" })
+      return el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 300, easing: "ease-in-out", fill: "forwards" })
         .finished;
     }),
   ).then(then);
