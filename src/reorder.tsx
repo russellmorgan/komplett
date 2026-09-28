@@ -9,11 +9,15 @@ export function useReorder(count: number, onMove: (from: number, to: number) => 
   function start(from: number, e: PointerEvent<HTMLElement>) {
     e.preventDefault();
     const handle = e.currentTarget;
-    const group = handle.closest("[data-reorder]")?.parentElement;
+    const self = handle.closest<HTMLElement>("[data-reorder]");
+    const group = self?.parentElement;
+    const startY = e.clientY;
     handle.setPointerCapture(e.pointerId);
     let over = from;
     setDrag({ from, over });
     const move = (ev: globalThis.PointerEvent) => {
+      // The dragged row follows the pointer; it's pointer-events: none (CSS), so hit-testing sees the row beneath.
+      if (self) self.style.translate = `0 ${ev.clientY - startY}px`;
       const row = document.elementFromPoint(ev.clientX, ev.clientY)?.closest("[data-reorder]");
       if (!row || row.parentElement !== group) return;
       over = Number(row.getAttribute("data-reorder"));
@@ -23,6 +27,7 @@ export function useReorder(count: number, onMove: (from: number, to: number) => 
       handle.removeEventListener("pointermove", move);
       handle.removeEventListener("pointerup", up);
       handle.removeEventListener("pointercancel", up);
+      if (self) self.style.translate = "";
       setDrag(null);
       if (over !== from) onMove(from, over);
     };

@@ -770,7 +770,11 @@ button.grip:hover {
   background: transparent;
 }
 [data-drag="self"] {
+  position: relative;
+  z-index: 1;
   opacity: 0.5;
+  pointer-events: none;
+  transition: opacity 300ms ease-in-out; /* the global `all` would make it lag the pointer */
 }
 [data-drag="before"] {
   box-shadow: inset 0 2px 0 var(--color-text);
