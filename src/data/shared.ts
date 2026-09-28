@@ -1,5 +1,5 @@
 import { collection, doc, onSnapshot, setDoc, updateDoc } from "firebase/firestore";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   projectSharedTask,
   type SharedTask,
@@ -9,6 +9,8 @@ import {
 import type { Task } from "../domain/tasks";
 import type { User } from "../domain/user";
 import { db } from "./firebase";
+import { notify } from "./timer";
+import { useUserDoc } from "./user";
 
 // Live view of one user's shared task. undefined while loading, null when none exists yet (or
 // the rules refuse: a partner who hasn't picked you back reads as null).
@@ -53,6 +55,22 @@ export function useSharedTaskSync(uid: string, user: User | undefined, tasks: Ta
     const next = projectSharedTask(task, stored, Date.now());
     if (sharedTaskChanged(stored, next)) setDoc(doc(db, "sharedTasks", uid), next);
   }, [uid, task, stored]);
+}
+
+// Notifies (and chimes) when your partner completes their shared task. Only completions from the
+// last minute count, so opening the app on an already-done task stays quiet.
+// ponytail: reloading within that minute alerts again; persist the last alert if that annoys.
+export function usePartnerDoneAlert(uid: string) {
+  const me = useUserDoc(uid);
+  const partner = useUserDoc(me?.partnerId ?? null);
+  const theirs = useSharedTask(partner?.partnerId === uid ? (me?.partnerId ?? null) : null);
+  const alerted = useRef<number | null>(null);
+  const done = theirs?.completedAt ?? null;
+  useEffect(() => {
+    if (done === null || done === alerted.current || Date.now() - done > 60_000) return;
+    alerted.current = done;
+    notify(`${partner?.displayName ?? "Your partner"} completed “${theirs?.title}”`, me?.settings);
+  }, [done, partner, theirs, me]);
 }
 
 // React to a partner's completed shared task; replaces this user's earlier reaction.

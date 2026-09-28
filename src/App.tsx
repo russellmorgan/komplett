@@ -12,7 +12,7 @@ import {
 import { type AuthUser, useAuthUser } from "./data/auth";
 import { useLists } from "./data/lists";
 import { useReminders } from "./data/reminders";
-import { useSharedTaskSync } from "./data/shared";
+import { usePartnerDoneAlert, useSharedTaskSync } from "./data/shared";
 import { useTasks } from "./data/tasks";
 import { TimerProvider, useTimerContext } from "./data/timer";
 import { useUserDoc } from "./data/user";
@@ -39,6 +39,7 @@ function Shell({ user }: { user: AuthUser }) {
   const tasks = useTasks(user.uid);
   useReminders(tasks);
   useSharedTaskSync(user.uid, useUserDoc(user.uid), tasks);
+  usePartnerDoneAlert(user.uid);
 
   const screens = [
     { path: "/timer", label: "Timer", element: <Timer user={user} /> },

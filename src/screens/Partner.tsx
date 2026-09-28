@@ -1,4 +1,5 @@
 import type { AuthUser } from "../data/auth";
+import { requestNotificationPermission } from "../data/reminders";
 import { setReaction, useAllUsers, useSharedTask } from "../data/shared";
 import { setPartner, useUserDoc } from "../data/user";
 import { REACTION_EMOJI, type SharedTask } from "../domain/shared";
@@ -32,7 +33,10 @@ export function Partner({ user }: { user: AuthUser }) {
                   type="button"
                   aria-pressed={on}
                   className="person"
-                  onClick={() => setPartner(user.uid, p.uid || null)}
+                  onClick={() => {
+                    if (p.uid) requestNotificationPermission(); // for the "partner is done" alert
+                    setPartner(user.uid, p.uid || null);
+                  }}
                 >
                   <Avatar person={p} />
                   <span className="row-title">
@@ -100,8 +104,10 @@ function SharedCard({
         <p className="muted">{empty}</p>
       ) : (
         <>
-          <span className="shared-title">{shared.title}</span>
-          <span className="shared-status">
+          <span className={shared.completedAt !== null ? "shared-title struck" : "shared-title"}>
+            {shared.title}
+          </span>
+          <span className={shared.completedAt !== null ? "shared-status done" : "shared-status"}>
             {shared.completedAt !== null ? (
               <>
                 <Icon name="check" size={12} /> Done

@@ -246,8 +246,12 @@ function PartnerPanel({ user, ...card }: PanelProps) {
           <span className="muted">They haven’t picked you back yet.</span>
         ) : theirs ? (
           <>
-            <strong>{theirs.title}</strong>
-            <span className="num">{status(theirs)}</span>
+            <strong className={theirs.completedAt !== null ? "struck" : undefined}>
+              {theirs.title}
+            </strong>
+            <span className={theirs.completedAt !== null ? "num done" : "num"}>
+              {status(theirs)}
+            </span>
           </>
         ) : (
           <span className="muted">No accountability task yet.</span>
@@ -257,8 +261,10 @@ function PartnerPanel({ user, ...card }: PanelProps) {
         <span className="muted">Your shared task</span>
         {mine ? (
           <>
-            <strong>{mine.title}</strong>
-            <span className="num">{status(mine)}</span>
+            <strong className={mine.completedAt !== null ? "struck" : undefined}>
+              {mine.title}
+            </strong>
+            <span className={mine.completedAt !== null ? "num done" : "num"}>{status(mine)}</span>
           </>
         ) : (
           <span className="muted">None yet. Set one from a task’s details.</span>

@@ -59,7 +59,8 @@ export function useTimer(): [TimerState, Dispatch<TimerAction>] {
   return [state, dispatch];
 }
 
-function periodEnded(title: string, settings: Settings | undefined) {
+// Notification plus chime: period ends, and a partner completing their shared task.
+export function notify(title: string, settings: Settings | undefined) {
   if ("Notification" in window && Notification.permission === "granted") new Notification(title);
   if (settings?.soundEnabled ?? true) playChime(settings?.chime);
 }
@@ -101,11 +102,11 @@ export function TimerProvider({ uid, children }: { uid: string; children: ReactN
     if (was.phase === "focus" && state.phase === "focusDone") {
       setPending(focusSummary(state, now));
       if (!state.endedEarly) {
-        periodEnded("Focus done — take a break", settings);
+        notify("Focus done — take a break", settings);
         dispatch({ type: "startBreak", now, breakMinutes: settings?.breakMinutes ?? 5 });
       }
     } else if (was.phase === "break" && state.phase === "idle" && remainingMs(was, now) === 0) {
-      periodEnded("Break over", settings);
+      notify("Break over", settings);
     }
   }, [state, dispatch, settings]);
 

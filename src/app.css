@@ -1308,6 +1308,11 @@ body.hide-nav .header {
 .shared-line strong {
   font-size: 17px;
 }
+/* A completed shared task: struck title (.struck) plus an accent "Done". */
+.shared-status.done,
+.shared-line .done {
+  color: var(--color-accent);
+}
 .avatar.inverse {
   flex: none;
   width: 44px;
