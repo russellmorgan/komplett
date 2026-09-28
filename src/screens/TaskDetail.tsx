@@ -64,7 +64,6 @@ export function TaskDetail({
         <textarea
           className="title-input"
           aria-label="Task title"
-          rows={2}
           defaultValue={task.title}
           onBlur={(e) => {
             const title = e.target.value.trim();

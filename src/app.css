@@ -881,6 +881,9 @@ textarea.title-input {
   line-height: 1.15;
   letter-spacing: -0.02em;
   resize: none;
+  field-sizing: content; /* grows with the title: 3 lines minimum, scrolls past 8 */
+  min-height: 3lh;
+  max-height: 8lh;
 }
 .days {
   display: grid;
