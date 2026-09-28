@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { activeTasks, completedTasks, movedSortOrder, nextSortOrder, type Task } from "./tasks";
+import {
+  activeTasks,
+  completedTasks,
+  movedSortOrder,
+  nextSortOrder,
+  type Task,
+  upNext,
+} from "./tasks";
 
 const task = (over: Partial<Task>): Task => ({
   id: "t",
@@ -69,5 +76,48 @@ describe("movedSortOrder", () => {
     expect(movedSortOrder(sorted, 1, 1)).toBeNull();
     expect(movedSortOrder(sorted, 0, -1)).toBeNull();
     expect(movedSortOrder(sorted, 2, 3)).toBeNull();
+  });
+});
+
+describe("upNext", () => {
+  const s = (taskId: string | null, startedAt: number) => ({
+    id: `s${startedAt}`,
+    ownerId: "u",
+    taskId,
+    taskTitle: "",
+    note: "",
+    focusMinutes: 25,
+    startedAt,
+    endedAt: startedAt,
+    endedEarly: false,
+  });
+
+  it("orders recently focused, then due today/overdue, then Inbox, each once", () => {
+    const tasks = [
+      task({ id: "inbox2", sortOrder: 2 }),
+      task({ id: "inbox1", sortOrder: 1 }),
+      task({ id: "future", listId: "work", dueDate: "2026-10-05" }),
+      task({ id: "today", listId: "work", dueDate: "2026-09-28" }),
+      task({ id: "overdue", listId: "work", dueDate: "2026-09-01" }),
+      task({ id: "focusedOld", listId: "work" }),
+      task({ id: "focusedNew", listId: "work", dueDate: "2026-09-28" }),
+      task({ id: "done", completedAt: 1 }),
+      task({ id: "undated", listId: "work" }),
+    ];
+    const sessions = [
+      s("focusedOld", 1),
+      s("done", 2),
+      s(null, 3),
+      s("focusedNew", 4),
+      s("focusedOld", 5),
+    ];
+    expect(upNext(tasks, sessions, "2026-09-28", "inbox").map((t) => t.id)).toEqual([
+      "focusedOld",
+      "focusedNew",
+      "overdue",
+      "today",
+      "inbox1",
+      "inbox2",
+    ]);
   });
 });

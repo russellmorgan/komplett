@@ -48,7 +48,8 @@ function Shell({ user }: { user: AuthUser }) {
     { path: "/partner", label: "Partner", element: <Partner user={user} /> },
     { path: "/settings", label: "Settings", element: <Settings user={user} /> },
   ];
-  const links: { path: string; label: string }[] = [...screens];
+  // Completed is reached from the Tasks screen, not the nav.
+  const links: { path: string; label: string }[] = screens.filter((s) => s.path !== "/completed");
   links.splice(1, 0, { path: "/", label: "Tasks" });
   return (
     <TimerProvider uid={user.uid}>

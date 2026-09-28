@@ -1,4 +1,5 @@
 // Pure task logic. No React, no Firebase. Timestamps are epoch milliseconds.
+import { type Session, sessionsNewestFirst } from "./sessions";
 
 export type Repeat =
   | { kind: "daily" | "weekdays" }
@@ -48,6 +49,30 @@ export function completedTasks(tasks: Task[], listId?: string): Task[] {
   return tasks
     .filter((t) => t.completedAt !== null && (listId === undefined || t.listId === listId))
     .sort((a, b) => (b.completedAt as number) - (a.completedAt as number));
+}
+
+// Timer's "Up next": the last few tasks you focused on, then due today or overdue (soonest first),
+// then Inbox in its own order. Open tasks only, each once. `today` is the local YYYY-MM-DD date.
+export function upNext(
+  tasks: Task[],
+  sessions: Session[],
+  today: string,
+  inboxId: string,
+  recent = 3,
+): Task[] {
+  const open = tasks.filter((t) => t.completedAt === null);
+  const byId = new Map(open.map((t) => [t.id, t]));
+  const focused = [...new Set(sessionsNewestFirst(sessions).map((s) => s.taskId))]
+    .map((id) => (id ? byId.get(id) : undefined))
+    .filter((t) => t !== undefined)
+    .slice(0, recent);
+  const due = open
+    .filter((t) => t.dueDate !== null && t.dueDate <= today)
+    .sort(
+      (a, b) =>
+        (a.dueDate as string).localeCompare(b.dueDate as string) || a.sortOrder - b.sortOrder,
+    );
+  return [...new Set([...focused, ...due, ...activeTasks(open, inboxId)])];
 }
 
 export function nextSortOrder(items: { sortOrder: number }[]): number {

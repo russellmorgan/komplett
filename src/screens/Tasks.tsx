@@ -1,5 +1,5 @@
 import { type FormEvent, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router";
+import { Link, useLocation, useNavigate, useParams } from "react-router";
 import type { AuthUser } from "../data/auth";
 import { useLists } from "../data/lists";
 import { useSessions } from "../data/sessions";
@@ -42,6 +42,7 @@ export function Tasks({ user }: { user: AuthUser }) {
   const lists = useLists(user.uid);
   const currentList = lists.find((l) => l.id === listId);
   const navigate = useNavigate();
+  const { pathname } = useLocation();
   const sessions = useSessions(user.uid);
   const me = useUserDoc(user.uid);
   const { state: timer, pending, startFocus } = useTimerContext();
@@ -183,20 +184,25 @@ export function Tasks({ user }: { user: AuthUser }) {
           })}
           {active.length === 0 && <li className="empty">Nothing left in {listName}.</li>}
         </ul>
-        <label className="switch-row">
-          <input
-            type="checkbox"
-            className="switch"
-            checked={showCompleted}
-            onChange={(e) => {
-              const on = e.target.checked;
-              fadeOut(on ? null : document.querySelector(".done-rows"), () =>
-                toggleShowCompleted(on),
-              );
-            }}
-          />
-          Show completed <span className="muted">{completed.length}</span>
-        </label>
+        <div className="switch-bar">
+          <label className="switch-row">
+            <input
+              type="checkbox"
+              className="switch"
+              checked={showCompleted}
+              onChange={(e) => {
+                const on = e.target.checked;
+                fadeOut(on ? null : document.querySelector(".done-rows"), () =>
+                  toggleShowCompleted(on),
+                );
+              }}
+            />
+            Show completed <span className="muted">{completed.length}</span>
+          </label>
+          <Link to="/completed" state={{ from: pathname }} className="muted underline">
+            All completed
+          </Link>
+        </div>
         {showCompleted && (
           <ul className="rows done-rows">
             {completed.map((task) => (

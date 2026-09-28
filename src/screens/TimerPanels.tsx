@@ -9,7 +9,7 @@ import type { Panel } from "../data/timerView";
 import { useUserDoc } from "../data/user";
 import { completePatch } from "../domain/repeat";
 import type { SharedTask } from "../domain/shared";
-import { nextSortOrder, type Task } from "../domain/tasks";
+import { nextSortOrder, type Task, upNext } from "../domain/tasks";
 import { inboxListId } from "../domain/user";
 import { fadeOut } from "../fade";
 import { Icon } from "../icons";
@@ -67,19 +67,10 @@ export function TimerPanel({ id, ...props }: PanelProps & { id: Panel }) {
   return <PartnerPanel {...props} />;
 }
 
-// Open tasks across every list: dated ones first (soonest first), then the rest in list order.
-function upNext(tasks: Task[]): Task[] {
-  return tasks
-    .filter((t) => t.completedAt === null)
-    .sort(
-      (a, b) =>
-        (a.dueDate ?? "9999").localeCompare(b.dueDate ?? "9999") || a.sortOrder - b.sortOrder,
-    );
-}
-
 function UpNext({ user, ...card }: PanelProps) {
   const all = useTasks(user.uid);
-  const open = upNext(all);
+  const sessions = useSessions(user.uid);
+  const open = upNext(all, sessions, new Date().toLocaleDateString("en-CA"), inboxListId(user.uid));
   const { state, pending, startFocus } = useTimerContext();
   const busy = state.phase !== "idle" || pending !== null;
   const [draft, setDraft] = useState("");
@@ -107,7 +98,7 @@ function UpNext({ user, ...card }: PanelProps) {
         <>
           <h2>Up next</h2>
           <Link to="/" className="muted underline">
-            {open.length} open
+            {all.filter((t) => t.completedAt === null).length} open
           </Link>
         </>
       }
@@ -154,7 +145,7 @@ function UpNext({ user, ...card }: PanelProps) {
             </li>
           );
         })}
-        {open.length === 0 && <li className="empty">Nothing open.</li>}
+        {open.length === 0 && <li className="empty">Nothing due or in Inbox.</li>}
       </ul>
       {last && (
         <div className="toast">

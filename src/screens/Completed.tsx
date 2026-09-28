@@ -1,3 +1,4 @@
+import { Link, useLocation } from "react-router";
 import type { AuthUser } from "../data/auth";
 import { useLists } from "../data/lists";
 import { deleteTask, deleteTasks, updateTask, useTasks } from "../data/tasks";
@@ -9,6 +10,8 @@ export function Completed({ user }: { user: AuthUser }) {
   const all = useTasks(user.uid);
   const lists = useLists(user.uid);
   const completed = completedTasks(all);
+  // Back to the list whose "All completed" link brought us here; Inbox on a direct visit.
+  const back = (useLocation().state as { from?: string } | null)?.from ?? "/";
 
   function clearAll() {
     if (!confirm("Permanently delete all completed tasks? This cannot be undone.")) return;
@@ -17,6 +20,9 @@ export function Completed({ user }: { user: AuthUser }) {
 
   return (
     <div className="stack">
+      <Link to={back} className="muted underline">
+        ← Back to tasks
+      </Link>
       <h1>
         Completed <span className="faint">{completed.length}</span>
       </h1>
