@@ -51,8 +51,16 @@ export function completedTasks(tasks: Task[], listId?: string): Task[] {
     .sort((a, b) => (b.completedAt as number) - (a.completedAt as number));
 }
 
-// Timer's "Up next": the last few tasks you focused on, then due today or overdue (soonest first),
-// then Inbox in its own order. Open tasks only, each once. `today` is the local YYYY-MM-DD date.
+// The automatic Today list: open tasks due exactly `today` (local YYYY-MM-DD), from any list.
+// Computed, never stored — a task keeps its own list.
+export function todayTasks(tasks: Task[], today: string): Task[] {
+  return tasks
+    .filter((t) => t.completedAt === null && t.dueDate === today)
+    .sort((a, b) => a.sortOrder - b.sortOrder);
+}
+
+// Timer's "Up next": the Today list first, then the last few tasks you focused on, then overdue
+// (soonest first), then Inbox in its own order. Open tasks only, each once.
 export function upNext(
   tasks: Task[],
   sessions: Session[],
@@ -66,13 +74,20 @@ export function upNext(
     .map((id) => (id ? byId.get(id) : undefined))
     .filter((t) => t !== undefined)
     .slice(0, recent);
-  const due = open
-    .filter((t) => t.dueDate !== null && t.dueDate <= today)
+  const overdue = open
+    .filter((t) => t.dueDate !== null && t.dueDate < today)
     .sort(
       (a, b) =>
         (a.dueDate as string).localeCompare(b.dueDate as string) || a.sortOrder - b.sortOrder,
     );
-  return [...new Set([...focused, ...due, ...activeTasks(open, inboxId)])];
+  return [
+    ...new Set([
+      ...todayTasks(tasks, today),
+      ...focused,
+      ...overdue,
+      ...activeTasks(open, inboxId),
+    ]),
+  ];
 }
 
 export function nextSortOrder(items: { sortOrder: number }[]): number {

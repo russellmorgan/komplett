@@ -14,6 +14,7 @@ import {
   movedSortOrder,
   nextSortOrder,
   type Task,
+  todayTasks,
 } from "../domain/tasks";
 import { inboxListId } from "../domain/user";
 import { fadeOut } from "../fade";
@@ -36,9 +37,11 @@ function dueLabel(date: string | null): string {
   });
 }
 
-export function Tasks({ user }: { user: AuthUser }) {
+// `today` renders the automatic Today list: tasks due today from every list. Read-only — no add bar,
+// no reordering; completing or editing a task works as usual and it stays in its own list.
+export function Tasks({ user, today = false }: { user: AuthUser; today?: boolean }) {
   const { listId: paramListId } = useParams();
-  const listId = paramListId ?? inboxListId(user.uid);
+  const listId = today ? "today" : (paramListId ?? inboxListId(user.uid));
   const lists = useLists(user.uid);
   const currentList = lists.find((l) => l.id === listId);
   const navigate = useNavigate();
@@ -61,8 +64,10 @@ export function Tasks({ user }: { user: AuthUser }) {
     navigate("/timer");
   };
   const all = useTasks(user.uid);
-  const active = activeTasks(all, listId);
-  const completed = completedTasks(all, listId);
+  const active = today ? todayTasks(all, localDate()) : activeTasks(all, listId);
+  const completed = today
+    ? completedTasks(all).filter((t) => t.dueDate === localDate())
+    : completedTasks(all, listId);
   const [title, setTitle] = useState("");
   const [lastCompleted, setLastCompleted] = useState<Task | null>(null);
   const showCompletedKey = `showCompleted-${listId}`;
@@ -76,7 +81,7 @@ export function Tasks({ user }: { user: AuthUser }) {
   }
   const [openId, setOpenId] = useState<string | null>(null);
   const open = all.find((t) => t.id === openId);
-  const listName = currentList?.isInbox === false ? currentList.name : "Inbox";
+  const listName = today ? "Today" : currentList?.isInbox === false ? currentList.name : "Inbox";
 
   function add(e: FormEvent) {
     e.preventDefault();
@@ -102,12 +107,16 @@ export function Tasks({ user }: { user: AuthUser }) {
             {listName} <span className="faint">{active.length}</span>
           </h1>
           <nav className="chips" aria-label="Lists">
+            <Link to="/today" className="chip" aria-current={today ? "page" : undefined}>
+              <span className="swatch" style={{ background: "var(--list-amber)" }} />
+              Today
+            </Link>
             {lists.map((l) => (
               <Link
                 key={l.id}
                 to={l.isInbox ? "/" : `/list/${l.id}`}
                 className="chip"
-                aria-current={l.id === listId ? "page" : undefined}
+                aria-current={!today && l.id === listId ? "page" : undefined}
               >
                 <span className="swatch" style={{ background: `var(--list-${l.color})` }} />
                 {l.name}
@@ -115,17 +124,19 @@ export function Tasks({ user }: { user: AuthUser }) {
             ))}
           </nav>
         </div>
-        <form onSubmit={add} className="add-bar">
-          <input
-            placeholder={`Add a task to ${listName}`}
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            aria-label="New task title"
-          />
-          <button type="submit" className="ink icon" aria-label="Add">
-            <Icon name="plus" size={12} />
-          </button>
-        </form>
+        {!today && (
+          <form onSubmit={add} className="add-bar">
+            <input
+              placeholder={`Add a task to ${listName}`}
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              aria-label="New task title"
+            />
+            <button type="submit" className="ink icon" aria-label="Add">
+              <Icon name="plus" size={12} />
+            </button>
+          </form>
+        )}
         {lastCompleted && (
           <div className="toast">
             <span>Completed “{lastCompleted.title}”</span>
@@ -143,17 +154,24 @@ export function Tasks({ user }: { user: AuthUser }) {
         )}
         <ul className="rows">
           {active.map((task, i) => {
-            const due = dueLabel(task.dueDate);
+            // Today is all one date, so show which list each task lives in instead.
+            const due = today
+              ? (lists.find((l) => l.id === task.listId)?.name ?? "")
+              : dueLabel(task.dueDate);
             const now = timer.task?.id === task.id && timer.phase !== "idle";
             return (
               <li
                 key={task.id}
-                {...reorder.row(i)}
-                className={task.id === openId ? "task-row selected" : "task-row"}
+                {...(today ? {} : reorder.row(i))}
+                className={
+                  (task.id === openId ? "task-row selected" : "task-row") + (today ? " static" : "")
+                }
               >
-                <button {...reorder.handle(i, task.title)}>
-                  <Grip />
-                </button>
+                {!today && (
+                  <button {...reorder.handle(i, task.title)}>
+                    <Grip />
+                  </button>
+                )}
                 <input
                   type="checkbox"
                   className="check"

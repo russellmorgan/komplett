@@ -56,6 +56,13 @@ export function Lists({ user }: { user: AuthUser }) {
             Inbox
           </NavLink>
         </div>
+        <div className="list-row">
+          <span />
+          <span className="swatch big" style={{ background: "var(--list-amber)" }} />
+          <NavLink to="/today" className="list-name">
+            Today
+          </NavLink>
+        </div>
         <ListGroup lists={topLists} folders={folders} />
 
         <div>

@@ -715,6 +715,10 @@ button.big.small {
 .done-rows .task-row {
   padding-left: 38px;
 }
+.rows .task-row.static {
+  grid-template-columns: 22px minmax(0, 1fr) auto auto;
+  padding-left: 0;
+}
 .session-row {
   grid-template-columns: minmax(7rem, auto) minmax(0, 1fr) auto auto;
   gap: 14px;
