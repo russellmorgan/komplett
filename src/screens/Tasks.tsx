@@ -93,10 +93,13 @@ export function Tasks({ user, today = false }: { user: AuthUser; today?: boolean
     setTitle("");
   }
 
+  // Important tasks are pinned to the top by rule, so only the rest can be dragged, among themselves.
+  const pinned = active.filter((t) => t.important).length;
   const reorder = useReorder(active.length, (from, to) => {
-    const sortOrder = movedSortOrder(active, from, to);
+    const rest = active.slice(pinned);
+    const sortOrder = movedSortOrder(rest, from - pinned, Math.max(to - pinned, 0));
     const task = active[from];
-    if (sortOrder !== null && task) updateTask(task.id, { sortOrder });
+    if (from >= pinned && sortOrder !== null && task) updateTask(task.id, { sortOrder });
   });
 
   return (
@@ -187,6 +190,16 @@ export function Tasks({ user, today = false }: { user: AuthUser; today?: boolean
                 <button type="button" className="row-title" onClick={() => setOpenId(task.id)}>
                   <span className={now ? "strong" : undefined}>{task.title}</span>
                   {task.note && <span className="muted">{task.note}</span>}
+                </button>
+                <button
+                  type="button"
+                  className="star"
+                  aria-pressed={!!task.important}
+                  aria-label={`Mark ${task.title} important`}
+                  title="Important"
+                  onClick={() => updateTask(task.id, { important: !task.important })}
+                >
+                  <Icon name="star" size={15} />
                 </button>
                 <span className={due === "Overdue" ? "due overdue" : "due"}>{due}</span>
                 <button

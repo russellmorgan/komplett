@@ -37,6 +37,27 @@ describe("activeTasks", () => {
   });
 });
 
+describe("important tasks", () => {
+  it("lead the list: soonest due first, undated last, then oldest created; the rest by sortOrder", () => {
+    const tasks = [
+      task({ id: "plain1", sortOrder: 1 }),
+      task({ id: "plain0", sortOrder: 0 }),
+      task({ id: "impNewer", important: true, sortOrder: 9, createdAt: 20 }),
+      task({ id: "impOlder", important: true, sortOrder: 8, createdAt: 10 }),
+      task({ id: "impLater", important: true, dueDate: "2026-10-09", createdAt: 1 }),
+      task({ id: "impSoon", important: true, dueDate: "2026-10-01", createdAt: 99 }),
+    ];
+    expect(activeTasks(tasks, "inbox").map((t) => t.id)).toEqual([
+      "impSoon",
+      "impLater",
+      "impOlder",
+      "impNewer",
+      "plain0",
+      "plain1",
+    ]);
+  });
+});
+
 describe("completedTasks", () => {
   it("keeps only completed tasks, newest completedAt first, optionally scoped to a list", () => {
     const tasks = [

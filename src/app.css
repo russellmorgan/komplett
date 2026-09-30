@@ -695,7 +695,7 @@ button.big.small {
 .task-row,
 .session-row {
   display: grid;
-  grid-template-columns: auto 22px minmax(0, 1fr) auto auto;
+  grid-template-columns: auto 22px minmax(0, 1fr) auto auto auto;
   align-items: center;
   gap: 12px;
   padding: 8px 8px 8px 2px;
@@ -716,7 +716,7 @@ button.big.small {
   padding-left: 38px;
 }
 .rows .task-row.static {
-  grid-template-columns: 22px minmax(0, 1fr) auto auto;
+  grid-template-columns: 22px minmax(0, 1fr) auto auto auto;
   padding-left: 0;
 }
 .session-row {
@@ -799,6 +799,21 @@ section[data-drag="after"] {
 }
 .due.overdue {
   color: var(--color-danger);
+}
+button.star {
+  width: var(--tap);
+  height: var(--tap);
+  padding: 0;
+  border: 0;
+  color: var(--color-text-muted);
+}
+button.star[aria-pressed="true"],
+button.important[aria-pressed="true"] {
+  color: var(--list-amber);
+}
+button.star[aria-pressed="true"] svg,
+button.important[aria-pressed="true"] svg {
+  fill: currentColor;
 }
 button.play {
   width: var(--tap);

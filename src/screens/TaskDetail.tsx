@@ -101,6 +101,15 @@ export function TaskDetail({
           </button>
         )}
       </div>
+      <button
+        type="button"
+        className="outline important"
+        aria-pressed={!!task.important}
+        onClick={() => save({ important: !task.important })}
+      >
+        <Icon name="star" size={14} />
+        {task.important ? "Important" : "Mark as important"}
+      </button>
       <label className="field">
         <span>Due</span>
         <input
