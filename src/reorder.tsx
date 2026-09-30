@@ -27,7 +27,15 @@ export function useReorder(count: number, onMove: (from: number, to: number) => 
       handle.removeEventListener("pointermove", move);
       handle.removeEventListener("pointerup", up);
       handle.removeEventListener("pointercancel", up);
-      if (self) self.style.translate = "";
+      if (self) {
+        // The row is already in its new slot, so snap the pointer offset away: the global `all`
+        // transition would slide it back from there. Keep only the opacity fade.
+        self.style.transition = "opacity 300ms ease-in-out";
+        self.style.translate = "";
+        setTimeout(() => {
+          self.style.transition = "";
+        }, 300);
+      }
       setDrag(null);
       if (over !== from) onMove(from, over);
     };
