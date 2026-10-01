@@ -73,7 +73,7 @@ function Shell({ user }: { user: AuthUser }) {
   );
 }
 
-// Inline nav on wide screens; a menu button with a dropdown below 720px (CSS decides which shows).
+// Inline nav on wide screens; a menu button with a dropdown below 64rem (CSS decides which shows).
 function Header({ links }: { links: { path: string; label: string }[] }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const { pathname } = useLocation();
