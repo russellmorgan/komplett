@@ -6,6 +6,9 @@ import { completedTasks } from "../domain/tasks";
 import { fadeOut } from "../fade";
 import { Icon } from "../icons";
 
+const when = (ms: number) =>
+  new Date(ms).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
+
 export function Completed({ user }: { user: AuthUser }) {
   const all = useTasks(user.uid);
   const lists = useLists(user.uid);
@@ -50,6 +53,7 @@ export function Completed({ user }: { user: AuthUser }) {
                     style={{ background: `var(--list-${list?.color ?? "slate"})` }}
                   />
                   {list?.name ?? task.listId}
+                  {task.completedAt !== null && ` · ${when(task.completedAt)}`}
                 </span>
               </span>
               <button
