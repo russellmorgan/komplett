@@ -942,8 +942,10 @@ textarea.title-input {
   grid-template-columns: 1.875rem 0.875rem minmax(0, 1fr) auto;
   align-items: center;
   gap: 0.75rem;
+  min-height: calc(var(--tap) + 1rem + 1px); /* Inbox/Today match rows that hold the grip button */
   padding: 0.5rem 0;
 }
+.lists > .list-row,
 .list-group > * > .list-row,
 .folder-lists .list-group > * + * > .list-row {
   border-top: 1px solid var(--color-border);
