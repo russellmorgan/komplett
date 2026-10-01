@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Komplett</string>
+    <string name="title_activity_main">Komplett</string>
+    <string name="package_name">app.komplett.mobile</string>
+    <string name="custom_url_scheme">app.komplett.mobile</string>
+</resources>

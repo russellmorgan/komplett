@@ -1,0 +1,4 @@
+# One line ending everywhere (overrides each machine's core.autocrlf); Biome expects LF.
+* text=auto eol=lf
+# Windows batch files need CRLF.
+*.bat text eol=crlf

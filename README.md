@@ -43,6 +43,22 @@ Closing the window quits the app on Windows/Linux; on macOS it stays running in 
 
 The main process serves `dist/` over `http://localhost:41847` rather than loading `index.html` as a `file:` URL: the bundle references `/assets/*` absolutely, `BrowserRouter` needs real paths, and Firebase auth only trusts an authorised domain — `localhost` is one by default, so no Firebase console change is needed. The port is fixed so the origin (and with it the signed-in session and the Firestore cache) survives a restart; a single-instance lock stops a second launch fighting over it.
 
+## Android app (Capacitor)
+
+`android/` is a Capacitor project that wraps the production build (`dist/`) in a native WebView, same idea as the Electron shell. Config is in [capacitor.config.ts](capacitor.config.ts); the app serves `dist/` from `https://localhost`, which Firebase Auth trusts by default.
+
+Needs [Android Studio](https://developer.android.com/studio) (it bundles the SDK and a JDK).
+
+```bash
+pnpm android        # build dist/, copy it into android/, open Android Studio; press Run there
+```
+
+Re-run it after every web change. Known gaps vs the web app:
+
+- **Google sign-in** uses `signInWithPopup`, which Android WebViews block. Needs `@capacitor-firebase/authentication` (plus `google-services.json` and a debug SHA-1 in the Firebase console).
+- **Magic links** open in the browser, not the app. Needs an app link or custom scheme.
+- **Notifications** use the web `Notification` API, which isn't available in the WebView. Needs `@capacitor/local-notifications` for timer end and reminders.
+
 ## Layout
 
 - `src/domain/` — pure functions, no React or Firebase. The tested seam.
