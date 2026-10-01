@@ -65,8 +65,8 @@ export function todayTasks(tasks: Task[], today: string): Task[] {
   return tasks.filter((t) => t.completedAt === null && t.dueDate === today).sort(byImportance);
 }
 
-// Timer's "Up next": the Today list first, then the last few tasks you focused on, then overdue
-// (soonest first), then Inbox in its own order. Open tasks only, each once.
+// Timer's "Up next": open tasks that are important, due today or overdue, among the last few you
+// focused on, or in Inbox. One manual order across lists: important first, then by sortOrder (drag edits it).
 export function upNext(
   tasks: Task[],
   sessions: Session[],
@@ -76,28 +76,30 @@ export function upNext(
 ): Task[] {
   const open = tasks.filter((t) => t.completedAt === null);
   const byId = new Map(open.map((t) => [t.id, t]));
-  const focused = [...new Set(sessionsNewestFirst(sessions).map((s) => s.taskId))]
-    .map((id) => (id ? byId.get(id) : undefined))
-    .filter((t) => t !== undefined)
-    .slice(0, recent);
-  const overdue = open
-    .filter((t) => t.dueDate !== null && t.dueDate < today)
-    .sort(
-      (a, b) =>
-        (a.dueDate as string).localeCompare(b.dueDate as string) || a.sortOrder - b.sortOrder,
-    );
-  return [
-    ...new Set([
-      ...todayTasks(tasks, today),
-      ...focused,
-      ...overdue,
-      ...activeTasks(open, inboxId),
-    ]),
-  ];
+  const focused = new Set(
+    [...new Set(sessionsNewestFirst(sessions).map((s) => s.taskId))]
+      .map((id) => (id ? byId.get(id) : undefined))
+      .filter((t) => t !== undefined)
+      .slice(0, recent),
+  );
+  return open
+    .filter(
+      (t) =>
+        t.important ||
+        t.listId === inboxId ||
+        focused.has(t) ||
+        (t.dueDate !== null && t.dueDate <= today),
+    )
+    .sort(byImportance);
 }
 
 export function nextSortOrder(items: { sortOrder: number }[]): number {
   return Math.max(0, ...items.map((t) => t.sortOrder)) + 1;
+}
+
+// A sortOrder that sorts before everything in `items` (new tasks that should land first).
+export function firstSortOrder(items: { sortOrder: number }[]): number {
+  return Math.min(1, ...items.map((t) => t.sortOrder)) - 1;
 }
 
 // New sortOrder for sorted[from] dropped at position `to` (index in the list as it will read after

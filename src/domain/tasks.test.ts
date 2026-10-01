@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   activeTasks,
   completedTasks,
+  firstSortOrder,
   movedSortOrder,
   nextSortOrder,
   type Task,
@@ -114,15 +115,16 @@ describe("upNext", () => {
     endedEarly: false,
   });
 
-  it("orders Today, then recently focused, then overdue, then Inbox, each once", () => {
+  it("lists Inbox, due-today/overdue and recently focused tasks, important first then by sortOrder", () => {
     const tasks = [
       task({ id: "inbox2", sortOrder: 2 }),
       task({ id: "inbox1", sortOrder: 1 }),
       task({ id: "future", listId: "work", dueDate: "2026-10-05" }),
-      task({ id: "today", listId: "work", dueDate: "2026-09-28" }),
-      task({ id: "overdue", listId: "work", dueDate: "2026-09-01" }),
-      task({ id: "focusedOld", listId: "work" }),
-      task({ id: "focusedNew", listId: "work", dueDate: "2026-09-28" }),
+      task({ id: "star", listId: "work", important: true, sortOrder: 9 }),
+      task({ id: "today", listId: "work", dueDate: "2026-09-28", sortOrder: 3 }),
+      task({ id: "overdue", listId: "work", dueDate: "2026-09-01", important: true }),
+      task({ id: "focusedOld", listId: "work", sortOrder: 5 }),
+      task({ id: "focusedNew", listId: "work", dueDate: "2026-09-28", sortOrder: 4 }),
       task({ id: "done", completedAt: 1 }),
       task({ id: "undated", listId: "work" }),
     ];
@@ -134,13 +136,22 @@ describe("upNext", () => {
       s("focusedOld", 5),
     ];
     expect(upNext(tasks, sessions, "2026-09-28", "inbox").map((t) => t.id)).toEqual([
+      "overdue",
+      "star",
+      "inbox1",
+      "inbox2",
       "today",
       "focusedNew",
       "focusedOld",
-      "overdue",
-      "inbox1",
-      "inbox2",
     ]);
+  });
+});
+
+describe("firstSortOrder", () => {
+  it("sorts before every item, including negatives and an empty list", () => {
+    expect(firstSortOrder([{ sortOrder: 3 }, { sortOrder: -2 }])).toBe(-3);
+    expect(firstSortOrder([{ sortOrder: 5 }])).toBe(0);
+    expect(firstSortOrder([])).toBe(0);
   });
 });
 

@@ -9,11 +9,11 @@ import type { Panel } from "../data/timerView";
 import { useUserDoc } from "../data/user";
 import { completePatch } from "../domain/repeat";
 import type { SharedTask } from "../domain/shared";
-import { nextSortOrder, type Task, upNext } from "../domain/tasks";
+import { firstSortOrder, movedSortOrder, type Task, upNext } from "../domain/tasks";
 import { inboxListId } from "../domain/user";
 import { fadeOut } from "../fade";
 import { Icon } from "../icons";
-import { Grip, type useReorder } from "../reorder";
+import { Grip, useReorder } from "../reorder";
 
 const hm = (m: number) =>
   m >= 60 ? `${Math.floor(m / 60)}h${m % 60 ? ` ${m % 60}m` : ""}` : `${m}m`;
@@ -70,22 +70,32 @@ export function TimerPanel({ id, ...props }: PanelProps & { id: Panel }) {
 function UpNext({ user, ...card }: PanelProps) {
   const all = useTasks(user.uid);
   const sessions = useSessions(user.uid);
-  const open = upNext(all, sessions, new Date().toLocaleDateString("en-CA"), inboxListId(user.uid));
+  const today = new Date().toLocaleDateString("en-CA");
+  const open = upNext(all, sessions, today, inboxListId(user.uid));
   const { state, pending, startFocus } = useTimerContext();
   const busy = state.phase !== "idle" || pending !== null;
   const [draft, setDraft] = useState("");
   const [last, setLast] = useState<Task | null>(null);
+  // The first 6 rows, plus any important or due-today task beyond them: those always show.
+  const shown = open.filter((t, i) => i < 6 || t.important || t.dueDate === today);
+  // Important tasks are pinned to the top by rule, so only the rest can be dragged, among themselves.
+  const pinned = shown.filter((t) => t.important).length;
+  const rowReorder = useReorder(shown.length, (from, to) => {
+    const sortOrder = movedSortOrder(shown.slice(pinned), from - pinned, Math.max(to - pinned, 0));
+    const task = shown[from];
+    if (from >= pinned && sortOrder !== null && task) updateTask(task.id, { sortOrder });
+  });
 
   function add(e: FormEvent) {
     e.preventDefault();
     const title = draft.trim();
     if (!title) return;
-    const listId = inboxListId(user.uid);
+    // Sorts above everything shown (important tasks stay pinned over it by rule).
     addTask({
       ownerId: user.uid,
-      listId,
+      listId: inboxListId(user.uid),
       title,
-      sortOrder: nextSortOrder(all.filter((t) => t.listId === listId)),
+      sortOrder: firstSortOrder(open),
     });
     setDraft("");
   }
@@ -115,10 +125,13 @@ function UpNext({ user, ...card }: PanelProps) {
         </button>
       </form>
       <ul className="rows">
-        {open.slice(0, 6).map((task) => {
+        {shown.map((task, i) => {
           const now = state.task?.id === task.id && state.phase !== "idle";
           return (
-            <li key={task.id} className="task-row">
+            <li key={task.id} className="task-row" {...rowReorder.row(i)}>
+              <button {...rowReorder.handle(i, task.title)}>
+                <Grip />
+              </button>
               <input
                 type="checkbox"
                 className="check"
