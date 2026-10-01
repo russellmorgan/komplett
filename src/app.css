@@ -605,7 +605,7 @@ button.dots:disabled {
 }
 .timer-controls {
   display: flex;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
   gap: clamp(0.625rem, 3vw, 1rem);
   flex-wrap: wrap;
