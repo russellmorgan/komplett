@@ -2,9 +2,11 @@ import { describe, expect, it } from "vitest";
 import {
   activeTasks,
   completedTasks,
+  firstSortOrder,
   movedSortOrder,
   nextSortOrder,
   type Task,
+  todayTasks,
   upNext,
 } from "./tasks";
 
@@ -33,6 +35,27 @@ describe("activeTasks", () => {
       task({ id: "a", sortOrder: 1 }),
     ];
     expect(activeTasks(tasks, "inbox").map((t) => t.id)).toEqual(["a", "b"]);
+  });
+});
+
+describe("important tasks", () => {
+  it("lead the list: soonest due first, undated last, then oldest created; the rest by sortOrder", () => {
+    const tasks = [
+      task({ id: "plain1", sortOrder: 1 }),
+      task({ id: "plain0", sortOrder: 0 }),
+      task({ id: "impNewer", important: true, sortOrder: 9, createdAt: 20 }),
+      task({ id: "impOlder", important: true, sortOrder: 8, createdAt: 10 }),
+      task({ id: "impLater", important: true, dueDate: "2026-10-09", createdAt: 1 }),
+      task({ id: "impSoon", important: true, dueDate: "2026-10-01", createdAt: 99 }),
+    ];
+    expect(activeTasks(tasks, "inbox").map((t) => t.id)).toEqual([
+      "impSoon",
+      "impLater",
+      "impOlder",
+      "impNewer",
+      "plain0",
+      "plain1",
+    ]);
   });
 });
 
@@ -92,15 +115,16 @@ describe("upNext", () => {
     endedEarly: false,
   });
 
-  it("orders recently focused, then due today/overdue, then Inbox, each once", () => {
+  it("lists Inbox, due-today/overdue and recently focused tasks, important first then by sortOrder", () => {
     const tasks = [
       task({ id: "inbox2", sortOrder: 2 }),
       task({ id: "inbox1", sortOrder: 1 }),
       task({ id: "future", listId: "work", dueDate: "2026-10-05" }),
-      task({ id: "today", listId: "work", dueDate: "2026-09-28" }),
-      task({ id: "overdue", listId: "work", dueDate: "2026-09-01" }),
-      task({ id: "focusedOld", listId: "work" }),
-      task({ id: "focusedNew", listId: "work", dueDate: "2026-09-28" }),
+      task({ id: "star", listId: "work", important: true, sortOrder: 9 }),
+      task({ id: "today", listId: "work", dueDate: "2026-09-28", sortOrder: 3 }),
+      task({ id: "overdue", listId: "work", dueDate: "2026-09-01", important: true }),
+      task({ id: "focusedOld", listId: "work", sortOrder: 5 }),
+      task({ id: "focusedNew", listId: "work", dueDate: "2026-09-28", sortOrder: 4 }),
       task({ id: "done", completedAt: 1 }),
       task({ id: "undated", listId: "work" }),
     ];
@@ -112,12 +136,35 @@ describe("upNext", () => {
       s("focusedOld", 5),
     ];
     expect(upNext(tasks, sessions, "2026-09-28", "inbox").map((t) => t.id)).toEqual([
-      "focusedOld",
-      "focusedNew",
       "overdue",
-      "today",
+      "star",
       "inbox1",
       "inbox2",
+      "today",
+      "focusedNew",
+      "focusedOld",
     ]);
+  });
+});
+
+describe("firstSortOrder", () => {
+  it("sorts before every item, including negatives and an empty list", () => {
+    expect(firstSortOrder([{ sortOrder: 3 }, { sortOrder: -2 }])).toBe(-3);
+    expect(firstSortOrder([{ sortOrder: 5 }])).toBe(0);
+    expect(firstSortOrder([])).toBe(0);
+  });
+});
+
+describe("todayTasks", () => {
+  it("keeps open tasks due exactly today from any list, regardless of list", () => {
+    const tasks = [
+      task({ id: "a", listId: "work", dueDate: "2026-09-30", sortOrder: 2 }),
+      task({ id: "b", dueDate: "2026-09-30", sortOrder: 1 }),
+      task({ id: "overdue", dueDate: "2026-09-29" }),
+      task({ id: "future", dueDate: "2026-10-01" }),
+      task({ id: "done", dueDate: "2026-09-30", completedAt: 1 }),
+      task({ id: "undated" }),
+    ];
+    expect(todayTasks(tasks, "2026-09-30").map((t) => t.id)).toEqual(["b", "a"]);
   });
 });

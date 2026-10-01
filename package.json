@@ -13,9 +13,12 @@
     "format": "biome format --write .",
     "ship": "pnpm build && firebase deploy --only hosting,firestore:rules",
     "electron": "pnpm --filter komplett-electron start",
-    "electron:dist": "pnpm build && pnpm --filter komplett-electron dist"
+    "electron:dist": "pnpm build && pnpm --filter komplett-electron dist",
+    "android": "pnpm build && cap sync android && cap open android"
   },
   "dependencies": {
+    "@capacitor/android": "^8.5.2",
+    "@capacitor/core": "^8.5.2",
     "firebase": "^12.19.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
@@ -23,6 +26,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.14",
+    "@capacitor/cli": "^8.5.2",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^5.0.0",

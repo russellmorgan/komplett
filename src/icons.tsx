@@ -11,6 +11,9 @@ const PATHS = {
   plus: <path d="M5 12h14M12 5v14" />,
   close: <path d="M18 6 6 18M6 6l12 12" />,
   check: <path d="M20 6 9 17l-5-5" />,
+  star: (
+    <polygon points="12 2 15.1 8.6 22 9.3 16.8 14 18.2 21 12 17.5 5.8 21 7.2 14 2 9.3 8.9 8.6 12 2" />
+  ),
   menu: <path d="M4 6h16M4 12h16M4 18h16" />,
   up: <path d="m6 15 6-6 6 6" />,
   down: <path d="m6 9 6 6 6-6" />,

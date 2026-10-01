@@ -60,6 +60,7 @@ function Shell({ user }: { user: AuthUser }) {
           <main>
             <Routes>
               <Route path="/" element={<Tasks user={user} />} />
+              <Route path="/today" element={<Tasks user={user} today />} />
               <Route path="/list/:listId" element={<ListRoute user={user} />} />
               {screens.map((screen) => (
                 <Route key={screen.path} path={screen.path} element={screen.element} />
@@ -72,7 +73,7 @@ function Shell({ user }: { user: AuthUser }) {
   );
 }
 
-// Inline nav on wide screens; a menu button with a dropdown below 720px (CSS decides which shows).
+// Inline nav on wide screens; a menu button with a dropdown below 64rem (CSS decides which shows).
 function Header({ links }: { links: { path: string; label: string }[] }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const { pathname } = useLocation();
