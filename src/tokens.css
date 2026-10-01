@@ -22,7 +22,10 @@
   --space-4: 1rem;
   --space-6: 1.5rem;
   --space-8: 2rem;
-  --space-gutter: clamp(20px, 5vw, 64px);
+  --gap-md: clamp(0.75rem, 2vw, 1.125rem);
+  --gap-lg: clamp(1rem, 3vw, 1.75rem);
+  --pad-card: clamp(1rem, 3vw, 1.625rem);
+  --space-gutter: clamp(1.25rem, 5vw, 4rem);
 
   --radius-sm: 0;
   --radius-md: 0;
@@ -31,8 +34,9 @@
   --radius-dot: 0;
 
   --border-width: 1.5px;
-  --tap: 44px;
-  --content-width: 1180px;
+  --tap: 2.75rem;
+  --tap-lg: 3.75rem; /* big timer controls */
+  --content-width: 73.75rem;
   --shadow-pop: 0 24px 48px -20px rgba(40, 35, 20, 0.35);
 
   /* Paper (default theme). */
@@ -73,9 +77,9 @@
 /* Orange: from "Komplett Orange" in the design project. */
 :root[data-theme="orange"] {
   --font-sans: "Rubik", system-ui, sans-serif;
-  --radius-sm: 12px;
-  --radius-md: 20px;
-  --radius-lg: 32px;
+  --radius-sm: 0.75rem;
+  --radius-md: 1.25rem;
+  --radius-lg: 2rem;
   --radius-dot: 999px;
   --shadow-pop: 0 24px 44px -24px rgba(110, 50, 0, 0.6);
 
