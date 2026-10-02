@@ -36,7 +36,7 @@
   --border-width: 1.5px;
   --tap: 2.75rem;
   --tap-lg: 3.75rem; /* big timer controls */
-  --content-width: 73.75rem;
+  --content-width: 90rem; /* 1440px */
   --shadow-pop: 0 24px 48px -20px rgba(40, 35, 20, 0.35);
 
   /* Paper (default theme). */

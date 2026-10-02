@@ -1293,7 +1293,7 @@ body.hide-nav .header {
   border-bottom: 0;
 }
 .panel .task-row {
-  grid-template-columns: 1.375rem minmax(0, 1fr) auto;
+  grid-template-columns: auto 1.375rem minmax(0, 1fr) auto;
   padding-left: 0;
 }
 .panel .toast {
