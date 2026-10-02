@@ -29,3 +29,21 @@ export function taskStats(sessions: Session[], taskId: string): { count: number;
 export function sessionsNewestFirst(sessions: Session[]): Session[] {
   return [...sessions].sort((a, b) => b.startedAt - a.startedAt);
 }
+
+// Local midnight of the Monday that starts the week containing `ms`.
+export function weekStart(ms: number): number {
+  const d = new Date(ms);
+  d.setHours(0, 0, 0, 0);
+  d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+  return d.getTime();
+}
+
+// Sessions grouped by week (Monday start), newest week first, newest session first within it.
+export function sessionsByWeek(sessions: Session[]): { weekStart: number; sessions: Session[] }[] {
+  const weeks = new Map<number, Session[]>();
+  for (const s of sessionsNewestFirst(sessions)) {
+    const key = weekStart(s.startedAt);
+    weeks.set(key, [...(weeks.get(key) ?? []), s]);
+  }
+  return [...weeks].map(([weekStart, sessions]) => ({ weekStart, sessions }));
+}

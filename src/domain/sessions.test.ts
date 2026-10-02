@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { type Session, sessionsNewestFirst, taskStats, totalStats } from "./sessions";
+import {
+  type Session,
+  sessionsByWeek,
+  sessionsNewestFirst,
+  taskStats,
+  totalStats,
+  weekStart,
+} from "./sessions";
 
 const session = (over: Partial<Session>): Session => ({
   id: "s",
@@ -42,5 +49,20 @@ describe("totalStats", () => {
     const all = [session({ id: "a", focusMinutes: 25 }), session({ id: "b", focusMinutes: 10 })];
     expect(totalStats(all)).toEqual({ count: 2, minutes: 35 });
     expect(totalStats([])).toEqual({ count: 0, minutes: 0 });
+  });
+});
+
+describe("sessionsByWeek", () => {
+  it("groups by Monday-start week, newest week and session first", () => {
+    const mon = new Date(2026, 8, 28, 9).getTime(); // Mon 28 Sep 2026
+    const sun = new Date(2026, 8, 27, 23).getTime(); // previous Sunday
+    const groups = sessionsByWeek([
+      session({ id: "sun", startedAt: sun }),
+      session({ id: "mon", startedAt: mon }),
+      session({ id: "tue", startedAt: mon + 86_400_000 }),
+    ]);
+    expect(groups.map((g) => g.sessions.map((s) => s.id))).toEqual([["tue", "mon"], ["sun"]]);
+    expect(groups[0]?.weekStart).toBe(weekStart(mon));
+    expect(new Date(groups[0]?.weekStart ?? 0).getDay()).toBe(1);
   });
 });
