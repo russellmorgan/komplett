@@ -83,6 +83,13 @@ export function Timer({ user }: { user: AuthUser }) {
     );
   };
 
+  // Drop the unsaved focus; noteSaved resets a stopped timer and leaves a running break alone.
+  const discard = () => {
+    setNote(null);
+    clearPending();
+    dispatch({ type: "noteSaved" });
+  };
+
   const dotCells = dots.map((d, i) => (
     // biome-ignore lint/suspicious/noArrayIndexKey: fixed-size grid, position is identity
     <span key={i} className={d} />
@@ -245,6 +252,9 @@ export function Timer({ user }: { user: AuthUser }) {
                 Save and take a break
               </button>
             )}
+            <button type="button" className="outline" onClick={discard}>
+              Discard
+            </button>
           </div>
         </form>
       )}
