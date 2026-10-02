@@ -34,9 +34,12 @@ describe("timerReducer transitions", () => {
     expect(focusDone.endedEarly).toBe(false);
   });
   it("stop: focus -> focusDone with endedEarly", () => {
-    const s = run([{ type: "stop", now: 5000 }], focus);
+    const s = run([{ type: "stop", now: 1000 + MIN }], focus);
     expect(s.phase).toBe("focusDone");
     expect(s.endedEarly).toBe(true);
+  });
+  it("stop under a minute discards the session", () => {
+    expect(run([{ type: "stop", now: 1000 + MIN - 1 }], focus)).toEqual(initialTimer);
   });
   it("startBreak: focusDone -> break", () => {
     expect(brk).toMatchObject({

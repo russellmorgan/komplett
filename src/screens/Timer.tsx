@@ -198,7 +198,7 @@ export function Timer({ user }: { user: AuthUser }) {
             <span className="big-icon">
               <Icon name={running && !paused ? "pause" : "play"} />
             </span>
-            {state.phase === "idle" ? "Start focus" : paused ? "Resume" : "Pause"}
+            {state.phase === "idle" ? "Start" : paused ? "Resume" : "Pause"}
           </button>
           {state.phase === "break" ? (
             <button

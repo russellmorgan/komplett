@@ -69,7 +69,11 @@ export function timerReducer(state: TimerState, action: TimerAction): TimerState
         ? { ...state, pausedAt: null, pausedMs: state.pausedMs + action.now - state.pausedAt }
         : state;
     case "stop":
-      if (state.phase === "focus") return focusDone(state, action.now, true);
+      if (state.phase === "focus") {
+        // Under a minute of real focus isn't a session: discard it rather than offer a note.
+        const focused = (state.pausedAt ?? action.now) - (state.startedAt as number) - state.pausedMs;
+        return focused < MIN ? initialTimer : focusDone(state, action.now, true);
+      }
       return state.phase === "break" ? initialTimer : state;
     case "tick":
       if (!running || state.pausedAt !== null || remainingMs(state, action.now) > 0) return state;
