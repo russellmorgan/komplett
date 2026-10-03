@@ -713,7 +713,7 @@ button.big.small {
   padding-left: 0;
 }
 .done-rows .task-row {
-  padding-left: calc(1.625rem + var(--gap-row)); /* grip width + gap: lines up with active rows */
+  padding-left: 1.5rem; /* grip: 0.125 padding + 1.125 visible width + 0.25 gap */
 }
 .rows .task-row.static {
   grid-template-columns: 1.375rem minmax(0, 1fr) auto auto auto;
@@ -773,6 +773,11 @@ button.grip {
   touch-action: none;
   user-select: none;
 }
+/* Pull the checkbox in close to the grip: a fixed 0.25rem instead of the row gap. */
+.task-row button.grip {
+  min-width: 1.5rem;
+  margin-right: calc(var(--space-1) - var(--gap-row));
+}
 button.grip:hover {
   color: var(--color-text);
   background: transparent;
@@ -810,6 +815,10 @@ button.star {
   padding: 0;
   border: 0;
   color: var(--color-text-muted);
+}
+/* Narrower than --tap (still full height) so it sits close to the play button. */
+.task-row button.star {
+  width: 2rem;
 }
 button.star[aria-pressed="true"],
 button.important[aria-pressed="true"] {

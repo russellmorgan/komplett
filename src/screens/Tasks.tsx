@@ -191,6 +191,7 @@ export function Tasks({ user, today = false }: { user: AuthUser; today?: boolean
                   <span className={now ? "strong" : undefined}>{task.title}</span>
                   {task.note && <span className="muted">{task.note}</span>}
                 </button>
+                <span className={due === "Overdue" ? "due overdue" : "due"}>{due}</span>
                 <button
                   type="button"
                   className="star"
@@ -201,7 +202,6 @@ export function Tasks({ user, today = false }: { user: AuthUser; today?: boolean
                 >
                   <Icon name="star" size={15} />
                 </button>
-                <span className={due === "Overdue" ? "due overdue" : "due"}>{due}</span>
                 <button
                   type="button"
                   className={now ? "play now" : "play"}
