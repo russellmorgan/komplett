@@ -8,8 +8,9 @@ export default defineConfig(({ command, mode }) => {
   if (command === "build" && !loadEnv(mode, process.cwd()).VITE_FIREBASE_API_KEY)
     throw new Error("VITE_FIREBASE_* missing: copy .env.example to .env and fill it in.");
   return {
-    // Relative base so dist/ also works over file:// in the Electron shell.
-    base: "./",
+    // Absolute base: with "./" a reload on /list/:id asks for /list/assets/*, which the SPA
+    // rewrite answers with index.html. Electron serves dist/ over http at /, so it's fine too.
+    base: "/",
     plugins: [
       react(),
       VitePWA({
@@ -21,7 +22,7 @@ export default defineConfig(({ command, mode }) => {
           theme_color: "#dbd7cb",
           background_color: "#dbd7cb",
           display: "standalone",
-          start_url: "./",
+          start_url: "/",
           icons: [
             { src: "icon-192.png", sizes: "192x192", type: "image/png" },
             { src: "icon-512.png", sizes: "512x512", type: "image/png" },
