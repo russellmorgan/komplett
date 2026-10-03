@@ -8,6 +8,7 @@ import { formatMmSs, remainingMs } from "../domain/timer";
 import { fadeOut } from "../fade";
 import { Icon } from "../icons";
 import { useReorder } from "../reorder";
+import { Breakout } from "./Breakout";
 import { TimerPanel } from "./TimerPanels";
 
 const LABEL = {
@@ -22,6 +23,7 @@ export function Timer({ user }: { user: AuthUser }) {
   const { state, dispatch, settings, pending, clearPending, startFocus } = useTimerContext();
   const [note, setNote] = useState<string | null>(null);
   const [view, setView] = useTimerView();
+  const [playing, setPlaying] = useState(false);
   const noteText = note ?? pending?.taskTitle ?? "";
   const now = Date.now();
   const running = state.phase === "focus" || state.phase === "break";
@@ -47,6 +49,10 @@ export function Timer({ user }: { user: AuthUser }) {
     document.body.classList.toggle("hide-nav", hideNav);
     return () => document.body.classList.remove("hide-nav");
   }, [hideNav]);
+  // A new focus ends the game, whichever way it was started.
+  useEffect(() => {
+    if (state.phase === "focus") setPlaying(false);
+  }, [state.phase]);
   useEffect(() => {
     if (!view.focus) return;
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && setView({ focus: false });
@@ -222,6 +228,23 @@ export function Timer({ user }: { user: AuthUser }) {
             </div>
           )}
         </div>
+      )}
+
+      {state.phase === "break" && !playing && (
+        <button type="button" className="outline play-game" onClick={() => setPlaying(true)}>
+          Play a game?
+        </button>
+      )}
+      {playing && (
+        <Breakout
+          uid={user.uid}
+          onClose={() => setPlaying(false)}
+          onStartFocus={() => {
+            dispatch({ type: "skipBreak" }); // start only works from idle
+            startFocus();
+            setPlaying(false);
+          }}
+        />
       )}
 
       {pending && (

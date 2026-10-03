@@ -29,3 +29,7 @@ export function setPartner(uid: string, partnerId: string | null) {
 export function setAccountabilityTask(uid: string, accountabilityTaskId: string | null) {
   return updateDoc(doc(db, "users", uid), { accountabilityTaskId });
 }
+
+export function setBreakoutBest(uid: string, breakoutBest: number) {
+  return updateDoc(doc(db, "users", uid), { breakoutBest });
+}

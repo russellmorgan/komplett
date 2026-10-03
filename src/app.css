@@ -1432,3 +1432,41 @@ button.dashed:hover {
   border-color: var(--color-text);
   background: transparent;
 }
+
+/* Break game: native <dialog>, canvas keeps 4:3 and fits short landscape screens. */
+.play-game {
+  justify-self: center;
+}
+dialog.game {
+  width: min(100% - var(--space-gutter) * 2, 48rem);
+  max-height: 100dvh;
+  padding: var(--pad-card);
+  border: 0;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: var(--shadow-pop);
+}
+dialog.game[open] {
+  display: grid;
+  gap: var(--gap-md);
+}
+dialog.game::backdrop {
+  background: color-mix(in srgb, var(--color-bg) 70%, transparent);
+}
+dialog.game canvas {
+  display: block;
+  width: min(100%, 62dvh * 4 / 3);
+  aspect-ratio: 4 / 3;
+  margin-inline: auto;
+  border-radius: var(--radius-md);
+  touch-action: none;
+  cursor: none;
+}
+.game-stats {
+  flex-wrap: wrap;
+}
+.combo {
+  color: var(--color-accent);
+  font-weight: 700;
+}

@@ -18,6 +18,7 @@ export type User = {
   partnerId: string | null;
   accountabilityTaskId: string | null;
   settings: Settings;
+  breakoutBest?: number; // break-time game high score; absent until the first game ends
 };
 
 export type List = {
