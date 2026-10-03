@@ -697,8 +697,8 @@ button.big.small {
   display: grid;
   grid-template-columns: auto 1.375rem minmax(0, 1fr) auto auto auto;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.5rem 0.5rem 0.5rem 0.125rem;
+  gap: var(--gap-row);
+  padding: var(--space-2) var(--space-1) var(--space-2) 0.125rem;
   border-top: 1px solid var(--color-border);
 }
 .task-row.selected {
@@ -713,7 +713,7 @@ button.big.small {
   padding-left: 0;
 }
 .done-rows .task-row {
-  padding-left: 2.375rem;
+  padding-left: calc(1.625rem + var(--gap-row)); /* grip width + gap: lines up with active rows */
 }
 .rows .task-row.static {
   grid-template-columns: 1.375rem minmax(0, 1fr) auto auto auto;
@@ -743,6 +743,10 @@ button.big.small {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+.row-title > .muted {
+  white-space: normal; /* notes wrap; titles stay one line */
+  overflow-wrap: anywhere;
 }
 button.row-title:hover {
   background: transparent;

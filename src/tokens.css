@@ -22,10 +22,11 @@
   --space-4: 1rem;
   --space-6: 1.5rem;
   --space-8: 2rem;
-  --gap-md: clamp(0.75rem, 2vw, 1.125rem);
-  --gap-lg: clamp(1rem, 3vw, 1.75rem);
-  --pad-card: clamp(1rem, 3vw, 1.625rem);
-  --space-gutter: clamp(1.25rem, 5vw, 4rem);
+  --gap-md: clamp(0.5rem, 2vw, 1.125rem);
+  --gap-lg: clamp(0.75rem, 3vw, 1.75rem);
+  --gap-row: clamp(0.25rem, 1.5vw, 0.75rem); /* between controls in a list row */
+  --pad-card: clamp(0.75rem, 3vw, 1.625rem);
+  --space-gutter: clamp(0.75rem, 4vw, 4rem);
 
   --radius-sm: 0;
   --radius-md: 0;
