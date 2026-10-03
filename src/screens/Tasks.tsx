@@ -1,4 +1,4 @@
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router";
 import type { AuthUser } from "../data/auth";
 import { useLists } from "../data/lists";
@@ -80,8 +80,28 @@ export function Tasks({ user, today = false }: { user: AuthUser; today?: boolean
     localStorage.setItem(showCompletedKey, checked ? "1" : "0");
   }
   const [openId, setOpenId] = useState<string | null>(null);
+  // Close the mobile list picker on a tap anywhere outside it.
+  const pickerRef = useRef<HTMLDetailsElement>(null);
+  useEffect(() => {
+    const close = (e: PointerEvent) => {
+      const picker = pickerRef.current;
+      if (picker?.open && !picker.contains(e.target as Node)) picker.open = false;
+    };
+    document.addEventListener("pointerdown", close);
+    return () => document.removeEventListener("pointerdown", close);
+  }, []);
   const open = all.find((t) => t.id === openId);
   const listName = today ? "Today" : currentList?.isInbox === false ? currentList.name : "Inbox";
+  const listLinks = [
+    { to: "/today", name: "Today", color: "amber", current: today ? ("page" as const) : undefined },
+    ...lists.map((l) => ({
+      to: l.isInbox ? "/" : `/list/${l.id}`,
+      name: l.name,
+      color: l.color,
+      current: !today && l.id === listId ? ("page" as const) : undefined,
+    })),
+  ];
+  const currentColor = listLinks.find((l) => l.current)?.color ?? "amber";
 
   function add(e: FormEvent) {
     e.preventDefault();
@@ -110,22 +130,34 @@ export function Tasks({ user, today = false }: { user: AuthUser; today?: boolean
             {listName} <span className="faint">{active.length}</span>
           </h1>
           <nav className="chips" aria-label="Lists">
-            <Link to="/today" className="chip" aria-current={today ? "page" : undefined}>
-              <span className="swatch" style={{ background: "var(--list-amber)" }} />
-              Today
-            </Link>
-            {lists.map((l) => (
-              <Link
-                key={l.id}
-                to={l.isInbox ? "/" : `/list/${l.id}`}
-                className="chip"
-                aria-current={!today && l.id === listId ? "page" : undefined}
-              >
+            {listLinks.map((l) => (
+              <Link key={l.to} to={l.to} className="chip" aria-current={l.current}>
                 <span className="swatch" style={{ background: `var(--list-${l.color})` }} />
                 {l.name}
               </Link>
             ))}
           </nav>
+          {/* ponytail: native <details> dropdown on mobile; chips wrap too much there. */}
+          <details className="list-picker" ref={pickerRef}>
+            <summary className="chip">
+              <span className="swatch" style={{ background: `var(--list-${currentColor})` }} />
+              {listName}
+              <Icon name="down" size={12} />
+            </summary>
+            <nav aria-label="Lists">
+              {listLinks.map((l) => (
+                <Link
+                  key={l.to}
+                  to={l.to}
+                  aria-current={l.current}
+                  onClick={(e) => e.currentTarget.closest("details")?.removeAttribute("open")}
+                >
+                  <span className="swatch" style={{ background: `var(--list-${l.color})` }} />
+                  {l.name}
+                </Link>
+              ))}
+            </nav>
+          </details>
         </div>
         {!today && (
           <form onSubmit={add} className="add-bar">

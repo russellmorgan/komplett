@@ -875,6 +875,57 @@ button.play.now {
   background: var(--color-text);
   color: var(--color-on-text);
 }
+.list-picker {
+  display: none;
+  position: relative;
+}
+.list-picker summary {
+  list-style: none;
+  cursor: pointer;
+}
+.list-picker summary::-webkit-details-marker {
+  display: none;
+}
+.list-picker[open] summary svg {
+  rotate: 180deg;
+}
+.list-picker nav {
+  position: absolute;
+  top: calc(100% + var(--space-2));
+  left: 0;
+  z-index: 40;
+  display: grid;
+  min-width: min(16rem, 100%);
+  max-height: 60dvh;
+  overflow-y: auto;
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-field);
+  box-shadow: var(--shadow-pop);
+  border-radius: var(--radius-md);
+}
+.list-picker nav a {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--tap);
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+}
+.list-picker nav a:last-child {
+  border-bottom: 0;
+}
+.list-picker nav a[aria-current="page"] {
+  color: var(--color-text);
+  font-weight: 600;
+}
+@media (width < 64rem) {
+  .chips:has(+ .list-picker) {
+    display: none;
+  }
+  .list-picker {
+    display: block;
+  }
+}
 .card .chip {
   background: var(--color-bg);
 }
