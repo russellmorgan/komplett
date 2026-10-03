@@ -1,8 +1,10 @@
+import { useState } from "react";
 import { type AuthUser, signOut } from "../data/auth";
 import { CHIME_IDS, CHIMES, playChime } from "../data/chime";
 import { MODES, THEMES, useAppearance } from "../data/theme";
 import { updateSettings, useUserDoc } from "../data/user";
 import { Icon } from "../icons";
+import { Breakout } from "./Breakout";
 
 // Native min/max only validate on submit; clamp so 0/NaN never reaches the user doc.
 const minutes = (v: string | number) => Math.min(180, Math.max(1, Math.round(Number(v)) || 1));
@@ -10,6 +12,7 @@ const minutes = (v: string | number) => Math.min(180, Math.max(1, Math.round(Num
 export function Settings({ user }: { user: AuthUser }) {
   const doc = useUserDoc(user.uid);
   const [appearance, setAppearance] = useAppearance();
+  const [playing, setPlaying] = useState(false);
 
   return (
     <div className="stack">
@@ -131,7 +134,17 @@ export function Settings({ user }: { user: AuthUser }) {
             ))}
           </fieldset>
         </div>
+        <div className="setting">
+          <span className="setting-label">
+            <strong>Break game</strong>
+            <span className="muted">Usually offered during a break</span>
+          </span>
+          <button type="button" className="outline" onClick={() => setPlaying(true)}>
+            <Icon name="play" size={10} /> Play
+          </button>
+        </div>
       </section>
+      {playing && <Breakout uid={user.uid} onClose={() => setPlaying(false)} />}
       <button type="button" className="outline start" onClick={signOut}>
         Sign out
       </button>

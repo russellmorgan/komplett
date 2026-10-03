@@ -142,7 +142,7 @@ export function Breakout({
 }: {
   uid: string;
   onClose: () => void;
-  onStartFocus: () => void;
+  onStartFocus?: () => void; // absent outside a break (Settings), which hides the button
 }) {
   const me = useUserDoc(uid);
   const partner = useUserDoc(me?.partnerId ?? null);
@@ -260,9 +260,11 @@ export function Breakout({
       <div className="panel-head">
         <h2>Break time</h2>
         <span className="panel-tools">
-          <button type="button" className="primary" onClick={onStartFocus}>
-            Start focus
-          </button>
+          {onStartFocus && (
+            <button type="button" className="primary" onClick={onStartFocus}>
+              Start focus
+            </button>
+          )}
           <button type="button" className="ghost icon" aria-label="Close game" onClick={onClose}>
             <Icon name="close" size={16} />
           </button>
