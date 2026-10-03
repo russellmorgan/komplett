@@ -5,6 +5,7 @@ import { useState } from "react";
 export const THEMES = [
   { id: "paper", name: "Paper" },
   { id: "orange", name: "Orange" },
+  { id: "blue", name: "Blue" },
 ] as const;
 export const MODES = [
   { id: "system", name: "System" },

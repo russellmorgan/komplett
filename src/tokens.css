@@ -98,3 +98,24 @@
   --color-danger: light-dark(#b3261e, #ff8a80);
   --color-dot-off: light-dark(#fd982f, #402f20);
 }
+
+/* Blue: Paper's shape and type, cobalt accent. Blue's complement is orange, so the neutrals keep
+ * Paper's warm cream (light) and the text is navy ink; danger is burnt orange, the direct complement.
+ * Dark flips it: navy paper, cream ink. */
+:root[data-theme="blue"] {
+  --shadow-pop: 0 24px 48px -20px rgba(20, 33, 61, 0.35);
+
+  --color-bg: light-dark(#e6e1d4, #141a26);
+  --color-surface: light-dark(#dbd5c6, #1c2333);
+  --color-field: light-dark(#f2efe7, #252d40);
+  --color-border: light-dark(#c7c0ae, #333d55);
+  --color-text: light-dark(#14213d, #e6e0d2);
+  --color-on-text: light-dark(#e6e1d4, #141a26);
+  --color-text-muted: light-dark(#565e72, #9aa3b8);
+  --color-text-faint: light-dark(#848896, #6d7690);
+  --color-accent: light-dark(#1f4fd1, #5b8cff);
+  --color-accent-hover: light-dark(#183fae, #7aa2ff);
+  --color-accent-text: light-dark(#ffffff, #0d1320);
+  --color-danger: light-dark(#c2410c, #ff8a4c);
+  --color-dot-off: light-dark(#d1cab9, #252d40);
+}
