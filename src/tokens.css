@@ -119,3 +119,24 @@
   --color-danger: light-dark(#c2410c, #ff8a4c);
   --color-dot-off: light-dark(#d1cab9, #252d40);
 }
+
+/* Green: Paper's shape and type, deep forest accent. Green's complement is red-magenta, so danger is
+ * crimson-rose; neutrals keep Paper's warm cream (light) with forest ink for text.
+ * Dark flips it: forest paper, cream ink. */
+:root[data-theme="green"] {
+  --shadow-pop: 0 24px 48px -20px rgba(19, 38, 28, 0.35);
+
+  --color-bg: light-dark(#e4e0d3, #121c17);
+  --color-surface: light-dark(#d8d3c4, #1a2620);
+  --color-field: light-dark(#f1eee6, #23312a);
+  --color-border: light-dark(#c4bead, #31443a);
+  --color-text: light-dark(#13261c, #e4dfd0);
+  --color-on-text: light-dark(#e4e0d3, #121c17);
+  --color-text-muted: light-dark(#56635a, #9aab9f);
+  --color-text-faint: light-dark(#858b84, #6c7d72);
+  --color-accent: light-dark(#1e5c3a, #4fae7a);
+  --color-accent-hover: light-dark(#164a2e, #6cc392);
+  --color-accent-text: light-dark(#ffffff, #0c1510);
+  --color-danger: light-dark(#b8234f, #ff6f93);
+  --color-dot-off: light-dark(#cfc9b8, #23312a);
+}

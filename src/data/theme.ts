@@ -6,6 +6,7 @@ export const THEMES = [
   { id: "paper", name: "Paper" },
   { id: "orange", name: "Orange" },
   { id: "blue", name: "Blue" },
+  { id: "green", name: "Green" },
 ] as const;
 export const MODES = [
   { id: "system", name: "System" },
