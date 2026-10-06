@@ -37,8 +37,8 @@ function dueLabel(date: string | null): string {
   });
 }
 
-// `today` renders the automatic Today list: tasks due today from every list. Read-only — no add bar,
-// no reordering; completing or editing a task works as usual and it stays in its own list.
+// `today` renders the automatic Today list: tasks due or moved to today, from every list. No add bar.
+// Dragging reorders by each task's own sortOrder, shared across lists; a task stays in its own list.
 export function Tasks({ user, today = false }: { user: AuthUser; today?: boolean }) {
   const { listId: paramListId } = useParams();
   const listId = today ? "today" : (paramListId ?? inboxListId(user.uid));
@@ -197,16 +197,12 @@ export function Tasks({ user, today = false }: { user: AuthUser; today?: boolean
             return (
               <li
                 key={task.id}
-                {...(today ? {} : reorder.row(i))}
-                className={
-                  (task.id === openId ? "task-row selected" : "task-row") + (today ? " static" : "")
-                }
+                {...reorder.row(i)}
+                className={task.id === openId ? "task-row selected" : "task-row"}
               >
-                {!today && (
-                  <button {...reorder.handle(i, task.title)}>
-                    <Grip />
-                  </button>
-                )}
+                <button {...reorder.handle(i, task.title)}>
+                  <Grip />
+                </button>
                 <input
                   type="checkbox"
                   className="check"

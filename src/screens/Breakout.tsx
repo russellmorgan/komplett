@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Avatar } from "../Avatar";
 import { setBreakoutBest, useUserDoc } from "../data/user";
 import {
   BALL_R,
@@ -281,7 +282,9 @@ export function Breakout({
         </div>
         {partner && (
           <div>
-            <strong>{partnerBest.toLocaleString()}</strong>
+            <strong>
+              <Avatar person={partner} className="avatar small" /> {partnerBest.toLocaleString()}
+            </strong>
             <span className={ahead ? "combo" : undefined}>
               {ahead ? `ahead of ${partnerName}!` : `${partnerName}’s best`}
             </span>

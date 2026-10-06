@@ -156,6 +156,14 @@ describe("firstSortOrder", () => {
 });
 
 describe("todayTasks", () => {
+  it("includes tasks manually moved to today, but not a stale todayOn", () => {
+    const tasks = [
+      task({ id: "m", todayOn: "2026-09-30" }),
+      task({ id: "old", todayOn: "2026-09-29" }),
+    ];
+    expect(todayTasks(tasks, "2026-09-30").map((t) => t.id)).toEqual(["m"]);
+  });
+
   it("keeps open tasks due exactly today from any list, regardless of list", () => {
     const tasks = [
       task({ id: "a", listId: "work", dueDate: "2026-09-30", sortOrder: 2 }),

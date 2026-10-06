@@ -1,5 +1,6 @@
 import { type FormEvent, type ReactNode, useState } from "react";
 import { Link } from "react-router";
+import { Avatar } from "../Avatar";
 import type { AuthUser } from "../data/auth";
 import { useSessions } from "../data/sessions";
 import { useSharedTask } from "../data/shared";
@@ -241,7 +242,10 @@ function PartnerPanel({ user, ...card }: PanelProps) {
       label="Partner"
       title={
         <>
-          <span className="avatar inverse">{partner ? name.slice(0, 1).toUpperCase() : "–"}</span>
+          <Avatar
+            person={partner ?? { displayName: "", photoURL: null }}
+            className="avatar inverse"
+          />
           <span className="row-title">
             <h2>{name}</h2>
             <span className="muted">Accountability partner</span>

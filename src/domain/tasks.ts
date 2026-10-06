@@ -17,6 +17,7 @@ export type Task = {
   reminderAt: number | null;
   repeat: Repeat | null;
   important?: boolean; // absent on old tasks; means false
+  todayOn?: string | null; // YYYY-MM-DD it was manually moved to Today; stale after that day
   sortOrder: number;
   completedAt: number | null;
   createdAt: number;
@@ -59,10 +60,12 @@ export function completedTasks(tasks: Task[], listId?: string): Task[] {
     .sort((a, b) => (b.completedAt as number) - (a.completedAt as number));
 }
 
-// The automatic Today list: open tasks due exactly `today` (local YYYY-MM-DD), from any list.
-// Computed, never stored — a task keeps its own list.
+// The Today list: open tasks due exactly `today` (local YYYY-MM-DD) or manually moved here today,
+// from any list. Computed, never stored — a task keeps its own list.
 export function todayTasks(tasks: Task[], today: string): Task[] {
-  return tasks.filter((t) => t.completedAt === null && t.dueDate === today).sort(byImportance);
+  return tasks
+    .filter((t) => t.completedAt === null && (t.dueDate === today || t.todayOn === today))
+    .sort(byImportance);
 }
 
 // Timer's "Up next": open tasks that are important, due today or overdue, among the last few you

@@ -1,3 +1,4 @@
+import { Avatar } from "../Avatar";
 import type { AuthUser } from "../data/auth";
 import { requestNotificationPermission } from "../data/reminders";
 import { setReaction, useAllUsers, useSharedTask } from "../data/shared";
@@ -143,13 +144,5 @@ function SharedCard({
         </>
       )}
     </section>
-  );
-}
-
-function Avatar({ person }: { person: { displayName: string; photoURL: string | null } }) {
-  return person.photoURL ? (
-    <img className="avatar" src={person.photoURL} alt="" />
-  ) : (
-    <span className="avatar">{person.displayName.slice(0, 1).toUpperCase() || "–"}</span>
   );
 }

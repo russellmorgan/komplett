@@ -42,6 +42,9 @@ export function TaskDetail({
 }) {
   const save = (patch: Partial<Task>) => updateTask(task.id, patch);
   const repeat = task.repeat;
+  const todayDate = new Date().toLocaleDateString("en-CA");
+  const dueToday = task.dueDate === todayDate;
+  const inToday = dueToday || task.todayOn === todayDate;
   const [armed, setArmed] = useState(false); // Delete is permanent: first click arms, second deletes.
 
   function setKind(kind: string) {
@@ -109,6 +112,16 @@ export function TaskDetail({
       >
         <Icon name="star" size={14} />
         {task.important ? "Important" : "Mark as important"}
+      </button>
+      <button
+        type="button"
+        className="outline"
+        aria-pressed={inToday}
+        disabled={dueToday} // already in Today by its due date
+        onClick={() => save({ todayOn: task.todayOn === todayDate ? null : todayDate })}
+      >
+        <Icon name="check" size={14} />
+        {inToday ? "In Today" : "Move to Today"}
       </button>
       <label className="field">
         <span>Due</span>
