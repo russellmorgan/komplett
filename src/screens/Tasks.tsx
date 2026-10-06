@@ -6,6 +6,7 @@ import { useSessions } from "../data/sessions";
 import { addTask, deleteTask, updateTask, useTasks } from "../data/tasks";
 import { useTimerContext } from "../data/timer";
 import { setAccountabilityTask, useUserDoc } from "../data/user";
+import { listColorCss } from "../domain/lists";
 import { completePatch } from "../domain/repeat";
 import { taskStats } from "../domain/sessions";
 import {
@@ -132,7 +133,7 @@ export function Tasks({ user, today = false }: { user: AuthUser; today?: boolean
           <nav className="chips" aria-label="Lists">
             {listLinks.map((l) => (
               <Link key={l.to} to={l.to} className="chip" aria-current={l.current}>
-                <span className="swatch" style={{ background: `var(--list-${l.color})` }} />
+                <span className="swatch" style={{ background: listColorCss(l.color) }} />
                 {l.name}
               </Link>
             ))}
@@ -140,7 +141,7 @@ export function Tasks({ user, today = false }: { user: AuthUser; today?: boolean
           {/* ponytail: native <details> dropdown on mobile; chips wrap too much there. */}
           <details className="list-picker" ref={pickerRef}>
             <summary className="chip">
-              <span className="swatch" style={{ background: `var(--list-${currentColor})` }} />
+              <span className="swatch" style={{ background: listColorCss(currentColor) }} />
               {listName}
               <Icon name="down" size={12} />
             </summary>
@@ -152,7 +153,7 @@ export function Tasks({ user, today = false }: { user: AuthUser; today?: boolean
                   aria-current={l.current}
                   onClick={(e) => e.currentTarget.closest("details")?.removeAttribute("open")}
                 >
-                  <span className="swatch" style={{ background: `var(--list-${l.color})` }} />
+                  <span className="swatch" style={{ background: listColorCss(l.color) }} />
                   {l.name}
                 </Link>
               ))}

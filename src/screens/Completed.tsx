@@ -2,6 +2,7 @@ import { Link, useLocation } from "react-router";
 import type { AuthUser } from "../data/auth";
 import { useLists } from "../data/lists";
 import { deleteTask, deleteTasks, updateTask, useTasks } from "../data/tasks";
+import { listColorCss } from "../domain/lists";
 import { completedTasks } from "../domain/tasks";
 import { fadeOut } from "../fade";
 import { Icon } from "../icons";
@@ -50,7 +51,7 @@ export function Completed({ user }: { user: AuthUser }) {
                 <span className="muted list-tag">
                   <span
                     className="swatch"
-                    style={{ background: `var(--list-${list?.color ?? "slate"})` }}
+                    style={{ background: listColorCss(list?.color ?? "slate") }}
                   />
                   {list?.name ?? task.listId}
                   {task.completedAt !== null && ` · ${when(task.completedAt)}`}

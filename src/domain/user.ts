@@ -25,7 +25,7 @@ export type List = {
   ownerId: string;
   folderId: string | null;
   name: string;
-  color: ListColor; // token name, never hex
+  color: ListColor; // palette token name, or custom #rrggbb
   sortOrder: number;
   isInbox: boolean;
 };

@@ -11,7 +11,7 @@ import {
   useFolders,
   useLists,
 } from "../data/lists";
-import { LIST_COLORS, type ListColor, sortByOrder } from "../domain/lists";
+import { LIST_COLORS, type ListColor, listColorCss, sortByOrder } from "../domain/lists";
 import { movedSortOrder, nextSortOrder } from "../domain/tasks";
 import { Icon } from "../icons";
 import { Grip, useReorder } from "../reorder";
@@ -159,7 +159,7 @@ function ListRow({
         <button {...reorder.handle(index, list.name)}>
           <Grip />
         </button>
-        <span className="swatch big" style={{ background: `var(--list-${list.color})` }} />
+        <span className="swatch big" style={{ background: listColorCss(list.color) }} />
         <NavLink to={`/list/${list.id}`} className="list-name">
           {list.name}
         </NavLink>
@@ -196,9 +196,27 @@ function ListRow({
                   aria-pressed={list.color === c}
                   onClick={() => updateList(list.id, { color: c as ListColor })}
                 >
-                  <span className="swatch" style={{ background: `var(--list-${c})` }} />
+                  <span className="swatch" style={{ background: listColorCss(c) }} />
                 </button>
               ))}
+              {/* change fires when the picker closes; React's onChange fires on every drag step. */}
+              <label
+                className="custom-swatch"
+                data-selected={list.color.startsWith("#")}
+                style={{
+                  background: listColorCss(list.color.startsWith("#") ? list.color : "slate"),
+                }}
+              >
+                <input
+                  type="color"
+                  aria-label="Custom color"
+                  defaultValue={list.color.startsWith("#") ? list.color : "#6366f1"}
+                  ref={(el) => {
+                    if (el)
+                      el.onchange = () => updateList(list.id, { color: el.value as ListColor });
+                  }}
+                />
+              </label>
             </div>
           </div>
           <label className="field">

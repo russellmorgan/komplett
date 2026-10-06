@@ -21,7 +21,10 @@ export const LIST_COLORS = [
   "pink",
 ] as const;
 
-export type ListColor = (typeof LIST_COLORS)[number];
+// A palette token name, or a custom "#rrggbb" picked by the user (same in light and dark).
+export type ListColor = (typeof LIST_COLORS)[number] | `#${string}`;
+
+export const listColorCss = (c: string) => (c.startsWith("#") ? c : `var(--list-${c})`);
 
 export function newList(
   fields: Pick<List, "ownerId" | "name"> & Partial<Pick<List, "folderId" | "color">>,
