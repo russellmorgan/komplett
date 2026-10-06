@@ -200,13 +200,13 @@ function ListRow({
                 </button>
               ))}
               {/* change fires when the picker closes; React's onChange fires on every drag step. */}
-              <label
-                className="custom-swatch"
-                data-selected={list.color.startsWith("#")}
-                style={{
-                  background: listColorCss(list.color.startsWith("#") ? list.color : "slate"),
-                }}
-              >
+              <label className="custom-swatch" data-selected={list.color.startsWith("#")}>
+                <span
+                  className="swatch"
+                  style={{
+                    background: listColorCss(list.color.startsWith("#") ? list.color : "slate"),
+                  }}
+                />
                 <input
                   type="color"
                   aria-label="Custom color"

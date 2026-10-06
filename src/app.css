@@ -1096,6 +1096,7 @@ textarea.title-input {
   height: 2.25rem;
   border: 2px solid transparent;
   border-radius: var(--radius-sm);
+  background: var(--color-field);
   cursor: pointer;
 }
 .custom-swatch[data-selected="true"] {
