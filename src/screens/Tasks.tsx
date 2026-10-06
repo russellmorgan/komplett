@@ -95,12 +95,15 @@ export function Tasks({ user, today = false }: { user: AuthUser; today?: boolean
   const listName = today ? "Today" : currentList?.isInbox === false ? currentList.name : "Inbox";
   const listLinks = [
     { to: "/today", name: "Today", color: "amber", current: today ? ("page" as const) : undefined },
-    ...lists.map((l) => ({
-      to: l.isInbox ? "/" : `/list/${l.id}`,
-      name: l.name,
-      color: l.color,
-      current: !today && l.id === listId ? ("page" as const) : undefined,
-    })),
+    // Today, then Inbox, always first; the rest in their list order.
+    ...[...lists]
+      .sort((a, b) => Number(!!b.isInbox) - Number(!!a.isInbox) || a.sortOrder - b.sortOrder)
+      .map((l) => ({
+        to: l.isInbox ? "/" : `/list/${l.id}`,
+        name: l.name,
+        color: l.color,
+        current: !today && l.id === listId ? ("page" as const) : undefined,
+      })),
   ];
   const currentColor = listLinks.find((l) => l.current)?.color ?? "amber";
 
