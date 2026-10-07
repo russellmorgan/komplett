@@ -37,7 +37,12 @@ Production builds need a real Firebase project on the **Spark plan** (never Blaz
 pnpm build          # build dist/ first
 pnpm electron       # run the desktop shell against dist/
 pnpm electron:dist  # build dist/, then produce an installer for the current OS (electron-builder)
+pnpm electron:dist:mac-silicon  # macOS DMG for Apple silicon only  -> release/Komplett-<version>-AppleSilicon.dmg
+pnpm electron:dist:mac-intel    # macOS DMG for Intel only          -> release/Komplett-<version>-Intel.dmg
+pnpm electron:dist:mac          # both of the above, one `pnpm build`
 ```
+
+The Mac builds are unsigned (no Developer ID certificate), so Gatekeeper blocks a downloaded copy until it's opened via right-click → Open.
 
 Closing the window quits the app on Windows/Linux; on macOS it stays running in the dock (standard behavior), matching each platform's convention.
 

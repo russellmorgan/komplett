@@ -14,6 +14,9 @@
     "ship": "pnpm build && firebase deploy --only hosting,firestore:rules",
     "electron": "pnpm --filter komplett-electron start",
     "electron:dist": "pnpm build && pnpm --filter komplett-electron dist",
+    "electron:dist:mac-silicon": "pnpm build && pnpm --filter komplett-electron dist:mac-silicon",
+    "electron:dist:mac-intel": "pnpm build && pnpm --filter komplett-electron dist:mac-intel",
+    "electron:dist:mac": "pnpm build && pnpm --filter komplett-electron dist:mac",
     "android": "pnpm build && cap sync android && cap open android"
   },
   "dependencies": {

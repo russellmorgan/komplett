@@ -5,7 +5,10 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "dist": "electron-builder"
+    "dist": "electron-builder",
+    "dist:mac-silicon": "electron-builder --mac dmg --arm64 -c.mac.artifactName='${productName}-${version}-AppleSilicon.${ext}'",
+    "dist:mac-intel": "electron-builder --mac dmg --x64 -c.mac.artifactName='${productName}-${version}-Intel.${ext}'",
+    "dist:mac": "pnpm dist:mac-silicon && pnpm dist:mac-intel"
   },
   "devDependencies": {
     "electron": "^38.5.0",
