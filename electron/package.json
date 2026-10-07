@@ -28,7 +28,8 @@
       }
     ],
     "mac": {
-      "target": "dmg",
+      "target": [{ "target": "dmg", "arch": "arm64" }],
+      "icon": "../public/icon-512.png",
       "category": "public.app-category.productivity"
     },
     "win": {

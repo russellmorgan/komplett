@@ -49,8 +49,10 @@ export function byImportance(a: Task, b: Task): number {
   return (a.dueDate ?? "9999").localeCompare(b.dueDate ?? "9999") || a.createdAt - b.createdAt;
 }
 
-export function activeTasks(tasks: Task[], listId: string): Task[] {
-  return tasks.filter((t) => t.listId === listId && t.completedAt === null).sort(byImportance);
+export function activeTasks(tasks: Task[], listId?: string): Task[] {
+  return tasks
+    .filter((t) => (listId === undefined || t.listId === listId) && t.completedAt === null)
+    .sort(byImportance);
 }
 
 // Completed tasks, newest completedAt first. Pass listId to scope to one list; omit for all.

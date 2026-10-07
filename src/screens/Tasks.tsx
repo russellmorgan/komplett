@@ -39,10 +39,20 @@ function dueLabel(date: string | null): string {
 }
 
 // `today` renders the automatic Today list: tasks due or moved to today, from every list. No add bar.
+// `showAll` renders every open task from every list, the same way (no add bar).
 // Dragging reorders by each task's own sortOrder, shared across lists; a task stays in its own list.
-export function Tasks({ user, today = false }: { user: AuthUser; today?: boolean }) {
+export function Tasks({
+  user,
+  today = false,
+  showAll = false,
+}: {
+  user: AuthUser;
+  today?: boolean;
+  showAll?: boolean;
+}) {
   const { listId: paramListId } = useParams();
-  const listId = today ? "today" : (paramListId ?? inboxListId(user.uid));
+  const listId = today ? "today" : showAll ? "all" : (paramListId ?? inboxListId(user.uid));
+  const combined = today || showAll;
   const lists = useLists(user.uid);
   const currentList = lists.find((l) => l.id === listId);
   const navigate = useNavigate();
@@ -65,10 +75,12 @@ export function Tasks({ user, today = false }: { user: AuthUser; today?: boolean
     navigate("/timer");
   };
   const all = useTasks(user.uid);
-  const active = today ? todayTasks(all, localDate()) : activeTasks(all, listId);
+  const active = today
+    ? todayTasks(all, localDate())
+    : activeTasks(all, showAll ? undefined : listId);
   const completed = today
     ? completedTasks(all).filter((t) => t.dueDate === localDate())
-    : completedTasks(all, listId);
+    : completedTasks(all, showAll ? undefined : listId);
   const [title, setTitle] = useState("");
   const [lastCompleted, setLastCompleted] = useState<Task | null>(null);
   const showCompletedKey = `showCompleted-${listId}`;
@@ -92,7 +104,13 @@ export function Tasks({ user, today = false }: { user: AuthUser; today?: boolean
     return () => document.removeEventListener("pointerdown", close);
   }, []);
   const open = all.find((t) => t.id === openId);
-  const listName = today ? "Today" : currentList?.isInbox === false ? currentList.name : "Inbox";
+  const listName = today
+    ? "Today"
+    : showAll
+      ? "All"
+      : currentList?.isInbox === false
+        ? currentList.name
+        : "Inbox";
   const listLinks = [
     { to: "/today", name: "Today", color: "amber", current: today ? ("page" as const) : undefined },
     // Today, then Inbox, always first; the rest in their list order.
@@ -102,8 +120,9 @@ export function Tasks({ user, today = false }: { user: AuthUser; today?: boolean
         to: l.isInbox ? "/" : `/list/${l.id}`,
         name: l.name,
         color: l.color,
-        current: !today && l.id === listId ? ("page" as const) : undefined,
+        current: !combined && l.id === listId ? ("page" as const) : undefined,
       })),
+    { to: "/all", name: "All", color: "slate", current: showAll ? ("page" as const) : undefined },
   ];
   const currentColor = listLinks.find((l) => l.current)?.color ?? "amber";
 
@@ -163,7 +182,7 @@ export function Tasks({ user, today = false }: { user: AuthUser; today?: boolean
             </nav>
           </details>
         </div>
-        {!today && (
+        {!combined && (
           <form onSubmit={add} className="add-bar">
             <input
               placeholder={`Add a task to ${listName}`}
@@ -193,8 +212,8 @@ export function Tasks({ user, today = false }: { user: AuthUser; today?: boolean
         )}
         <ul className="rows">
           {active.map((task, i) => {
-            // Today is all one date, so show which list each task lives in instead.
-            const due = today
+            // Today/All mix lists, so show which list each task lives in instead of its due date.
+            const due = combined
               ? (lists.find((l) => l.id === task.listId)?.name ?? "")
               : dueLabel(task.dueDate);
             const now = timer.task?.id === task.id && timer.phase !== "idle";

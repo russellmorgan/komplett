@@ -23,6 +23,14 @@ export function Lists({ user }: { user: AuthUser }) {
   const folders = useFolders(user.uid);
   const topLists = sortByOrder(lists.filter((l) => !l.isInbox && l.folderId === null));
   const sortedFolders = sortByOrder(folders);
+  // ponytail: not persisted; per-device localStorage if folders should stay collapsed across visits
+  const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
+  const toggle = (id: string) =>
+    setCollapsed((c) => {
+      const next = new Set(c);
+      if (!next.delete(id)) next.add(id);
+      return next;
+    });
 
   function createList(folderId: string | null) {
     const name = window.prompt("List name");
@@ -47,7 +55,9 @@ export function Lists({ user }: { user: AuthUser }) {
 
   return (
     <div className="stack">
-      <h1>Lists</h1>
+      <h1>
+        Lists <span className="faint">{lists.length}</span>
+      </h1>
       <section className="card lists">
         <div className="list-row">
           <span />
@@ -74,7 +84,15 @@ export function Lists({ user }: { user: AuthUser }) {
                   <button {...folderReorder.handle(i, `folder ${folder.name}`)}>
                     <Grip />
                   </button>
-                  <span className="folder-name">{folder.name}</span>
+                  <button
+                    type="button"
+                    className="week-toggle folder-name"
+                    aria-expanded={!collapsed.has(folder.id)}
+                    onClick={() => toggle(folder.id)}
+                  >
+                    <Icon name="down" size={14} />
+                    {folder.name}
+                  </button>
                   <button
                     type="button"
                     className="ghost icon"
@@ -96,12 +114,14 @@ export function Lists({ user }: { user: AuthUser }) {
                     <Icon name="trash" size={15} />
                   </button>
                 </div>
-                <div className="folder-lists">
-                  <ListGroup lists={folderLists} folders={folders} />
-                  <button type="button" className="link" onClick={() => createList(folder.id)}>
-                    <Icon name="plus" size={12} /> New list in {folder.name}
-                  </button>
-                </div>
+                {!collapsed.has(folder.id) && (
+                  <div className="folder-lists">
+                    <ListGroup lists={folderLists} folders={folders} />
+                    <button type="button" className="link" onClick={() => createList(folder.id)}>
+                      <Icon name="plus" size={12} /> New list in {folder.name}
+                    </button>
+                  </div>
+                )}
               </div>
             );
           })}

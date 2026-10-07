@@ -61,6 +61,7 @@ function Shell({ user }: { user: AuthUser }) {
             <Routes>
               <Route path="/" element={<Tasks user={user} />} />
               <Route path="/today" element={<Tasks user={user} today />} />
+              <Route path="/all" element={<Tasks user={user} showAll />} />
               <Route path="/list/:listId" element={<ListRoute user={user} />} />
               {screens.map((screen) => (
                 <Route key={screen.path} path={screen.path} element={screen.element} />
