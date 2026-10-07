@@ -1,5 +1,5 @@
 const path = require("node:path");
-const { app, BrowserWindow, dialog } = require("electron");
+const { app, BrowserWindow, dialog, ipcMain } = require("electron");
 const { createServer } = require("./serve");
 
 // A fixed port keeps the origin stable across launches, so the signed-in session, localStorage
@@ -15,8 +15,22 @@ const distDir = app.isPackaged
   : path.join(__dirname, "../dist");
 
 function createWindow() {
-  new BrowserWindow({ width: 1200, height: 800 }).loadURL(ORIGIN);
+  // Hidden title bar: the page fills the window (see .titlebar in app.css). titleBarOverlay keeps
+  // native window buttons on Windows/Linux; macOS keeps its traffic lights.
+  new BrowserWindow({
+    width: 1200,
+    height: 800,
+    titleBarStyle: "hidden",
+    titleBarOverlay: true,
+    webPreferences: { preload: path.join(__dirname, "preload.js") },
+  }).loadURL(ORIGIN);
 }
+
+// Windows/Linux only: macOS has no overlay to recolor, so setTitleBarOverlay is absent there.
+ipcMain.on("title-bar-overlay", (e, color, symbolColor) => {
+  if (typeof color !== "string" || typeof symbolColor !== "string") return;
+  BrowserWindow.fromWebContents(e.sender)?.setTitleBarOverlay?.({ color, symbolColor });
+});
 
 if (!app.requestSingleInstanceLock()) {
   app.quit();

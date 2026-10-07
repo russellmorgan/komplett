@@ -34,6 +34,17 @@ export function applyAppearance(a: Appearance = load()) {
   root.dataset.theme = a.theme;
   if (a.mode === "system") delete root.dataset.mode;
   else root.dataset.mode = a.mode;
+  syncTitleBarOverlay();
+}
+
+// Electron (Windows/Linux): paint the native window buttons with the page's own colors. Computed
+// styles resolve light-dark(), which the raw custom properties don't. No-op in the browser.
+export function syncTitleBarOverlay() {
+  const bridge = (window as { komplett?: { setTitleBarOverlay(c: string, s: string): void } })
+    .komplett;
+  if (!bridge) return;
+  const { backgroundColor, color } = getComputedStyle(document.body);
+  bridge.setTitleBarOverlay(backgroundColor, color);
 }
 
 export function useAppearance(): [Appearance, (patch: Partial<Appearance>) => void] {

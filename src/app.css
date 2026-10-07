@@ -431,9 +431,27 @@ input.switch:checked {
   white-space: nowrap;
 }
 
+/* Electron's hidden title bar: a sticky drag strip that clears the window buttons (macOS traffic
+ * lights, Windows/Linux overlay). main.tsx sets data-shell="electron"; elsewhere it doesn't exist. */
+.titlebar {
+  display: none;
+}
+:root[data-shell="electron"] {
+  --titlebar: env(titlebar-area-height, 2.25rem);
+}
+:root[data-shell="electron"] .titlebar {
+  display: block;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  height: var(--titlebar);
+  background: var(--color-bg);
+  -webkit-app-region: drag;
+}
+
 /* Shell: top header, content below, all within the design's max width. */
 .shell {
-  min-height: 100dvh;
+  min-height: calc(100dvh - var(--titlebar));
   max-width: var(--content-width);
   margin: 0 auto;
   padding: clamp(1rem, 3vw, 1.75rem) var(--space-gutter) clamp(3rem, 8vw, 6rem);
@@ -563,7 +581,7 @@ input.switch:checked {
 
 /* Sign in */
 .signin {
-  min-height: 100dvh;
+  min-height: calc(100dvh - var(--titlebar));
   display: grid;
   place-items: center;
   padding: var(--space-4);
@@ -1011,7 +1029,7 @@ textarea.title-input {
   }
   .task-detail {
     position: fixed;
-    inset: 0;
+    inset: var(--titlebar) 0 0;
     z-index: 30;
     overflow-y: auto;
     border-radius: 0;
@@ -1313,12 +1331,12 @@ body.hide-nav .header {
   margin-top: calc(-1 * clamp(1.25rem, 3vw, 2.5rem));
 }
 .timer.focus {
-  min-height: calc(100dvh - 7.75rem);
+  min-height: calc(100dvh - 7.75rem - var(--titlebar));
   align-content: center;
 }
 .exit-focus {
   position: fixed;
-  top: 1.5rem;
+  top: calc(var(--titlebar) + 1.5rem);
   right: var(--space-gutter);
   z-index: 20;
   border-color: var(--color-border);
@@ -1331,9 +1349,9 @@ body.hide-nav .header {
 }
 .view-panel {
   /* Top layer via the popover API; pinned under the toolbar rather than centered. */
-  inset: 10.625rem var(--space-gutter) auto auto;
+  inset: calc(var(--titlebar) + 10.625rem) var(--space-gutter) auto auto;
   width: min(calc(100% - 2 * var(--space-gutter)), 21.25rem);
-  max-height: calc(100dvh - 11.875rem);
+  max-height: calc(100dvh - 11.875rem - var(--titlebar));
   overflow-y: auto;
   margin: 0;
   padding: 1.25rem;
