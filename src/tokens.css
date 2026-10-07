@@ -84,19 +84,24 @@
   --radius-dot: 999px;
   --shadow-pop: 0 24px 44px -24px rgba(110, 50, 0, 0.6);
 
-  --color-bg: light-dark(#fe8002, #261b11);
-  --color-surface: light-dark(#fff8ef, #33251a);
+  /* Light: the orange field is softened a notch off pure #fe8002 (max chroma vibrates against cream
+   * cards), and every neutral is a warm brown tinted toward the hue instead of grey, so text reads as
+   * shade of the orange rather than a foreign colour. Text tiers are dark enough to pass on the orange
+   * itself (muted 5:1, faint 3.6:1), not only on cards. Lines and off-dots are translucent ink, so they
+   * show as a darker orange on the field and a tan on cards rather than glowing peach. */
+  --color-bg: light-dark(#f5862e, #261b11);
+  --color-surface: light-dark(#fdf3e7, #33251a);
   --color-field: light-dark(#ffeedd, #402f20);
-  --color-border: light-dark(#ffd0a0, #523d28);
-  --color-text: light-dark(#262626, #e3d9cb);
-  --color-on-text: light-dark(#fff8ef, #262626);
-  --color-text-muted: light-dark(#6b5a48, #b89c7c);
-  --color-text-faint: light-dark(#9a4a00, #8a6f55);
-  --color-accent: light-dark(#262626, #fe8002);
-  --color-accent-hover: light-dark(#000000, #fd982f);
-  --color-accent-text: light-dark(#fff8ef, #262626);
-  --color-danger: light-dark(#b3261e, #ff8a80);
-  --color-dot-off: light-dark(#fd982f, #402f20);
+  --color-border: light-dark(color-mix(in srgb, #4a2a10 35%, transparent), color-mix(in srgb, #e3d9cb 30%, transparent));
+  --color-text: light-dark(#2b1a0e, #e3d9cb);
+  --color-on-text: light-dark(#fdf3e7, #261b11);
+  --color-text-muted: light-dark(#4a2a10, #b89c7c);
+  --color-text-faint: light-dark(#6b3d12, #9a7c5e);
+  --color-accent: light-dark(#2b1a0e, #fe8002);
+  --color-accent-hover: light-dark(#170d05, #fd982f);
+  --color-accent-text: light-dark(#fdf3e7, #261b11);
+  --color-danger: light-dark(#6e0d09, #ff8a80); /* red is next to orange on the wheel, so it has to win on darkness */
+  --color-dot-off: light-dark(color-mix(in srgb, #4a2a10 30%, transparent), color-mix(in srgb, #e3d9cb 22%, transparent));
 }
 
 /* Blue: Paper's shape and type, cobalt accent. Blue's complement is orange, so the neutrals keep
