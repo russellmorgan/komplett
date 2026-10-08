@@ -76,13 +76,17 @@
   color-scheme: dark;
 }
 
-/* Orange: from "Komplett Orange" in the design project. */
-:root[data-theme="orange"] {
-  --font-sans: "Rubik", system-ui, sans-serif;
+/* Rounded corners: a switch in Settings, independent of the theme. */
+:root[data-round] {
   --radius-sm: 0.75rem;
   --radius-md: 1.25rem;
   --radius-lg: 2rem;
   --radius-dot: 999px;
+}
+
+/* Orange: from "Komplett Orange" in the design project. */
+:root[data-theme="orange"] {
+  --font-sans: "Rubik", system-ui, sans-serif;
   --shadow-pop: 0 24px 44px -24px rgba(110, 50, 0, 0.6);
 
   /* Light: the orange field is softened a notch off pure #fe8002 (max chroma vibrates against cream

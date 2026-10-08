@@ -17,21 +17,23 @@ export const MODES = [
 export type Appearance = {
   theme: (typeof THEMES)[number]["id"];
   mode: (typeof MODES)[number]["id"];
+  round: boolean;
 };
 
 const KEY = "komplett:appearance";
 
 function load(): Appearance {
   try {
-    return { theme: "paper", mode: "system", ...JSON.parse(localStorage.getItem(KEY) ?? "{}") };
+    return { theme: "paper", mode: "system", round: false, ...JSON.parse(localStorage.getItem(KEY) ?? "{}") };
   } catch {
-    return { theme: "paper", mode: "system" };
+    return { theme: "paper", mode: "system", round: false };
   }
 }
 
 export function applyAppearance(a: Appearance = load()) {
   const root = document.documentElement;
   root.dataset.theme = a.theme;
+  root.toggleAttribute("data-round", a.round);
   if (a.mode === "system") delete root.dataset.mode;
   else root.dataset.mode = a.mode;
   syncTitleBarOverlay();

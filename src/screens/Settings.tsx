@@ -116,6 +116,15 @@ export function Settings({ user }: { user: AuthUser }) {
               </button>
             ))}
           </fieldset>
+          <label className="round-toggle">
+            Rounded
+            <input
+              type="checkbox"
+              className="switch"
+              checked={appearance.round}
+              onChange={(e) => setAppearance({ round: e.target.checked })}
+            />
+          </label>
         </div>
         <div className="setting">
           <span className="setting-label">
