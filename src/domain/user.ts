@@ -4,11 +4,14 @@ import type { ListColor } from "./lists";
 
 export type ChimeId = "bell" | "woodblock" | "glass" | "pulse" | "soft" | "lawOrder";
 
+export type StartView = "timer" | "tasks" | "lists";
+
 export type Settings = {
   focusMinutes: number;
   breakMinutes: number;
   soundEnabled: boolean;
   chime?: ChimeId; // absent on users created before chimes existed; means "bell"
+  startView?: StartView; // absent means "tasks"
 };
 
 export type User = {

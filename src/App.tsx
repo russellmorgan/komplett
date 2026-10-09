@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   BrowserRouter,
   Link,
@@ -18,6 +18,7 @@ import { useTasks } from "./data/tasks";
 import { TimerProvider, useTimerContext } from "./data/timer";
 import { useUserDoc } from "./data/user";
 import { formatMmSs, remainingMs } from "./domain/timer";
+import type { User } from "./domain/user";
 import { Icon } from "./icons";
 import { Completed } from "./screens/Completed";
 import { History } from "./screens/History";
@@ -39,7 +40,12 @@ function Shell({ user }: { user: AuthUser }) {
   // Reminders fire on every screen, not just Tasks.
   const tasks = useTasks(user.uid);
   useReminders(tasks);
-  useSharedTaskSync(user.uid, useUserDoc(user.uid), tasks);
+  const doc = useUserDoc(user.uid);
+  const booting = useRef(window.location.pathname === "/");
+  useEffect(() => {
+    if (doc) booting.current = false;
+  }, [doc]);
+  useSharedTaskSync(user.uid, doc, tasks);
   usePartnerDoneAlert(user.uid);
 
   const screens = [
@@ -60,7 +66,7 @@ function Shell({ user }: { user: AuthUser }) {
           <Header links={links} />
           <main>
             <Routes>
-              <Route path="/" element={<Tasks user={user} />} />
+              <Route path="/" element={<Home user={user} doc={doc} booting={booting.current} />} />
               <Route path="/today" element={<Tasks user={user} today />} />
               <Route path="/all" element={<Tasks user={user} showAll />} />
               <Route path="/list/:listId" element={<ListRoute user={user} />} />
@@ -73,6 +79,17 @@ function Shell({ user }: { user: AuthUser }) {
       </BrowserRouter>
     </TimerProvider>
   );
+}
+
+const START_PATHS = { timer: "/timer", lists: "/lists" } as const;
+
+// On app load only: when we land on "/", render nothing until the user's settings arrive, then go
+// straight to their start view (no Tasks flash). Later visits to "/" are just Tasks.
+function Home({ user, doc, booting }: { user: AuthUser; doc?: User; booting: boolean }) {
+  if (booting && !doc) return null;
+  const view = booting ? doc?.settings.startView : undefined;
+  if (view === "timer" || view === "lists") return <Navigate to={START_PATHS[view]} replace />;
+  return <Tasks user={user} />;
 }
 
 // Inline nav on wide screens; a menu button with a dropdown below 64rem (CSS decides which shows).
