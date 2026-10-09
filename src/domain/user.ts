@@ -2,7 +2,7 @@ import type { ListColor } from "./lists";
 
 // Pure shapes for the documents created on first sign-in. No React, no Firebase.
 
-export type ChimeId = "bell" | "woodblock" | "glass" | "pulse" | "soft";
+export type ChimeId = "bell" | "woodblock" | "glass" | "pulse" | "soft" | "lawOrder";
 
 export type Settings = {
   focusMinutes: number;

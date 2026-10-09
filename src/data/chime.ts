@@ -1,10 +1,13 @@
 import type { ChimeId } from "../domain/user";
 
-// Period-end chimes, synthesized with Web Audio so there are no sound files to ship or cache.
+// Period-end chimes, mostly synthesized with Web Audio so there are no sound files to ship or cache.
 // Each note is [start s, frequency Hz, length s]; `wave` and `gain` shape the timbre.
+// A chime with a `file` (under public/sounds) is played as a sample instead.
 
 type Note = [start: number, freq: number, length: number];
-type Chime = { name: string; wave: OscillatorType; gain: number; notes: Note[] };
+type Synth = { name: string; wave: OscillatorType; gain: number; notes: Note[] };
+type Sample = { name: string; file: string };
+type Chime = Synth | Sample;
 
 export const CHIMES = {
   bell: {
@@ -55,11 +58,16 @@ export const CHIMES = {
       [0.4, 784, 0.9],
     ],
   },
+  lawOrder: { name: "Law & Order", file: "/sounds/law-order-complete.m4a" },
 } satisfies Record<ChimeId, Chime>;
 export const CHIME_IDS = Object.keys(CHIMES) as ChimeId[];
 
 export function playChime(id: ChimeId = "bell") {
   const chime: Chime = CHIMES[id] ?? CHIMES.bell;
+  if ("file" in chime) {
+    new Audio(chime.file).play().catch(() => {}); // autoplay blocked: same silence as a suspended AudioContext
+    return;
+  }
   const ctx = new AudioContext();
   let end = 0;
   for (const [start, freq, length] of chime.notes) {
