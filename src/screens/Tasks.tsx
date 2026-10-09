@@ -1,6 +1,7 @@
 import { type FormEvent, useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router";
 import type { AuthUser } from "../data/auth";
+import { playDone } from "../data/chime";
 import { useLists } from "../data/lists";
 import { useSessions } from "../data/sessions";
 import { addTask, deleteTask, updateTask, useTasks } from "../data/tasks";
@@ -244,6 +245,7 @@ export function Tasks({
                     const finishes = !task.repeat && timesLeft(task) === 1;
                     fadeOut(finishes ? e.currentTarget.closest("li") : null, () => {
                       updateTask(task.id, completePatch(task, Date.now()));
+                      playDone(me?.settings.soundEnabled);
                       if (finishes) setLastCompleted(task);
                     });
                   }}

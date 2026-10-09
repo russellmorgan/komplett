@@ -87,3 +87,8 @@ export function playChime(id: ChimeId = "bell") {
   }
   setTimeout(() => ctx.close(), end * 1000 + 100);
 }
+
+// Task completed: the glass chime, unless the user turned sounds off.
+export function playDone(soundEnabled: boolean | undefined) {
+  if (soundEnabled ?? true) playChime("glass");
+}

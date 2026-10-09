@@ -2,6 +2,7 @@ import { type FormEvent, type ReactNode, useEffect, useState } from "react";
 import { Link } from "react-router";
 import { Avatar } from "../Avatar";
 import type { AuthUser } from "../data/auth";
+import { playDone } from "../data/chime";
 import { useSessions } from "../data/sessions";
 import { useSharedTask } from "../data/shared";
 import { addTask, updateTask, useTasks } from "../data/tasks";
@@ -69,6 +70,7 @@ export function TimerPanel({ id, ...props }: PanelProps & { id: Panel }) {
 }
 
 function UpNext({ user, ...card }: PanelProps) {
+  const me = useUserDoc(user.uid);
   const all = useTasks(user.uid);
   const sessions = useSessions(user.uid);
   const today = new Date().toLocaleDateString("en-CA");
@@ -145,6 +147,7 @@ function UpNext({ user, ...card }: PanelProps) {
                 checked={false}
                 onChange={() => {
                   updateTask(task.id, completePatch(task, Date.now()));
+                  playDone(me?.settings.soundEnabled);
                   if (!task.repeat && timesLeft(task) === 1) setLast(task);
                 }}
                 aria-label={`Complete ${task.title}`}
