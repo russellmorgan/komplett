@@ -1,4 +1,4 @@
-import { type FormEvent, type ReactNode, useState } from "react";
+import { type FormEvent, type ReactNode, useEffect, useState } from "react";
 import { Link } from "react-router";
 import { Avatar } from "../Avatar";
 import type { AuthUser } from "../data/auth";
@@ -77,6 +77,12 @@ function UpNext({ user, ...card }: PanelProps) {
   const busy = state.phase !== "idle" || pending !== null;
   const [draft, setDraft] = useState("");
   const [last, setLast] = useState<Task | null>(null);
+  // The Undo toast goes away on its own after 5 seconds (a newer completion restarts the clock).
+  useEffect(() => {
+    if (!last) return;
+    const t = setTimeout(() => setLast(null), 5000);
+    return () => clearTimeout(t);
+  }, [last]);
   // The first 6 rows, plus any important or due-today task beyond them: those always show.
   const shown = open.filter((t, i) => i < 6 || t.important || t.dueDate === today);
   // Important tasks are pinned to the top by rule, so only the rest can be dragged, among themselves.

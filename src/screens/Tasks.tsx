@@ -83,6 +83,12 @@ export function Tasks({
     : completedTasks(all, showAll ? undefined : listId);
   const [title, setTitle] = useState("");
   const [lastCompleted, setLastCompleted] = useState<Task | null>(null);
+  // The Undo toast goes away on its own after 5 seconds (a newer completion restarts the clock).
+  useEffect(() => {
+    if (!lastCompleted) return;
+    const t = setTimeout(() => setLastCompleted(null), 5000);
+    return () => clearTimeout(t);
+  }, [lastCompleted]);
   const showCompletedKey = `showCompleted-${listId}`;
   const [showCompleted, setShowCompleted] = useState(
     () => localStorage.getItem(showCompletedKey) === "1",
