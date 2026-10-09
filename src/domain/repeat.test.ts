@@ -94,6 +94,19 @@ describe("completePatch", () => {
   });
 });
 
+describe("completePatch with times", () => {
+  it("counts checks until the last one, which completes and resets", () => {
+    const t = task({ times: 3, timesDone: 0 });
+    expect(completePatch(t, 5)).toEqual({ timesDone: 1 });
+    expect(completePatch({ ...t, timesDone: 1 }, 5)).toEqual({ timesDone: 2 });
+    expect(completePatch({ ...t, timesDone: 2 }, 5)).toEqual({ completedAt: 5, timesDone: 0 });
+  });
+  it("advances a repeating task on the last check", () => {
+    const t = task({ dueDate: "2026-01-01", repeat: { kind: "daily" }, times: 2, timesDone: 1 });
+    expect(completePatch(t, 0)).toEqual({ dueDate: "2026-01-02", reminderAt: null, timesDone: 0 });
+  });
+});
+
 it("weekly with no days selected does not advance", () => {
   expect(nextOccurrence({ kind: "weekly", days: [] }, "2026-03-10", "2026-03-10")).toBe(
     "2026-03-10",

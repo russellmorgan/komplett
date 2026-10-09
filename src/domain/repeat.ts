@@ -1,5 +1,5 @@
 // Repeat advancement. Dates are YYYY-MM-DD strings handled in UTC so local zones can't shift them.
-import type { Repeat, Task } from "./tasks";
+import { type Repeat, type Task, timesLeft } from "./tasks";
 
 const DAY = 86_400_000;
 
@@ -64,7 +64,10 @@ export function advanceTask(task: Task, now: number): Pick<Task, "dueDate" | "re
 }
 
 export function completePatch(task: Task, now: number): Partial<Task> {
+  // A multi-times task only counts a check until the last one; that one completes and resets the count.
+  if (timesLeft(task) > 1) return { timesDone: (task.timesDone ?? 0) + 1 };
+  const reset = (task.times ?? 1) > 1 ? { timesDone: 0 } : {};
   // A weekly repeat with no days never recurs, so completing it just completes it.
   const recurs = task.repeat && !(task.repeat.kind === "weekly" && task.repeat.days.length === 0);
-  return recurs ? advanceTask(task, now) : { completedAt: now };
+  return { ...(recurs ? advanceTask(task, now) : { completedAt: now }), ...reset };
 }

@@ -15,6 +15,7 @@ import {
   movedSortOrder,
   nextSortOrder,
   type Task,
+  timesLeft,
   todayTasks,
 } from "../domain/tasks";
 import { inboxListId } from "../domain/user";
@@ -208,7 +209,10 @@ export function Tasks({
               type="button"
               className="primary"
               onClick={() => {
-                updateTask(lastCompleted.id, { completedAt: null });
+                updateTask(lastCompleted.id, {
+                  completedAt: null,
+                  ...(lastCompleted.times ? { timesDone: lastCompleted.timesDone ?? 0 } : {}),
+                });
                 setLastCompleted(null);
               }}
             >
@@ -236,19 +240,24 @@ export function Tasks({
                   type="checkbox"
                   className="check"
                   checked={false}
-                  onChange={(e) =>
-                    fadeOut(task.repeat ? null : e.currentTarget.closest("li"), () => {
+                  onChange={(e) => {
+                    const finishes = !task.repeat && timesLeft(task) === 1;
+                    fadeOut(finishes ? e.currentTarget.closest("li") : null, () => {
                       updateTask(task.id, completePatch(task, Date.now()));
-                      if (!task.repeat) setLastCompleted(task);
-                    })
-                  }
+                      if (finishes) setLastCompleted(task);
+                    });
+                  }}
                   aria-label={`Complete ${task.title}`}
                 />
                 <button type="button" className="row-title" onClick={() => setOpenId(task.id)}>
                   <span className={now ? "strong" : undefined}>{task.title}</span>
                   {task.note && <span className="muted">{task.note}</span>}
                 </button>
-                <span className={due === "Overdue" ? "due overdue" : "due"}>{due}</span>
+                <span className={due === "Overdue" ? "due overdue" : "due"}>
+                  {timesLeft(task) > 1
+                    ? [`${timesLeft(task)} left`, due].filter(Boolean).join(" · ")
+                    : due}
+                </span>
                 <button
                   type="button"
                   className="star"

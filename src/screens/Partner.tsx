@@ -113,6 +113,8 @@ function SharedCard({
               <>
                 <Icon name="check" size={12} /> Done
               </>
+            ) : (shared.timesLeft ?? 1) > 1 ? (
+              `${shared.timesLeft} to go${shared.dueDate ? ` · due ${shared.dueDate}` : ""}`
             ) : shared.dueDate ? (
               `Due ${shared.dueDate}`
             ) : (

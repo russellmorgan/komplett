@@ -18,6 +18,8 @@ export type Task = {
   repeat: Repeat | null;
   important?: boolean; // absent on old tasks; means false
   todayOn?: string | null; // YYYY-MM-DD it was manually moved to Today; stale after that day
+  times?: number; // checks needed before it completes; absent means 1
+  timesDone?: number; // checks so far toward `times`; absent means 0
   sortOrder: number;
   completedAt: number | null;
   createdAt: number;
@@ -39,6 +41,11 @@ export function newTask(
     createdAt: now,
     updatedAt: now,
   };
+}
+
+// Checks still needed before the task completes (or advances, if it repeats).
+export function timesLeft(task: Pick<Task, "times" | "timesDone">): number {
+  return Math.max(1, (task.times ?? 1) - (task.timesDone ?? 0));
 }
 
 // Display order of open tasks: important ones first (soonest due, undated last, then oldest

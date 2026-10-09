@@ -31,6 +31,7 @@ describe("projectSharedTask", () => {
       title: "Ship it",
       dueDate: "2026-09-20",
       completedAt: null,
+      timesLeft: 1,
       reactions: [],
       updatedAt: 99,
     });

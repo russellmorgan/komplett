@@ -10,7 +10,7 @@ import type { Panel } from "../data/timerView";
 import { useUserDoc } from "../data/user";
 import { completePatch } from "../domain/repeat";
 import type { SharedTask } from "../domain/shared";
-import { firstSortOrder, movedSortOrder, type Task, upNext } from "../domain/tasks";
+import { firstSortOrder, movedSortOrder, type Task, timesLeft, upNext } from "../domain/tasks";
 import { inboxListId } from "../domain/user";
 import { fadeOut } from "../fade";
 import { Icon } from "../icons";
@@ -145,12 +145,13 @@ function UpNext({ user, ...card }: PanelProps) {
                 checked={false}
                 onChange={() => {
                   updateTask(task.id, completePatch(task, Date.now()));
-                  if (!task.repeat) setLast(task);
+                  if (!task.repeat && timesLeft(task) === 1) setLast(task);
                 }}
                 aria-label={`Complete ${task.title}`}
               />
               <span className="row-title">
                 <span className={now ? "strong" : undefined}>{task.title}</span>
+                {timesLeft(task) > 1 && <span className="muted">{timesLeft(task)} left</span>}
               </span>
               <button
                 type="button"
@@ -174,7 +175,10 @@ function UpNext({ user, ...card }: PanelProps) {
             type="button"
             className="primary"
             onClick={() => {
-              updateTask(last.id, { completedAt: null });
+              updateTask(last.id, {
+                completedAt: null,
+                ...(last.times ? { timesDone: last.timesDone ?? 0 } : {}),
+              });
               setLast(null);
             }}
           >
@@ -229,9 +233,11 @@ function Today({ user, ...card }: PanelProps) {
 function status(shared: SharedTask) {
   return shared.completedAt !== null
     ? "Done"
-    : shared.dueDate
-      ? `Due ${shared.dueDate}`
-      : "In progress";
+    : (shared.timesLeft ?? 1) > 1
+      ? `${shared.timesLeft} to go`
+      : shared.dueDate
+        ? `Due ${shared.dueDate}`
+        : "In progress";
 }
 
 function PartnerPanel({ user, ...card }: PanelProps) {

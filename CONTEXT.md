@@ -16,6 +16,7 @@ Personal to-do + pomodoro + accountability app for a handful of friends. Spec an
 | **Reminder** | An absolute UTC timestamp at which a notification fires while the app is open. | alert, alarm |
 | **Repeat rule** | A preset (`daily`, `weekdays`, `weekly` + days, `monthly` + day, `yearly`). Not RRULE. | recurrence, schedule |
 | **Advance** | What completing a repeating task does: due date moves to the next occurrence on the *same* task; it is not completed. | roll over, regenerate |
+| **Times** | How many checks a task needs before it completes (or advances). Each earlier check only counts down; the count resets on completion. Partners see what's left. | reps, count |
 | **Complete** | Set `completedAt` on a non-repeating task. Completed tasks are hidden unless shown. | done, archive, finish |
 | **Completed area** | Per-list "Show completed" toggle and the global Completed page. | archive, trash |
 | **Delete** | Permanent removal. No undo, no trash. | archive, remove |

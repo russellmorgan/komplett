@@ -2,7 +2,7 @@ import { useState } from "react";
 import type { useLists } from "../data/lists";
 import { requestNotificationPermission } from "../data/reminders";
 import { updateTask } from "../data/tasks";
-import type { Repeat, Task } from "../domain/tasks";
+import { type Repeat, type Task, timesLeft } from "../domain/tasks";
 import { Icon } from "../icons";
 
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -143,6 +143,23 @@ export function TaskDetail({
           }}
         />
       </label>
+      <div className="field">
+        <span>Times to complete</span>
+        <label className="inline-field">
+          <input
+            type="number"
+            min={1}
+            max={99}
+            value={task.times ?? 1}
+            onChange={(e) => {
+              const times = Number(e.target.value);
+              if (Number.isInteger(times) && times >= 1 && times <= 99)
+                save({ times, timesDone: Math.min(task.timesDone ?? 0, times - 1) });
+            }}
+          />
+          {(task.times ?? 1) > 1 && <span className="muted">{timesLeft(task)} left</span>}
+        </label>
+      </div>
       <label className="field">
         <span>List</span>
         <select value={task.listId} onChange={(e) => save({ listId: e.target.value })}>

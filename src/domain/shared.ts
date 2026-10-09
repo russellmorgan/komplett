@@ -1,6 +1,6 @@
 // The shared task is a projection of the accountability task that the partner reads. Pure.
 
-import type { Task } from "./tasks";
+import { type Task, timesLeft } from "./tasks";
 
 // Mirrored in firestore.rules (sharedTasks.onlyOwnReaction); change both together.
 export const REACTION_EMOJI = ["👏", "🔥", "🎉", "💪", "❤️", "🙌", "⭐", "🚀"] as const;
@@ -12,6 +12,7 @@ export type SharedTask = {
   title: string;
   dueDate: string | null;
   completedAt: number | null;
+  timesLeft?: number; // checks still needed; absent on old docs, means 1
   reactions: Reaction[];
   updatedAt: number;
 };
@@ -24,6 +25,7 @@ export function projectSharedTask(task: Task, prev: SharedTask | null, now: numb
     title: task.title,
     dueDate: task.dueDate,
     completedAt: task.completedAt,
+    timesLeft: timesLeft(task),
     reactions:
       prev?.taskId === task.id && prev.completedAt === task.completedAt ? prev.reactions : [],
     updatedAt: now,
@@ -37,7 +39,8 @@ export function sharedTaskChanged(stored: SharedTask | null, next: SharedTask): 
     stored.taskId !== next.taskId ||
     stored.title !== next.title ||
     stored.dueDate !== next.dueDate ||
-    stored.completedAt !== next.completedAt
+    stored.completedAt !== next.completedAt ||
+    stored.timesLeft !== next.timesLeft
   );
 }
 
