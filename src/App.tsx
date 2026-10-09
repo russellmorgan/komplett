@@ -124,8 +124,8 @@ function Header({ links }: { links: { path: string; label: string }[] }) {
         Kom<span>plett</span>
       </Link>
       <div className="header-actions">
-        {nav("nav")}
         {pathname !== "/timer" && <TimerPill />}
+        {nav("nav")}
         <button
           type="button"
           className="menu-button"
