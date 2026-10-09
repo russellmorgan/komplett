@@ -1,0 +1,31 @@
+[
+  {
+    "version": "0.1",
+    "date": "2026-10-09",
+    "changes": [
+      "Pick which screen opens when you start the app: Timer, Tasks or Lists (in Settings).",
+      "Press 1 to 6 on your keyboard to jump between screens.",
+      "New “Law & Order” chime for when a focus or break ends.",
+      "A Rounded corners switch in Settings, for any theme.",
+      "Desktop apps for Mac and Windows, with a clean window and no title bar.",
+      "Give each list your own custom color.",
+      "Add tasks to Today by hand and drag them into the order you want.",
+      "Partners can add a profile photo; History groups sessions by week and lets you fold weeks away.",
+      "A brick-breaker game to play during breaks, with high scores shared with your partner.",
+      "Blue, Green and Orange themes, plus dark mode.",
+      "Discard a finished focus session without saving it; sessions under a minute aren’t kept.",
+      "Star a task to pin it to the top of its list.",
+      "A Today list that fills itself with tasks due today.",
+      "Drag tasks to reorder them.",
+      "Get an alert when your partner finishes the task they shared with you.",
+      "Install Komplett on your phone or computer and use it offline.",
+      "History shows your sessions, total focus time and tasks completed.",
+      "Pick an accountability partner, share one task with them and react with an emoji when they finish.",
+      "Start a focus timer straight from any task.",
+      "A focus and break timer that keeps counting on every screen.",
+      "Organize tasks into colored lists and folders.",
+      "Give tasks a due date, reminder, note and repeat schedule.",
+      "Add tasks to your Inbox, tick them off and see everything you’ve completed."
+    ]
+  }
+]

@@ -24,7 +24,12 @@ const KEY = "komplett:appearance";
 
 function load(): Appearance {
   try {
-    return { theme: "paper", mode: "system", round: false, ...JSON.parse(localStorage.getItem(KEY) ?? "{}") };
+    return {
+      theme: "paper",
+      mode: "system",
+      round: false,
+      ...JSON.parse(localStorage.getItem(KEY) ?? "{}"),
+    };
   } catch {
     return { theme: "paper", mode: "system", round: false };
   }

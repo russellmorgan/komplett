@@ -21,6 +21,7 @@ import { formatMmSs, remainingMs } from "./domain/timer";
 import type { User } from "./domain/user";
 import { Icon } from "./icons";
 import { Completed } from "./screens/Completed";
+import { Help, VERSION, WhatsNew } from "./screens/Help";
 import { History } from "./screens/History";
 import { Lists } from "./screens/Lists";
 import { Partner } from "./screens/Partner";
@@ -70,11 +71,18 @@ function Shell({ user }: { user: AuthUser }) {
               <Route path="/today" element={<Tasks user={user} today />} />
               <Route path="/all" element={<Tasks user={user} showAll />} />
               <Route path="/list/:listId" element={<ListRoute user={user} />} />
+              <Route path="/help" element={<Help />} />
+              <Route path="/whats-new" element={<WhatsNew />} />
               {screens.map((screen) => (
                 <Route key={screen.path} path={screen.path} element={screen.element} />
               ))}
             </Routes>
           </main>
+          <footer className="footer">
+            <span>v{VERSION}</span>
+            <Link to="/help">help</Link>
+            <Link to="/whats-new">what's new?</Link>
+          </footer>
         </div>
       </BrowserRouter>
     </TimerProvider>
