@@ -493,6 +493,20 @@ input.switch:checked {
   font-size: 0.9375rem;
   color: var(--color-text-muted);
 }
+.nav kbd {
+  margin-left: 0.125em;
+  font: inherit;
+  font-size: var(--text-xs);
+  opacity: 0.5;
+}
+.menu kbd {
+  display: none;
+}
+@media (hover: none) {
+  .nav kbd {
+    display: none;
+  }
+}
 .nav a:hover {
   color: var(--color-text);
   border-bottom-color: var(--color-text);

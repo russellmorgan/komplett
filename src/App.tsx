@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   BrowserRouter,
   Link,
@@ -7,6 +7,7 @@ import {
   Route,
   Routes,
   useLocation,
+  useNavigate,
   useParams,
 } from "react-router";
 import { type AuthUser, useAuthUser } from "./data/auth";
@@ -78,11 +79,24 @@ function Shell({ user }: { user: AuthUser }) {
 function Header({ links }: { links: { path: string; label: string }[] }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const { pathname } = useLocation();
+  const navigate = useNavigate();
+  // 1-6 jump to the nav items in order, unless the user is typing in a field.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const link = links[Number(e.key) - 1];
+      if (!link || e.metaKey || e.ctrlKey || e.altKey) return;
+      if ((e.target as HTMLElement).closest("input, textarea, select, [contenteditable]")) return;
+      navigate(link.path);
+      setMenuOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [links, navigate]);
   const nav = (className: string) => (
     <nav className={className}>
-      {links.map((l) => (
+      {links.map((l, i) => (
         <NavLink key={l.path} to={l.path} end onClick={() => setMenuOpen(false)}>
-          {l.label}
+          {l.label} <kbd>{i + 1}</kbd>
         </NavLink>
       ))}
     </nav>
