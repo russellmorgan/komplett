@@ -120,8 +120,9 @@ export function Tasks({
         ? currentList.name
         : "Inbox";
   const listLinks = [
+    { to: "/all", name: "All", color: "slate", current: showAll ? ("page" as const) : undefined },
     { to: "/today", name: "Today", color: "amber", current: today ? ("page" as const) : undefined },
-    // Today, then Inbox, always first; the rest in their list order.
+    // All, Today, then Inbox, always first; the rest in their list order.
     ...[...lists]
       .sort((a, b) => Number(!!b.isInbox) - Number(!!a.isInbox) || a.sortOrder - b.sortOrder)
       .map((l) => ({
@@ -130,7 +131,6 @@ export function Tasks({
         color: l.color,
         current: !combined && l.id === listId ? ("page" as const) : undefined,
       })),
-    { to: "/all", name: "All", color: "slate", current: showAll ? ("page" as const) : undefined },
   ];
   const currentColor = listLinks.find((l) => l.current)?.color ?? "amber";
 
