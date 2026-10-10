@@ -41,6 +41,10 @@ export function TaskDetail({
   onClose: () => void;
 }) {
   const save = (patch: Partial<Task>) => updateTask(task.id, patch);
+  const setTimes = (times: number) => {
+    if (Number.isInteger(times) && times >= 1 && times <= 99)
+      save({ times, timesDone: Math.min(task.timesDone ?? 0, times - 1) });
+  };
   const repeat = task.repeat;
   const todayDate = new Date().toLocaleDateString("en-CA");
   const dueToday = task.dueDate === todayDate;
@@ -145,20 +149,35 @@ export function TaskDetail({
       </label>
       <div className="field">
         <span>Times to complete</span>
-        <label className="inline-field">
-          <input
-            type="number"
-            min={1}
-            max={99}
-            value={task.times ?? 1}
-            onChange={(e) => {
-              const times = Number(e.target.value);
-              if (Number.isInteger(times) && times >= 1 && times <= 99)
-                save({ times, timesDone: Math.min(task.timesDone ?? 0, times - 1) });
-            }}
-          />
+        <div className="inline-field">
+          <div className="stepper">
+            <button
+              type="button"
+              onClick={() => setTimes((task.times ?? 1) - 1)}
+              aria-label="Decrease times to complete"
+            >
+              −
+            </button>
+            <input
+              key={task.times ?? 1}
+              type="number"
+              inputMode="numeric"
+              min={1}
+              max={99}
+              defaultValue={task.times ?? 1}
+              onBlur={(e) => setTimes(Number(e.target.value))}
+              aria-label="Times to complete"
+            />
+            <button
+              type="button"
+              onClick={() => setTimes((task.times ?? 1) + 1)}
+              aria-label="Increase times to complete"
+            >
+              +
+            </button>
+          </div>
           {(task.times ?? 1) > 1 && <span className="muted">{timesLeft(task)} left</span>}
-        </label>
+        </div>
       </div>
       <label className="field">
         <span>List</span>
