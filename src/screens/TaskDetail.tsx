@@ -129,23 +129,37 @@ export function TaskDetail({
       </button>
       <label className="field">
         <span>Due</span>
-        <input
-          type="date"
-          value={task.dueDate ?? ""}
-          onChange={(e) => save({ dueDate: e.target.value || null })}
-        />
+        <span className="field-row">
+          <input
+            type="date"
+            value={task.dueDate ?? ""}
+            onChange={(e) => save({ dueDate: e.target.value || null })}
+          />
+          {task.dueDate && (
+            <button type="button" className="link" onClick={() => save({ dueDate: null })}>
+              Clear
+            </button>
+          )}
+        </span>
       </label>
       <label className="field">
         <span>Reminder</span>
-        <input
-          type="datetime-local"
-          value={task.reminderAt === null ? "" : toLocalInput(task.reminderAt)}
-          onChange={(e) => {
-            const ms = e.target.value ? new Date(e.target.value).getTime() : null;
-            if (ms !== null) requestNotificationPermission();
-            save({ reminderAt: ms });
-          }}
-        />
+        <span className="field-row">
+          <input
+            type="datetime-local"
+            value={task.reminderAt === null ? "" : toLocalInput(task.reminderAt)}
+            onChange={(e) => {
+              const ms = e.target.value ? new Date(e.target.value).getTime() : null;
+              if (ms !== null) requestNotificationPermission();
+              save({ reminderAt: ms });
+            }}
+          />
+          {task.reminderAt !== null && (
+            <button type="button" className="link" onClick={() => save({ reminderAt: null })}>
+              Clear
+            </button>
+          )}
+        </span>
       </label>
       <div className="field">
         <span>Times to complete</span>
