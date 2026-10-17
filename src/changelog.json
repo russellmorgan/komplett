@@ -1,5 +1,12 @@
 [
   {
+    "version": "0.2",
+    "date": "2026-10-17",
+    "changes": [
+      "On wide screens, put the Up next, Today and Partner cards beside the timer at half width (View); phones keep the stacked layout."
+    ]
+  },
+  {
     "version": "0.1",
     "date": "2026-10-09",
     "changes": [

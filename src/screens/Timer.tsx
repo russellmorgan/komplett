@@ -36,6 +36,9 @@ export function Timer({ user }: { user: AuthUser }) {
     view.shown.includes(k) && (!view.focus || k === "progress") && (view.details || !isPanel(k));
   const panels = view.order.filter(has);
   const hiddenPanels = PANELS.filter(([k]) => !view.shown.includes(k));
+  // Cards beside the timer, each half the width: only when there are cards to put there, and never
+  // in focus mode. The CSS applies it from 64rem up; below that everything stacks as before.
+  const beside = view.beside && !view.focus && panels.length > 0;
   const reorder = useReorder(panels.length, (from, to) => {
     const moved = [...panels];
     moved.splice(to, 0, ...moved.splice(from, 1));
@@ -102,7 +105,9 @@ export function Timer({ user }: { user: AuthUser }) {
   ));
 
   return (
-    <section className={view.focus ? "timer focus" : "timer"}>
+    <section
+      className={["timer", view.focus && "focus", beside && "beside"].filter(Boolean).join(" ")}
+    >
       {view.focus ? (
         <button type="button" className="exit-focus" onClick={() => setView({ focus: false })}>
           Exit focus <span className="faint">Esc</span>
@@ -131,6 +136,7 @@ export function Timer({ user }: { user: AuthUser }) {
           <ViewPanel
             shown={view.shown}
             density={view.density}
+            beside={view.beside}
             onToggle={(k) =>
               view.shown.includes(k)
                 ? fadeOut(
@@ -144,143 +150,145 @@ export function Timer({ user }: { user: AuthUser }) {
         </div>
       )}
 
-      {(has("task") || has("phase")) && (
-        <div className="timer-top">
-          {has("task") && (
-            <h1>
-              {words.slice(0, cut).join(" ")}
-              <br />
-              <span className="faint">{words.slice(cut).join(" ")}</span>
-            </h1>
-          )}
-          {has("phase") && (
-            <div className="segmented">
-              <span aria-current={state.phase !== "break"}>
-                Focus {settings?.focusMinutes ?? 25}
-              </span>
-              <span aria-current={state.phase === "break"}>
-                Break {settings?.breakMinutes ?? 5}
-              </span>
-            </div>
-          )}
-        </div>
-      )}
+      <div className="timer-main">
+        {(has("task") || has("phase")) && (
+          <div className="timer-top">
+            {has("task") && (
+              <h1>
+                {words.slice(0, cut).join(" ")}
+                <br />
+                <span className="faint">{words.slice(cut).join(" ")}</span>
+              </h1>
+            )}
+            {has("phase") && (
+              <div className="segmented">
+                <span aria-current={state.phase !== "break"}>
+                  Focus {settings?.focusMinutes ?? 25}
+                </span>
+                <span aria-current={state.phase === "break"}>
+                  Break {settings?.breakMinutes ?? 5}
+                </span>
+              </div>
+            )}
+          </div>
+        )}
 
-      {has("readout") && (
-        <div className="timer-readout">
-          <span>{formatMmSs(total - left)}</span>
-          <span>{formatMmSs(total)}</span>
-        </div>
-      )}
+        {has("readout") && (
+          <div className="timer-readout">
+            <span>{formatMmSs(total - left)}</span>
+            <span>{formatMmSs(total)}</span>
+          </div>
+        )}
 
-      {/* Without the controls row the grid itself is the button: tap to start, pause or resume. */}
-      {has("controls") ? (
-        <div
-          className={paused ? "dots paused" : "dots"}
-          role="timer"
-          aria-label={`${formatMmSs(left)} remaining`}
-          style={gridStyle}
-        >
-          {dotCells}
-        </div>
-      ) : (
-        <button
-          type="button"
-          className={paused ? "dots paused" : "dots"}
-          aria-label={`${formatMmSs(left)} remaining. ${running && !paused ? "Pause" : "Start"}`}
-          disabled={!!pending || !settings}
-          onClick={togglePause}
-          style={gridStyle}
-        >
-          {dotCells}
-        </button>
-      )}
-
-      {has("controls") && !pending && (
-        <div className="timer-controls">
+        {/* Without the controls row the grid itself is the button: tap to start, pause or resume. */}
+        {has("controls") ? (
+          <div
+            className={paused ? "dots paused" : "dots"}
+            role="timer"
+            aria-label={`${formatMmSs(left)} remaining`}
+            style={gridStyle}
+          >
+            {dotCells}
+          </div>
+        ) : (
           <button
             type="button"
-            className="square"
-            aria-label="Stop"
-            disabled={!running}
-            onClick={() => dispatch({ type: "stop", now })}
+            className={paused ? "dots paused" : "dots"}
+            aria-label={`${formatMmSs(left)} remaining. ${running && !paused ? "Pause" : "Start"}`}
+            disabled={!!pending || !settings}
+            onClick={togglePause}
+            style={gridStyle}
           >
-            <Icon name="stop" size={16} />
+            {dotCells}
           </button>
-          <button type="button" className="big" disabled={!settings} onClick={togglePause}>
-            <span className="big-icon">
-              <Icon name={running && !paused ? "pause" : "play"} />
-            </span>
-            {state.phase === "idle" ? "Start" : paused ? "Resume" : "Pause"}
-          </button>
-          {state.phase === "break" ? (
+        )}
+
+        {has("controls") && !pending && (
+          <div className="timer-controls">
             <button
               type="button"
-              className="outline"
-              onClick={() => dispatch({ type: "skipBreak" })}
+              className="square"
+              aria-label="Stop"
+              disabled={!running}
+              onClick={() => dispatch({ type: "stop", now })}
             >
-              Skip break
+              <Icon name="stop" size={16} />
             </button>
-          ) : (
-            <div className="sessions-today">
-              <strong>{sessionsToday}</strong>
-              <span>sessions today</span>
-            </div>
-          )}
-        </div>
-      )}
-
-      {state.phase === "break" && !playing && (
-        <button type="button" className="outline play-game" onClick={() => setPlaying(true)}>
-          Play a game?
-        </button>
-      )}
-      {playing && (
-        <Breakout
-          uid={user.uid}
-          onClose={() => setPlaying(false)}
-          onStartFocus={() => {
-            dispatch({ type: "skipBreak" }); // start only works from idle
-            startFocus();
-            setPlaying(false);
-          }}
-        />
-      )}
-
-      {pending && (
-        <form
-          className="card timer-note"
-          onSubmit={(e) => {
-            e.preventDefault();
-            save(false);
-          }}
-        >
-          <span>
-            {pending.focusMinutes} min focus{pending.endedEarly ? " (stopped early)" : ""}
-            {pending.taskTitle && ` on “${pending.taskTitle}”`}. What did you do?
-          </span>
-          <textarea
-            value={noteText}
-            onChange={(e) => setNote(e.target.value)}
-            rows={3}
-            aria-label="Session note"
-          />
-          <div className="button-row">
-            <button type="submit" className="ink">
-              Save session
+            <button type="button" className="big" disabled={!settings} onClick={togglePause}>
+              <span className="big-icon">
+                <Icon name={running && !paused ? "pause" : "play"} />
+              </span>
+              {state.phase === "idle" ? "Start" : paused ? "Resume" : "Pause"}
             </button>
-            {/* A focus that ran out already started its break; only a stopped one offers this. */}
-            {state.phase === "focusDone" && (
-              <button type="button" className="primary" onClick={() => save(true)}>
-                Save and take a break
+            {state.phase === "break" ? (
+              <button
+                type="button"
+                className="outline"
+                onClick={() => dispatch({ type: "skipBreak" })}
+              >
+                Skip break
               </button>
+            ) : (
+              <div className="sessions-today">
+                <strong>{sessionsToday}</strong>
+                <span>sessions today</span>
+              </div>
             )}
-            <button type="button" className="outline" onClick={discard}>
-              Discard
-            </button>
           </div>
-        </form>
-      )}
+        )}
+
+        {state.phase === "break" && !playing && (
+          <button type="button" className="outline play-game" onClick={() => setPlaying(true)}>
+            Play a game?
+          </button>
+        )}
+        {playing && (
+          <Breakout
+            uid={user.uid}
+            onClose={() => setPlaying(false)}
+            onStartFocus={() => {
+              dispatch({ type: "skipBreak" }); // start only works from idle
+              startFocus();
+              setPlaying(false);
+            }}
+          />
+        )}
+
+        {pending && (
+          <form
+            className="card timer-note"
+            onSubmit={(e) => {
+              e.preventDefault();
+              save(false);
+            }}
+          >
+            <span>
+              {pending.focusMinutes} min focus{pending.endedEarly ? " (stopped early)" : ""}
+              {pending.taskTitle && ` on “${pending.taskTitle}”`}. What did you do?
+            </span>
+            <textarea
+              value={noteText}
+              onChange={(e) => setNote(e.target.value)}
+              rows={3}
+              aria-label="Session note"
+            />
+            <div className="button-row">
+              <button type="submit" className="ink">
+                Save session
+              </button>
+              {/* A focus that ran out already started its break; only a stopped one offers this. */}
+              {state.phase === "focusDone" && (
+                <button type="button" className="primary" onClick={() => save(true)}>
+                  Save and take a break
+                </button>
+              )}
+              <button type="button" className="outline" onClick={discard}>
+                Discard
+              </button>
+            </div>
+          </form>
+        )}
+      </div>
 
       {panels.length > 0 && (
         <div className="panels">
@@ -320,13 +328,15 @@ export function Timer({ user }: { user: AuthUser }) {
 function ViewPanel({
   shown,
   density,
+  beside,
   onToggle,
   set,
 }: {
   shown: Item[];
   density: Density;
+  beside: boolean;
   onToggle: (k: Item) => void;
-  set: (patch: { shown?: Item[]; density?: Density }) => void;
+  set: (patch: { shown?: Item[]; density?: Density; beside?: boolean }) => void;
 }) {
   const grid = gridOf(density);
   return (
@@ -369,6 +379,19 @@ function ViewPanel({
           </button>
         ))}
       </div>
+      <div className="view-head">
+        <span className="strong">Layout</span>
+        <span className="muted">wide screens</span>
+      </div>
+      <label className="view-toggle">
+        <span className={beside ? undefined : "muted"}>Cards beside the timer</span>
+        <input
+          type="checkbox"
+          className="switch"
+          checked={beside}
+          onChange={() => set({ beside: !beside })}
+        />
+      </label>
       <div>
         {ITEMS.map(([k, label]) => (
           <label key={k} className="view-toggle">

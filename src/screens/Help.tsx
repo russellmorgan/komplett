@@ -20,7 +20,7 @@ const SECTIONS: [string, string[]][] = [
       "Tap the clock to start or pause a focus period, and stop to end it early. When focus ends, a break starts.",
       "After a focus, add a note about what you did and save it to History, or discard it. Sessions under a minute aren't saved.",
       "While the timer runs, a countdown shows in the header on every other screen. Tap it to get back.",
-      "Up next, Today and your partner's task sit beside the timer. Hide any of them with Show.",
+      "Up next, Today and your partner's task sit under the timer — or beside it, each half the width, on wide screens (View). Hide any of them with Show and drag the grip to reorder.",
       "During a break you can play a quick brick-breaker game.",
     ],
   ],

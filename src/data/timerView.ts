@@ -35,6 +35,7 @@ export type TimerView = {
   density: Density;
   focus: boolean; // focus mode: just the dots (and progress row if shown); Esc exits
   details: boolean; // panels under the timer on/off, without forgetting which are shown
+  beside: boolean; // cards beside the timer, each half the width (wide screens only; stacks below 64rem)
   order: Panel[];
 };
 
@@ -44,6 +45,7 @@ const DEFAULT: TimerView = {
   density: "Standard",
   focus: false,
   details: false,
+  beside: false,
   order: ["upnext", "today", "partner"],
 };
 
