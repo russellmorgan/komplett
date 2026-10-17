@@ -11,6 +11,30 @@ export default defineConfig(({ command, mode }) => {
     // Absolute base: with "./" a reload on /list/:id asks for /list/assets/*, which the SPA
     // rewrite answers with index.html. Electron serves dist/ over http at /, so it's fine too.
     base: "/",
+    build: {
+      // One bundle was ~950 kB (Firebase alone is most of it), which tripped Vite's 500 kB chunk
+      // warning. Manual chunks by library: the app's own code then redeploys without making users
+      // re-download the rarely-changing vendors, and no single chunk crosses the warning limit.
+      rolldownOptions: {
+        output: {
+          codeSplitting: {
+            groups: [
+              // Firestore is the heavyweight; keep it out of the rest of Firebase. First match
+              // wins, so this more specific group comes before the catch-all Firebase one.
+              // maxSize splits its prebundled modules into chunks that each stay under Vite's
+              // 500 kB warning limit.
+              {
+                name: "firestore",
+                test: /node_modules[\\/](@firebase[\\/]firestore|firebase[\\/]firestore)[\\/]/,
+                maxSize: 480 * 1024,
+              },
+              { name: "firebase", test: /node_modules[\\/](firebase|@firebase)[\\/]/ },
+              { name: "vendor", test: /node_modules/ },
+            ],
+          },
+        },
+      },
+    },
     plugins: [
       react(),
       VitePWA({
