@@ -622,12 +622,6 @@ input.switch:checked {
   display: grid;
   gap: clamp(1.25rem, 3vw, 2rem);
 }
-/* The timer display itself (title, readout, dots, controls, note) as one group, so "Cards beside
-   the timer" can size the whole display to half the width. Same spacing as .timer itself. */
-.timer-main {
-  display: grid;
-  gap: clamp(1.25rem, 3vw, 2rem);
-}
 .timer-top {
   display: flex;
   align-items: flex-end;
@@ -1435,23 +1429,6 @@ body.hide-nav .header {
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 18.75rem), 1fr));
   gap: 1rem;
   align-items: start;
-}
-/* View's "Cards beside the timer": the display and the cards each take half the width, side by
-   side. Only from 64rem up (the app's mobile breakpoint); below that everything stacks as now,
-   and the class is dropped in focus mode or with no cards shown. One card per row in the side
-   column keeps the grip drag-to-reorder a purely vertical move, like the stacked layout. */
-@media (width >= 64rem) {
-  .timer.beside {
-    grid-template-columns: 1fr 1fr;
-    align-items: start;
-  }
-  .timer.beside > .timer-toolbar,
-  .timer.beside > .hidden-panels {
-    grid-column: 1 / -1;
-  }
-  .timer.beside .panels {
-    grid-template-columns: 1fr;
-  }
 }
 .panel-head {
   display: flex;
