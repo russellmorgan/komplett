@@ -1,5 +1,15 @@
 [
   {
+    "version": "0.11",
+    "date": "2026-10-18",
+    "changes": [
+      "Folders are now called projects.",
+      "Set how many times a task needs ticking off before it's done; your partner sees how many checks are left.",
+      "A glass chime plays when you complete a task.",
+      "Clear a due date or reminder with one tap."
+    ]
+  },
+  {
     "version": "0.1",
     "date": "2026-10-09",
     "changes": [

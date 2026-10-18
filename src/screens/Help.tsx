@@ -27,7 +27,7 @@ const SECTIONS: [string, string[]][] = [
   [
     "Lists",
     [
-      "Create lists to group tasks, give each a color, and put lists into folders.",
+      "Create lists to group tasks, give each a color, and put lists into projects.",
       "Your Inbox is always there and can't be deleted.",
     ],
   ],

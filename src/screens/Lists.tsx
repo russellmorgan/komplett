@@ -42,7 +42,7 @@ export function Lists({ user }: { user: AuthUser }) {
   }
 
   function createFolder() {
-    const name = window.prompt("Folder name");
+    const name = window.prompt("Project name");
     if (!name?.trim()) return;
     addFolder(user.uid, name.trim(), nextSortOrder(folders));
   }
@@ -81,7 +81,7 @@ export function Lists({ user }: { user: AuthUser }) {
             return (
               <div key={folder.id} className="folder" {...folderReorder.row(i)}>
                 <div className="folder-row">
-                  <button {...folderReorder.handle(i, `folder ${folder.name}`)}>
+                  <button {...folderReorder.handle(i, `project ${folder.name}`)}>
                     <Grip />
                   </button>
                   <button
@@ -96,9 +96,9 @@ export function Lists({ user }: { user: AuthUser }) {
                   <button
                     type="button"
                     className="ghost icon"
-                    aria-label={`Rename folder ${folder.name}`}
+                    aria-label={`Rename project ${folder.name}`}
                     onClick={() => {
-                      const name = window.prompt("Rename folder", folder.name);
+                      const name = window.prompt("Rename project", folder.name);
                       if (name?.trim()) updateFolder(folder.id, { name: name.trim() });
                     }}
                   >
@@ -107,8 +107,8 @@ export function Lists({ user }: { user: AuthUser }) {
                   <button
                     type="button"
                     className="ghost icon"
-                    aria-label={`Delete folder ${folder.name}`}
-                    title="Delete folder, keep its lists"
+                    aria-label={`Delete project ${folder.name}`}
+                    title="Delete project, keep its lists"
                     onClick={() => deleteFolder(folder.id)}
                   >
                     <Icon name="trash" size={15} />
@@ -132,7 +132,7 @@ export function Lists({ user }: { user: AuthUser }) {
           <Icon name="plus" size={12} /> New list
         </button>
         <button type="button" className="outline" onClick={createFolder}>
-          <Icon name="plus" size={12} /> New folder
+          <Icon name="plus" size={12} /> New project
         </button>
       </div>
     </div>
@@ -240,12 +240,12 @@ function ListRow({
             </div>
           </div>
           <label className="field">
-            <span>Folder</span>
+            <span>Project</span>
             <select
               value={list.folderId ?? ""}
               onChange={(e) => updateList(list.id, { folderId: e.target.value || null })}
             >
-              <option value="">No folder</option>
+              <option value="">No project</option>
               {folders.map((f) => (
                 <option key={f.id} value={f.id}>
                   {f.name}
