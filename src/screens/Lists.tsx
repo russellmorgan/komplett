@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { NavLink } from "react-router";
 import type { AuthUser } from "../data/auth";
 import {
@@ -32,20 +32,11 @@ export function Lists({ user }: { user: AuthUser }) {
       return next;
     });
 
-  function createList(folderId: string | null) {
-    const name = window.prompt("List name");
-    if (!name?.trim()) return;
-    addList(
-      { ownerId: user.uid, name: name.trim(), folderId },
-      nextSortOrder(lists.filter((l) => l.folderId === folderId)),
-    );
-  }
-
-  function createFolder() {
-    const name = window.prompt("Project name");
-    if (!name?.trim()) return;
-    addFolder(user.uid, name.trim(), nextSortOrder(folders));
-  }
+  // One modal serves create-list, create-project and edit-project.
+  type Dialog =
+    | { kind: "list"; folderId: string | null }
+    | { kind: "project"; folder?: (typeof folders)[number] };
+  const [dialog, setDialog] = useState<Dialog | null>(null);
 
   const folderReorder = useReorder(sortedFolders.length, (from, to) => {
     const sortOrder = movedSortOrder(sortedFolders, from, to);
@@ -96,11 +87,8 @@ export function Lists({ user }: { user: AuthUser }) {
                   <button
                     type="button"
                     className="ghost icon"
-                    aria-label={`Rename project ${folder.name}`}
-                    onClick={() => {
-                      const name = window.prompt("Rename project", folder.name);
-                      if (name?.trim()) updateFolder(folder.id, { name: name.trim() });
-                    }}
+                    aria-label={`Edit project ${folder.name}`}
+                    onClick={() => setDialog({ kind: "project", folder })}
                   >
                     <Icon name="edit" size={15} />
                   </button>
@@ -114,10 +102,15 @@ export function Lists({ user }: { user: AuthUser }) {
                     <Icon name="trash" size={15} />
                   </button>
                 </div>
+                {folder.description && <p className="muted folder-desc">{folder.description}</p>}
                 {!collapsed.has(folder.id) && (
                   <div className="folder-lists">
                     <ListGroup lists={folderLists} folders={folders} />
-                    <button type="button" className="link" onClick={() => createList(folder.id)}>
+                    <button
+                      type="button"
+                      className="link"
+                      onClick={() => setDialog({ kind: "list", folderId: folder.id })}
+                    >
                       <Icon name="plus" size={12} /> New list in {folder.name}
                     </button>
                   </div>
@@ -128,14 +121,101 @@ export function Lists({ user }: { user: AuthUser }) {
         </div>
       </section>
       <div className="button-row">
-        <button type="button" className="outline" onClick={() => createList(null)}>
+        <button
+          type="button"
+          className="outline"
+          onClick={() => setDialog({ kind: "list", folderId: null })}
+        >
           <Icon name="plus" size={12} /> New list
         </button>
-        <button type="button" className="outline" onClick={createFolder}>
+        <button type="button" className="outline" onClick={() => setDialog({ kind: "project" })}>
           <Icon name="plus" size={12} /> New project
         </button>
       </div>
+      {dialog?.kind === "list" && (
+        <NameDialog
+          title="New list"
+          onClose={() => setDialog(null)}
+          onSave={(name, description) =>
+            addList(
+              { ownerId: user.uid, name, description, folderId: dialog.folderId },
+              nextSortOrder(lists.filter((l) => l.folderId === dialog.folderId)),
+            )
+          }
+        />
+      )}
+      {dialog?.kind === "project" && (
+        <NameDialog
+          title={dialog.folder ? "Edit project" : "New project"}
+          name={dialog.folder?.name}
+          description={dialog.folder?.description}
+          onClose={() => setDialog(null)}
+          onSave={(name, description) =>
+            dialog.folder
+              ? updateFolder(dialog.folder.id, { name, description })
+              : addFolder(user.uid, name, nextSortOrder(folders), description)
+          }
+        />
+      )}
     </div>
+  );
+}
+
+// Native modal <dialog> with a name and an optional description.
+function NameDialog({
+  title,
+  name = "",
+  description = "",
+  onSave,
+  onClose,
+}: {
+  title: string;
+  name?: string;
+  description?: string;
+  onSave: (name: string, description: string) => void;
+  onClose: () => void;
+}) {
+  const ref = useRef<HTMLDialogElement>(null);
+  useEffect(() => ref.current?.showModal(), []);
+  return (
+    // biome-ignore lint/a11y/useKeyWithClickEvents: Escape already closes a modal dialog; the click is only the backdrop.
+    <dialog
+      ref={ref}
+      className="modal"
+      aria-label={title}
+      onClose={onClose}
+      onClick={(e) => e.target === ref.current && ref.current?.close()}
+    >
+      <form
+        className="modal-form"
+        onSubmit={(e) => {
+          e.preventDefault();
+          const data = new FormData(e.currentTarget);
+          const trimmed = String(data.get("name")).trim();
+          if (!trimmed) return;
+          onSave(trimmed, String(data.get("description")).trim());
+          ref.current?.close();
+        }}
+      >
+        <h2>{title}</h2>
+        <label className="field">
+          <span>Name</span>
+          <input name="name" defaultValue={name} required />
+        </label>
+        <label className="field">
+          <span>Description</span>
+          <textarea name="description" rows={3} placeholder="Optional" defaultValue={description} />
+        </label>
+        <div className="button-row">
+          <button type="submit" className="primary">
+            Save
+          </button>
+          <button type="button" className="outline" onClick={() => ref.current?.close()}>
+            Cancel
+          </button>
+        </div>
+      </form>
+    </dialog>
   );
 }
 
@@ -180,9 +260,12 @@ function ListRow({
           <Grip />
         </button>
         <span className="swatch big" style={{ background: listColorCss(list.color) }} />
-        <NavLink to={`/list/${list.id}`} className="list-name">
-          {list.name}
-        </NavLink>
+        <div className="list-text">
+          <NavLink to={`/list/${list.id}`} className="list-name">
+            {list.name}
+          </NavLink>
+          {list.description && <span className="muted">{list.description}</span>}
+        </div>
         <button
           type="button"
           className="ghost icon"
@@ -202,6 +285,18 @@ function ListRow({
               onBlur={(e) => {
                 const name = e.target.value.trim();
                 if (name && name !== list.name) updateList(list.id, { name });
+              }}
+            />
+          </label>
+          <label className="field">
+            <span>Description</span>
+            <textarea
+              rows={3}
+              placeholder="Optional"
+              defaultValue={list.description ?? ""}
+              onBlur={(e) => {
+                const description = e.target.value.trim();
+                if (description !== (list.description ?? "")) updateList(list.id, { description });
               }}
             />
           </label>

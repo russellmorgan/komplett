@@ -7,6 +7,7 @@ describe("newList", () => {
       ownerId: "u",
       folderId: null,
       name: "Groceries",
+      description: "",
       color: "slate",
       sortOrder: 1,
       isInbox: false,
@@ -18,6 +19,7 @@ describe("newList", () => {
       ownerId: "u",
       folderId: "f1",
       name: "Work",
+      description: "",
       color: "rose",
       sortOrder: 2,
       isInbox: false,
@@ -27,7 +29,12 @@ describe("newList", () => {
 
 describe("newFolder", () => {
   it("builds a plain owned folder", () => {
-    expect(newFolder("u", "Personal", 1)).toEqual({ ownerId: "u", name: "Personal", sortOrder: 1 });
+    expect(newFolder("u", "Personal", 1)).toEqual({
+      ownerId: "u",
+      name: "Personal",
+      description: "",
+      sortOrder: 1,
+    });
   });
 });
 

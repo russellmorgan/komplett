@@ -120,8 +120,20 @@ export function Tasks({
         ? currentList.name
         : "Inbox";
   const listLinks = [
-    { to: "/all", name: "All", color: "slate", current: showAll ? ("page" as const) : undefined },
-    { to: "/today", name: "Today", color: "amber", current: today ? ("page" as const) : undefined },
+    {
+      to: "/all",
+      name: "All",
+      color: "slate",
+      description: "",
+      current: showAll ? ("page" as const) : undefined,
+    },
+    {
+      to: "/today",
+      name: "Today",
+      color: "amber",
+      description: "",
+      current: today ? ("page" as const) : undefined,
+    },
     // All, Today, then Inbox, always first; the rest in their list order.
     ...[...lists]
       .sort((a, b) => Number(!!b.isInbox) - Number(!!a.isInbox) || a.sortOrder - b.sortOrder)
@@ -129,6 +141,7 @@ export function Tasks({
         to: l.isInbox ? "/" : `/list/${l.id}`,
         name: l.name,
         color: l.color,
+        description: l.description ?? "",
         current: !combined && l.id === listId ? ("page" as const) : undefined,
       })),
   ];
@@ -160,9 +173,18 @@ export function Tasks({
           <h1>
             {listName} <span className="faint">{active.length}</span>
           </h1>
+          {!combined && currentList?.description && (
+            <p className="muted list-desc">{currentList.description}</p>
+          )}
           <nav className="chips" aria-label="Lists">
             {listLinks.map((l) => (
-              <Link key={l.to} to={l.to} className="chip" aria-current={l.current}>
+              <Link
+                key={l.to}
+                to={l.to}
+                className="chip"
+                aria-current={l.current}
+                title={l.description || undefined}
+              >
                 <span className="swatch" style={{ background: listColorCss(l.color) }} />
                 {l.name}
               </Link>

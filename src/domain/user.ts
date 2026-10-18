@@ -28,6 +28,7 @@ export type List = {
   ownerId: string;
   folderId: string | null;
   name: string;
+  description?: string; // absent on lists made before descriptions existed
   color: ListColor; // palette token name, or custom #rrggbb
   sortOrder: number;
   isInbox: boolean;

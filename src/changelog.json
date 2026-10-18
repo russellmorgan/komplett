@@ -1,5 +1,13 @@
 [
   {
+    "version": "0.12",
+    "date": "2026-10-18",
+    "changes": [
+      "Add a description to any list or project; it shows under the list and on hover over the list chips.",
+      "New lists and projects are created in a proper dialog instead of a browser prompt."
+    ]
+  },
+  {
     "version": "0.11",
     "date": "2026-10-18",
     "changes": [

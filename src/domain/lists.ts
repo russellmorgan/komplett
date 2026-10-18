@@ -5,6 +5,7 @@ import type { List } from "./user";
 export type Folder = {
   ownerId: string;
   name: string;
+  description?: string;
   sortOrder: number;
 };
 
@@ -27,21 +28,28 @@ export type ListColor = (typeof LIST_COLORS)[number] | `#${string}`;
 export const listColorCss = (c: string) => (c.startsWith("#") ? c : `var(--list-${c})`);
 
 export function newList(
-  fields: Pick<List, "ownerId" | "name"> & Partial<Pick<List, "folderId" | "color">>,
+  fields: Pick<List, "ownerId" | "name"> &
+    Partial<Pick<List, "folderId" | "color" | "description">>,
   sortOrder: number,
 ): List {
   return {
     ownerId: fields.ownerId,
     folderId: fields.folderId ?? null,
     name: fields.name,
+    description: fields.description ?? "",
     color: fields.color ?? "slate",
     sortOrder,
     isInbox: false,
   };
 }
 
-export function newFolder(ownerId: string, name: string, sortOrder: number): Folder {
-  return { ownerId, name, sortOrder };
+export function newFolder(
+  ownerId: string,
+  name: string,
+  sortOrder: number,
+  description = "",
+): Folder {
+  return { ownerId, name, description, sortOrder };
 }
 
 export function sortByOrder<T extends { sortOrder: number }>(items: T[]): T[] {

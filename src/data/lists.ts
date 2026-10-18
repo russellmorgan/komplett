@@ -68,8 +68,8 @@ export async function deleteList(id: string) {
   return batch.commit();
 }
 
-export function addFolder(ownerId: string, name: string, sortOrder: number) {
-  return setDoc(doc(folders), newFolder(ownerId, name, sortOrder));
+export function addFolder(ownerId: string, name: string, sortOrder: number, description = "") {
+  return setDoc(doc(folders), newFolder(ownerId, name, sortOrder, description));
 }
 
 export function updateFolder(id: string, patch: Partial<Omit<Folder, "ownerId">>) {
