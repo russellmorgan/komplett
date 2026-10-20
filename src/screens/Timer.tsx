@@ -67,7 +67,8 @@ export function Timer({ user }: { user: AuthUser }) {
   const gridStyle = { "--cols": gridOf(view.density).cols } as CSSProperties;
   const togglePause = () => {
     if (state.phase === "idle") startFocus();
-    else if (running) dispatch({ type: paused ? "resume" : "pause", now });
+    // Fresh clock, not the render-time `now`: nothing re-renders while paused, so it'd be stale.
+    else if (running) dispatch({ type: paused ? "resume" : "pause", now: Date.now() });
   };
 
   // Design sets the first third of the title in ink and the rest faint.
