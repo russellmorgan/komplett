@@ -277,10 +277,25 @@ function ListRow({
         </button>
       </div>
       {editing && (
-        <div className="list-edit">
+        <form
+          className="list-edit"
+          onSubmit={(e) => {
+            e.preventDefault();
+            // Name and description otherwise save on blur; this catches anything still unsaved.
+            const data = new FormData(e.currentTarget);
+            const name = String(data.get("name")).trim();
+            const description = String(data.get("description")).trim();
+            const patch: { name?: string; description?: string } = {};
+            if (name && name !== list.name) patch.name = name;
+            if (description !== (list.description ?? "")) patch.description = description;
+            if (Object.keys(patch).length) updateList(list.id, patch);
+            setEditing(false);
+          }}
+        >
           <label className="field">
             <span>Name</span>
             <input
+              name="name"
               defaultValue={list.name}
               onBlur={(e) => {
                 const name = e.target.value.trim();
@@ -291,6 +306,7 @@ function ListRow({
           <label className="field">
             <span>Description</span>
             <textarea
+              name="description"
               rows={3}
               placeholder="Optional"
               defaultValue={list.description ?? ""}
@@ -348,16 +364,21 @@ function ListRow({
               ))}
             </select>
           </label>
-          <button
-            type="button"
-            className="outline"
-            onClick={() => {
-              if (window.confirm(`Delete "${list.name}" and all its tasks?`)) deleteList(list.id);
-            }}
-          >
-            <Icon name="trash" size={15} /> Delete list
-          </button>
-        </div>
+          <div className="button-row">
+            <button type="submit" className="primary">
+              Save changes
+            </button>
+            <button
+              type="button"
+              className="outline"
+              onClick={() => {
+                if (window.confirm(`Delete "${list.name}" and all its tasks?`)) deleteList(list.id);
+              }}
+            >
+              <Icon name="trash" size={15} /> Delete list
+            </button>
+          </div>
+        </form>
       )}
     </div>
   );
