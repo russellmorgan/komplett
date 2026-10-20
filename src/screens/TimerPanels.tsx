@@ -4,7 +4,7 @@ import { Avatar } from "../Avatar";
 import type { AuthUser } from "../data/auth";
 import { playDone } from "../data/chime";
 import { useSessions } from "../data/sessions";
-import { useSharedTask } from "../data/shared";
+import { addSharedReaction, removeSharedReaction, useSharedTask } from "../data/shared";
 import { addTask, updateTask, useTasks } from "../data/tasks";
 import { useTimerContext } from "../data/timer";
 import type { Panel } from "../data/timerView";
@@ -15,6 +15,7 @@ import { firstSortOrder, movedSortOrder, type Task, timesLeft, upNext } from "..
 import { inboxListId } from "../domain/user";
 import { fadeOut } from "../fade";
 import { Icon } from "../icons";
+import { ReactionPicker, Reactions } from "../ReactionPicker";
 import { Grip, useReorder } from "../reorder";
 
 const hm = (m: number) =>
@@ -284,11 +285,25 @@ function PartnerPanel({ user, ...card }: PanelProps) {
             <span className={theirs.completedAt !== null ? "num done" : "num"}>
               {status(theirs)}
             </span>
+            <Reactions
+              reactions={theirs.reactions}
+              myUid={user.uid}
+              onRemove={(at) =>
+                removeSharedReaction(partnerId as string, theirs, user.uid, at).catch(console.error)
+              }
+            />
           </>
         ) : (
           <span className="muted">No accountability task yet.</span>
         )}
       </div>
+      {mutual && theirs?.completedAt != null && (
+        <ReactionPicker
+          onReact={(emoji) =>
+            addSharedReaction(partnerId as string, theirs, user.uid, emoji).catch(console.error)
+          }
+        />
+      )}
       <div className="shared-line">
         <span className="muted">Your shared task</span>
         {mine ? (
