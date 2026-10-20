@@ -1,10 +1,16 @@
 import { Avatar } from "../Avatar";
 import type { AuthUser } from "../data/auth";
 import { requestNotificationPermission } from "../data/reminders";
-import { setReaction, useAllUsers, useSharedTask } from "../data/shared";
+import {
+  addSharedReaction,
+  removeSharedReaction,
+  useAllUsers,
+  useSharedTask,
+} from "../data/shared";
 import { setPartner, useUserDoc } from "../data/user";
-import { REACTION_EMOJI, type SharedTask } from "../domain/shared";
+import type { SharedTask } from "../domain/shared";
 import { Icon } from "../icons";
+import { ReactionPicker, Reactions } from "../ReactionPicker";
 
 export function Partner({ user }: { user: AuthUser }) {
   const me = useUserDoc(user.uid);
@@ -73,7 +79,10 @@ export function Partner({ user }: { user: AuthUser }) {
               shared={theirs}
               empty="They haven’t set an accountability task yet."
               onReact={(shared, emoji) =>
-                setReaction(partnerId, shared, user.uid, emoji).catch(console.error)
+                addSharedReaction(partnerId, shared, user.uid, emoji).catch(console.error)
+              }
+              onRemove={(shared, at) =>
+                removeSharedReaction(partnerId, shared, user.uid, at).catch(console.error)
               }
               myUid={user.uid}
             />
@@ -89,15 +98,16 @@ function SharedCard({
   shared,
   empty,
   onReact,
+  onRemove,
   myUid,
 }: {
   heading: string;
   shared: SharedTask | null | undefined;
   empty: string;
   onReact?: (shared: SharedTask, emoji: string) => void;
+  onRemove?: (shared: SharedTask, at: number) => void;
   myUid?: string;
 }) {
-  const mine = shared?.reactions.find((r) => r.byUserId === myUid)?.emoji;
   return (
     <section className="card shared-card">
       <span className="muted">{heading}</span>
@@ -121,27 +131,13 @@ function SharedCard({
               "In progress"
             )}
           </span>
-          {shared.reactions.length > 0 && (
-            <span className="reactions" title="Reactions">
-              {shared.reactions.map((r) => (
-                <span key={r.byUserId}>{r.emoji}</span>
-              ))}
-            </span>
-          )}
+          <Reactions
+            reactions={shared.reactions}
+            myUid={myUid}
+            onRemove={onRemove && ((at) => onRemove(shared, at))}
+          />
           {onReact && shared.completedAt !== null && (
-            <fieldset className="reaction-picker">
-              <legend className="muted">React</legend>
-              {REACTION_EMOJI.map((emoji) => (
-                <button
-                  key={emoji}
-                  type="button"
-                  aria-pressed={emoji === mine}
-                  onClick={() => onReact(shared, emoji)}
-                >
-                  {emoji}
-                </button>
-              ))}
-            </fieldset>
+            <ReactionPicker onReact={(emoji) => onReact(shared, emoji)} />
           )}
         </>
       )}

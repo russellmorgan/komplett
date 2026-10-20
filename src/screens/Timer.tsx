@@ -1,12 +1,14 @@
 import { type CSSProperties, useEffect, useState } from "react";
 import type { AuthUser } from "../data/auth";
 import { addSession, useSessions } from "../data/sessions";
+import { addSharedReaction, removeSharedReaction, usePartnerShared } from "../data/shared";
 import { useTimerContext } from "../data/timer";
 import { ITEMS, type Item, PANELS, PRESETS, useTimerView } from "../data/timerView";
 import { DENSITIES, type Density, dotMatrix, gridOf } from "../domain/dots";
 import { formatMmSs, remainingMs } from "../domain/timer";
 import { fadeOut } from "../fade";
 import { Icon } from "../icons";
+import { ReactionPicker, Reactions } from "../ReactionPicker";
 import { useReorder } from "../reorder";
 import { Breakout } from "./Breakout";
 import { TimerPanel } from "./TimerPanels";
@@ -28,6 +30,7 @@ export function Timer({ user }: { user: AuthUser }) {
   const now = Date.now();
   const running = state.phase === "focus" || state.phase === "break";
   const paused = state.pausedAt !== null;
+  const { partnerId, partner, shared } = usePartnerShared(user.uid);
   const startOfDay = new Date().setHours(0, 0, 0, 0);
   const sessionsToday = useSessions(user.uid).filter((s) => s.startedAt >= startOfDay).length;
 
@@ -246,6 +249,25 @@ export function Timer({ user }: { user: AuthUser }) {
             setPlaying(false);
           }}
         />
+      )}
+
+      {!view.focus && partnerId && partner && shared?.completedAt != null && (
+        <section className="card shared-card">
+          <span className="muted">{partner.displayName} completed</span>
+          <span className="shared-title struck">{shared.title}</span>
+          <Reactions
+            reactions={shared.reactions}
+            myUid={user.uid}
+            onRemove={(at) =>
+              removeSharedReaction(partnerId, shared, user.uid, at).catch(console.error)
+            }
+          />
+          <ReactionPicker
+            onReact={(emoji) =>
+              addSharedReaction(partnerId, shared, user.uid, emoji).catch(console.error)
+            }
+          />
+        </section>
       )}
 
       {pending && (

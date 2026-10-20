@@ -1,10 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
+  addReaction,
   projectSharedTask,
   REACTION_EMOJI,
+  removeReaction,
   type SharedTask,
   sharedTaskChanged,
-  withReaction,
 } from "./shared";
 import type { Task } from "./tasks";
 
@@ -88,20 +89,19 @@ describe("projection follows the task lifecycle", () => {
   });
 });
 
-describe("withReaction", () => {
+describe("addReaction / removeReaction", () => {
   const done: SharedTask = {
     ...projectSharedTask(task({ completedAt: 5 }), null, 1),
     reactions: [{ emoji: "👏", byUserId: "other", at: 1 }],
   };
-  it("adds the user's reaction alongside others", () => {
-    expect(withReaction(done.reactions, "p", "🔥", 9)).toEqual([
-      { emoji: "👏", byUserId: "other", at: 1 },
-      { emoji: "🔥", byUserId: "p", at: 9 },
-    ]);
+  it("adds as many reactions as the user likes, repeats included", () => {
+    const r = addReaction(addReaction(done.reactions, "p", "🔥", 9), "p", "🔥", 10);
+    expect(r.filter((x) => x.byUserId === "p").map((x) => x.at)).toEqual([9, 10]);
+    expect(r).toHaveLength(3);
   });
-  it("replaces the user's previous reaction instead of adding a second", () => {
-    const once = withReaction(done.reactions, "p", "🔥", 9);
-    expect(withReaction(once, "p", "🎉", 10)).toEqual([
+  it("removes just the one reaction asked for", () => {
+    const r = addReaction(addReaction(done.reactions, "p", "🔥", 9), "p", "🎉", 10);
+    expect(removeReaction(r, "p", 9)).toEqual([
       { emoji: "👏", byUserId: "other", at: 1 },
       { emoji: "🎉", byUserId: "p", at: 10 },
     ]);

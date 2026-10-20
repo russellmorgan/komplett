@@ -1232,6 +1232,16 @@ textarea.title-input {
 .reactions {
   font-size: var(--text-lg);
 }
+.reactions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.reaction-mine {
+  padding: 0 var(--space-2);
+  border-color: var(--color-border);
+  font-size: inherit;
+}
 .reaction-picker {
   display: flex;
   flex-wrap: wrap;
@@ -1252,10 +1262,6 @@ textarea.title-input {
   padding: 0;
   border-color: var(--color-border);
   font-size: 1.375rem;
-}
-.reaction-picker [aria-pressed="true"] {
-  border-color: var(--color-text);
-  background: var(--color-field);
 }
 
 /* Settings */

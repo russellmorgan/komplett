@@ -2,7 +2,7 @@
 
 import { type Task, timesLeft } from "./tasks";
 
-// Mirrored in firestore.rules (sharedTasks.onlyOwnReaction); change both together.
+// The picker set. firestore.rules doesn't check it per reaction (see sharedTasks.onlyReactions).
 export const REACTION_EMOJI = ["👏", "🔥", "🎉", "💪", "❤️", "🙌", "⭐", "🚀"] as const;
 
 export type Reaction = { emoji: string; byUserId: string; at: number };
@@ -44,12 +44,16 @@ export function sharedTaskChanged(stored: SharedTask | null, next: SharedTask): 
   );
 }
 
-// One reaction per user: a new one replaces that user's previous one.
-export function withReaction(
+// A user may leave any number of reactions; each is identified by who left it and when.
+export function addReaction(
   reactions: Reaction[],
   byUserId: string,
   emoji: string,
   at: number,
 ): Reaction[] {
-  return [...reactions.filter((r) => r.byUserId !== byUserId), { emoji, byUserId, at }];
+  return [...reactions, { emoji, byUserId, at }];
+}
+
+export function removeReaction(reactions: Reaction[], byUserId: string, at: number): Reaction[] {
+  return reactions.filter((r) => !(r.byUserId === byUserId && r.at === at));
 }

@@ -1,10 +1,11 @@
 import { collection, doc, onSnapshot, setDoc, updateDoc } from "firebase/firestore";
 import { useEffect, useRef, useState } from "react";
 import {
+  addReaction,
   projectSharedTask,
+  removeReaction,
   type SharedTask,
   sharedTaskChanged,
-  withReaction,
 } from "../domain/shared";
 import type { Task } from "../domain/tasks";
 import type { User } from "../domain/user";
@@ -61,9 +62,7 @@ export function useSharedTaskSync(uid: string, user: User | undefined, tasks: Ta
 // last minute count, so opening the app on an already-done task stays quiet.
 // ponytail: reloading within that minute alerts again; persist the last alert if that annoys.
 export function usePartnerDoneAlert(uid: string) {
-  const me = useUserDoc(uid);
-  const partner = useUserDoc(me?.partnerId ?? null);
-  const theirs = useSharedTask(partner?.partnerId === uid ? (me?.partnerId ?? null) : null);
+  const { me, partner, shared: theirs } = usePartnerShared(uid);
   const alerted = useRef<number | null>(null);
   const done = theirs?.completedAt ?? null;
   useEffect(() => {
@@ -73,11 +72,37 @@ export function usePartnerDoneAlert(uid: string) {
   }, [done, partner, theirs, me]);
 }
 
-// React to a partner's completed shared task; replaces this user's earlier reaction.
-export function setReaction(ownerUid: string, shared: SharedTask, byUserId: string, emoji: string) {
+// Reactions on a partner's completed shared task. A user can leave any number and take back any
+// of their own.
+export function addSharedReaction(
+  ownerUid: string,
+  shared: SharedTask,
+  byUserId: string,
+  emoji: string,
+) {
   return updateDoc(doc(db, "sharedTasks", ownerUid), {
-    reactions: withReaction(shared.reactions, byUserId, emoji, Date.now()),
+    reactions: addReaction(shared.reactions, byUserId, emoji, Date.now()),
   });
+}
+
+export function removeSharedReaction(
+  ownerUid: string,
+  shared: SharedTask,
+  byUserId: string,
+  at: number,
+) {
+  return updateDoc(doc(db, "sharedTasks", ownerUid), {
+    reactions: removeReaction(shared.reactions, byUserId, at),
+  });
+}
+
+// Your partner and their shared task, once they've picked you back.
+export function usePartnerShared(uid: string) {
+  const me = useUserDoc(uid);
+  const partnerId = me?.partnerId ?? null;
+  const partner = useUserDoc(partnerId);
+  const shared = useSharedTask(partner?.partnerId === uid ? partnerId : null);
+  return { me, partnerId, partner, shared };
 }
 
 // Everyone who has signed in, for picking a partner.

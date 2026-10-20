@@ -28,7 +28,7 @@ Personal to-do + pomodoro + accountability app for a handful of friends. Spec an
 | **Partner** | The one user you've picked for accountability. Picking is one-way; both must pick each other for mutual visibility. | buddy, friend |
 | **Accountability task** | The single task you've chosen to share with your partner. | shared task (see below), commitment |
 | **Shared task** | The projected document (`title`, `dueDate`, `completedAt`, `reactions`) your partner reads. Derived from the accountability task; never edited directly. | — |
-| **Reaction** | One emoji from a fixed set, left by a partner on a completed shared task. One per user, replaceable. | like, kudos |
+| **Reaction** | One emoji from a fixed set, left by a partner on a completed shared task. A user can leave any number, and remove any of their own. | like, kudos |
 | **Token** | A CSS custom property for color, font, spacing, or radius. All styling goes through tokens. | variable, theme value |
 | **Data module** | The only place Firebase is imported. Components use its hooks and functions. | repository, service |
 | **Domain module** | Pure functions with no React or Firebase: repeat advancement, timer reducer, session aggregation, shared-task projection. The tested seam. | utils, lib |

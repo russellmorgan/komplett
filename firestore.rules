@@ -20,24 +20,19 @@ service cloud.firestore {
           && userDoc(request.auth.uid).partnerId == uid
           && userDoc(uid).partnerId == request.auth.uid;
       }
-      // A partner may only change `reactions` on a completed task, and only to hold their own
-      // reaction. ponytail: rules can't diff arrays, so this allows at most one reaction — fine
-      // with one partner; loosen to per-user checks when Phase 2 adds more partners.
-      function onlyOwnReaction() {
-        let next = request.resource.data.reactions;
+      // A partner may only change `reactions`, on a completed task, and only to well-formed
+      // lists. ponytail: rules can't loop over arrays, so per-element checks (own uid, emoji in
+      // the set) aren't enforced; the only other writer is the one mutual partner, and the owner
+      // can write the doc anyway. Tighten if more partners arrive.
+      function onlyReactions() {
         return request.resource.data.diff(resource.data).affectedKeys().hasOnly(["reactions"])
           && resource.data.completedAt != null
-          && next.size() <= 1
-          && (next.size() == 0
-            || (next[0].keys().hasOnly(["emoji", "byUserId", "at"])
-              && next[0].byUserId == request.auth.uid
-              // keep in step with REACTION_EMOJI in src/domain/shared.ts
-              && next[0].emoji in ["👏", "🔥", "🎉", "💪", "❤️", "🙌", "⭐", "🚀"]
-              && next[0].at is number));
+          && request.resource.data.reactions is list
+          && request.resource.data.reactions.size() <= 50;
       }
       allow read: if isOwner(uid) || mutualPartner();
       allow write: if isOwner(uid);
-      allow update: if mutualPartner() && onlyOwnReaction();
+      allow update: if mutualPartner() && onlyReactions();
     }
 
     match /tasks/{id} {
