@@ -2,7 +2,7 @@ import { useState } from "react";
 import type { AuthUser } from "../data/auth";
 import { deleteSession, useSessions } from "../data/sessions";
 import { useTasks } from "../data/tasks";
-import { sessionsByWeek, totalStats } from "../domain/sessions";
+import { nextMonths, sessionsByWeek, totalStats, weeksWithin } from "../domain/sessions";
 import { completedTasks } from "../domain/tasks";
 import { Icon } from "../icons";
 
@@ -26,15 +26,24 @@ const asHours = (minutes: number) => {
 // correctly after the task is deleted.
 export function History({ user }: { user: AuthUser }) {
   const allSessions = useSessions(user.uid);
-  const weeks = sessionsByWeek(allSessions);
+  const allWeeks = sessionsByWeek(allSessions);
+  // Only the last few months are listed; "Load more" widens the window. The totals below always
+  // cover the full history.
+  const [months, setMonths] = useState(3);
+  const now = Date.now();
+  const weeks = weeksWithin(allWeeks, now, months);
+  const moreMonths = nextMonths(allWeeks, now, months);
   const { count, minutes } = totalStats(allSessions);
-  const [collapsed, setCollapsed] = useState<Set<number>>(new Set());
+  // Only the newest week starts open; this holds the weeks the user has flipped from that default.
+  const [flipped, setFlipped] = useState<Set<number>>(new Set());
   const toggle = (w: number) =>
-    setCollapsed((c) => {
+    setFlipped((c) => {
       const next = new Set(c);
       if (!next.delete(w)) next.add(w);
       return next;
     });
+  const newestWeek = weeks[0]?.weekStart;
+  const isCollapsed = (w: number) => (w !== newestWeek) !== flipped.has(w);
   const completedCount = completedTasks(useTasks(user.uid)).length;
   return (
     <div className="stack">
@@ -61,14 +70,15 @@ export function History({ user }: { user: AuthUser }) {
             <button
               type="button"
               className="week-toggle"
-              aria-expanded={!collapsed.has(week.weekStart)}
+              aria-expanded={!isCollapsed(week.weekStart)}
               onClick={() => toggle(week.weekStart)}
             >
               <Icon name="down" size={14} />
               {weekLabel(week.weekStart)}
+              <span className="due">{asHours(totalStats(week.sessions).minutes)}</span>
             </button>
           </h2>
-          {!collapsed.has(week.weekStart) && (
+          {!isCollapsed(week.weekStart) && (
             <ul className="rows">
               {week.sessions.map((s) => (
                 <li className="session-row" key={s.id}>
@@ -97,7 +107,12 @@ export function History({ user }: { user: AuthUser }) {
           )}
         </section>
       ))}
-      {weeks.length === 0 && (
+      {moreMonths !== null && (
+        <button type="button" className="outline start" onClick={() => setMonths(moreMonths)}>
+          Load more
+        </button>
+      )}
+      {allWeeks.length === 0 && (
         <ul className="rows">
           <li className="empty">No focus sessions yet.</li>
         </ul>
