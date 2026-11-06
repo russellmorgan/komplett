@@ -14,7 +14,7 @@ import {
   activeTasks,
   completedTasks,
   movedSortOrder,
-  nextSortOrder,
+  newTaskSortOrder,
   type Task,
   timesLeft,
   todayTasks,
@@ -152,7 +152,10 @@ export function Tasks({
     const trimmed = title.trim();
     if (!trimmed) return;
     // Order against every task in the list, completed ones included, so nothing interleaves later.
-    const sortOrder = nextSortOrder(all.filter((t) => t.listId === listId));
+    const sortOrder = newTaskSortOrder(
+      all.filter((t) => t.listId === listId),
+      me?.settings.newTaskPosition,
+    );
     addTask({ ownerId: user.uid, listId, title: trimmed, sortOrder });
     setTitle("");
   }

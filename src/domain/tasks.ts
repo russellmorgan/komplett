@@ -1,5 +1,6 @@
 // Pure task logic. No React, no Firebase. Timestamps are epoch milliseconds.
 import { type Session, sessionsNewestFirst } from "./sessions";
+import type { NewTaskPosition } from "./user";
 
 export type Repeat =
   | { kind: "daily" | "weekdays" }
@@ -112,6 +113,15 @@ export function nextSortOrder(items: { sortOrder: number }[]): number {
 // A sortOrder that sorts before everything in `items` (new tasks that should land first).
 export function firstSortOrder(items: { sortOrder: number }[]): number {
   return Math.min(1, ...items.map((t) => t.sortOrder)) - 1;
+}
+
+// sortOrder for a task added to a list: after everything, or before everything. Starred tasks are
+// pinned above by byImportance, so "start" lands just below them.
+export function newTaskSortOrder(
+  items: { sortOrder: number }[],
+  position: NewTaskPosition = "end",
+): number {
+  return position === "start" ? firstSortOrder(items) : nextSortOrder(items);
 }
 
 // New sortOrder for sorted[from] dropped at position `to` (index in the list as it will read after

@@ -6,12 +6,15 @@ export type ChimeId = "bell" | "woodblock" | "glass" | "pulse" | "soft" | "lawOr
 
 export type StartView = "timer" | "tasks" | "lists";
 
+export type NewTaskPosition = "start" | "end";
+
 export type Settings = {
   focusMinutes: number;
   breakMinutes: number;
   soundEnabled: boolean;
   chime?: ChimeId; // absent on users created before chimes existed; means "bell"
   startView?: StartView; // absent means "tasks"
+  newTaskPosition?: NewTaskPosition; // where a new task lands in a list; absent means "end"
 };
 
 export type User = {
