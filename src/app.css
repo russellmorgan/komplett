@@ -89,14 +89,18 @@ button:not([class]):hover {
   background: var(--color-text);
   color: var(--color-on-text);
 }
-button.primary,
-button.danger {
+button.primary {
   border: 0;
   background: var(--color-accent);
   color: var(--color-accent-text);
 }
 button.primary:hover {
   background: var(--color-accent-hover);
+}
+button.danger {
+  border: 0;
+  background: var(--color-danger-fill);
+  color: var(--color-danger-fill-text);
 }
 button.ink {
   border: 0;

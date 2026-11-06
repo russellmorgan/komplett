@@ -55,6 +55,8 @@
   --color-accent-text: #ffffff;
   --color-danger: light-dark(#c42a20, #ff6a5f);
   --color-dot-off: light-dark(#c9c5b9, #312f2b);
+  --color-danger-fill: #d32f2f; /* solid red behind destructive confirm buttons, same in every theme */
+  --color-danger-fill-text: #ffffff;
 
   /* List accent palette: lists store the token name ("rose"), never the hex. Mid-tones read on both. */
   --list-slate: light-dark(#475569, #94a3b8);
