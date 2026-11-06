@@ -1,5 +1,15 @@
 [
   {
+    "version": "0.13",
+    "date": "2026-11-06",
+    "changes": [
+      "Partners can leave as many reactions as they like on a finished shared task, and remove their own.",
+      "Reactions now live in the Partner panel on the timer screen, where you can drag or hide them.",
+      "Pressing Enter while editing a list saves your name and description changes.",
+      "Fixed the timer losing track of the time you spent paused when you resumed."
+    ]
+  },
+  {
     "version": "0.12",
     "date": "2026-10-18",
     "changes": [
