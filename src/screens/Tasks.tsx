@@ -13,6 +13,7 @@ import { taskStats } from "../domain/sessions";
 import {
   activeTasks,
   completedTasks,
+  inboxTasks,
   movedSortOrder,
   newTaskSortOrder,
   type Task,
@@ -77,9 +78,12 @@ export function Tasks({
     navigate("/timer");
   };
   const all = useTasks(user.uid);
+  const inboxId = inboxListId(user.uid);
   const active = today
     ? todayTasks(all, localDate())
-    : activeTasks(all, showAll ? undefined : listId);
+    : listId === inboxId
+      ? inboxTasks(all, inboxId)
+      : activeTasks(all, showAll ? undefined : listId);
   const completed = today
     ? completedTasks(all).filter((t) => t.dueDate === localDate())
     : completedTasks(all, showAll ? undefined : listId);
@@ -249,9 +253,13 @@ export function Tasks({
         <ul className="rows">
           {active.map((task, i) => {
             // Today/All mix lists, so show which list each task lives in instead of its due date.
+            // Inbox also shows repeating tasks from other lists: name their list beside the date.
+            const home = lists.find((l) => l.id === task.listId)?.name ?? "";
             const due = combined
-              ? (lists.find((l) => l.id === task.listId)?.name ?? "")
-              : dueLabel(task.dueDate);
+              ? home
+              : task.listId === listId
+                ? dueLabel(task.dueDate)
+                : [home, dueLabel(task.dueDate)].filter(Boolean).join(" · ");
             const now = timer.task?.id === task.id && timer.phase !== "idle";
             return (
               <li
@@ -280,7 +288,11 @@ export function Tasks({
                   <span className={now ? "strong" : undefined}>{task.title}</span>
                   {task.note && <span className="muted">{task.note}</span>}
                 </button>
-                <span className={due === "Overdue" ? "due overdue" : "due"}>
+                <span
+                  className={
+                    !combined && dueLabel(task.dueDate) === "Overdue" ? "due overdue" : "due"
+                  }
+                >
                   {timesLeft(task) > 1
                     ? [`${timesLeft(task)} left`, due].filter(Boolean).join(" · ")
                     : due}

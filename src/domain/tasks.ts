@@ -63,6 +63,14 @@ export function activeTasks(tasks: Task[], listId?: string): Task[] {
     .sort(byImportance);
 }
 
+// The Inbox list: its own open tasks, plus every open repeating task from any other list so
+// recurring chores can't hide in a list you rarely open. Computed, never stored.
+export function inboxTasks(tasks: Task[], inboxId: string): Task[] {
+  return tasks
+    .filter((t) => t.completedAt === null && (t.listId === inboxId || t.repeat !== null))
+    .sort(byImportance);
+}
+
 // Completed tasks, newest completedAt first. Pass listId to scope to one list; omit for all.
 export function completedTasks(tasks: Task[], listId?: string): Task[] {
   return tasks

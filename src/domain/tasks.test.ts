@@ -3,6 +3,7 @@ import {
   activeTasks,
   completedTasks,
   firstSortOrder,
+  inboxTasks,
   movedSortOrder,
   newTaskSortOrder,
   nextSortOrder,
@@ -153,6 +154,19 @@ describe("firstSortOrder", () => {
     expect(firstSortOrder([{ sortOrder: 3 }, { sortOrder: -2 }])).toBe(-3);
     expect(firstSortOrder([{ sortOrder: 5 }])).toBe(0);
     expect(firstSortOrder([])).toBe(0);
+  });
+});
+
+describe("inboxTasks", () => {
+  it("adds open repeating tasks from other lists to the Inbox's own open tasks", () => {
+    const tasks = [
+      task({ id: "own", listId: "inbox", sortOrder: 2 }),
+      task({ id: "repeats", listId: "work", repeat: { kind: "daily" }, sortOrder: 1 }),
+      task({ id: "plain", listId: "work" }),
+      task({ id: "done", listId: "work", repeat: { kind: "daily" }, completedAt: 5 }),
+      task({ id: "ownDone", listId: "inbox", completedAt: 5 }),
+    ];
+    expect(inboxTasks(tasks, "inbox").map((t) => t.id)).toEqual(["repeats", "own"]);
   });
 });
 
