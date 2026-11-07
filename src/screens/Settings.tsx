@@ -3,17 +3,22 @@ import { type AuthUser, signOut } from "../data/auth";
 import { CHIME_IDS, CHIMES, playChime } from "../data/chime";
 import { MODES, THEMES, useAppearance } from "../data/theme";
 import { updateSettings, useUserDoc } from "../data/user";
-import type { StartView } from "../domain/user";
+import type { NewTaskPosition, StartView } from "../domain/user";
 import { Icon } from "../icons";
 import { Breakout } from "./Breakout";
 
-// Native min/max only validate on submit; clamp so 0/NaN never reaches the user doc.
 const START_VIEWS: [StartView, string][] = [
   ["timer", "Timer"],
   ["tasks", "Tasks"],
   ["lists", "Lists"],
 ];
 
+const NEW_TASK_POSITIONS: [NewTaskPosition, string][] = [
+  ["start", "Start"],
+  ["end", "End"],
+];
+
+// Native min/max only validate on submit; clamp so 0/NaN never reaches the user doc.
 const minutes = (v: string | number) => Math.min(180, Math.max(1, Math.round(Number(v)) || 1));
 
 export function Settings({ user }: { user: AuthUser }) {
@@ -41,6 +46,24 @@ export function Settings({ user }: { user: AuthUser }) {
                   type="button"
                   aria-pressed={(doc.settings.startView ?? "tasks") === id}
                   onClick={() => updateSettings(user.uid, { startView: id })}
+                >
+                  {name}
+                </button>
+              ))}
+            </fieldset>
+          </div>
+          <div className="setting">
+            <span className="setting-label">
+              <strong>New tasks</strong>
+              <span className="muted">Added at the start (below starred) or end of a list</span>
+            </span>
+            <fieldset className="segmented" aria-label="New task position">
+              {NEW_TASK_POSITIONS.map(([id, name]) => (
+                <button
+                  key={id}
+                  type="button"
+                  aria-pressed={(doc.settings.newTaskPosition ?? "end") === id}
+                  onClick={() => updateSettings(user.uid, { newTaskPosition: id })}
                 >
                   {name}
                 </button>

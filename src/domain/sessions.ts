@@ -47,3 +47,23 @@ export function sessionsByWeek(sessions: Session[]): { weekStart: number; sessio
   }
   return [...weeks].map(([weekStart, sessions]) => ({ weekStart, sessions }));
 }
+
+type Week = { weekStart: number; sessions: Session[] };
+
+// The weeks starting no earlier than the week `months` before `now`, so a boundary week is never cut in half.
+export function weeksWithin(weeks: Week[], now: number, months: number): Week[] {
+  const d = new Date(now);
+  d.setMonth(d.getMonth() - months);
+  const cutoff = weekStart(d.getTime());
+  return weeks.filter((w) => w.weekStart >= cutoff);
+}
+
+// The next window to load, `step` months at a time, skipping empty stretches so a click always
+// reveals something. Null when every week is already within `months`.
+export function nextMonths(weeks: Week[], now: number, months: number, step = 3): number | null {
+  const shown = weeksWithin(weeks, now, months).length;
+  if (shown === weeks.length) return null;
+  let next = months + step;
+  while (weeksWithin(weeks, now, next).length === shown) next += step;
+  return next;
+}

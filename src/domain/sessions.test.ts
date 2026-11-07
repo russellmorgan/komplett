@@ -1,11 +1,13 @@
 import { describe, expect, it } from "vitest";
 import {
+  nextMonths,
   type Session,
   sessionsByWeek,
   sessionsNewestFirst,
   taskStats,
   totalStats,
   weekStart,
+  weeksWithin,
 } from "./sessions";
 
 const session = (over: Partial<Session>): Session => ({
@@ -64,5 +66,30 @@ describe("sessionsByWeek", () => {
     expect(groups.map((g) => g.sessions.map((s) => s.id))).toEqual([["tue", "mon"], ["sun"]]);
     expect(groups[0]?.weekStart).toBe(weekStart(mon));
     expect(new Date(groups[0]?.weekStart ?? 0).getDay()).toBe(1);
+  });
+});
+
+describe("weeksWithin / nextMonths", () => {
+  const now = new Date(2026, 10, 6, 12).getTime(); // Fri 6 Nov 2026
+  const at = (y: number, m: number, d: number) => new Date(y, m, d, 9).getTime();
+  const weeks = sessionsByWeek([
+    session({ id: "now", startedAt: now }),
+    session({ id: "2m", startedAt: at(2026, 8, 10) }),
+    session({ id: "5m", startedAt: at(2026, 5, 10) }),
+    session({ id: "2y", startedAt: at(2024, 5, 10) }),
+  ]);
+  const ids = (ws: typeof weeks) => ws.flatMap((w) => w.sessions.map((s) => s.id));
+
+  it("keeps only whole weeks inside the window", () => {
+    expect(ids(weeksWithin(weeks, now, 3))).toEqual(["now", "2m"]);
+    expect(ids(weeksWithin(weeks, now, 6))).toEqual(["now", "2m", "5m"]);
+  });
+  it("loads the next three months, skipping empty stretches", () => {
+    expect(nextMonths(weeks, now, 3)).toBe(6);
+    expect(nextMonths(weeks, now, 6)).toBe(30); // jumps the gap to the 2024 session
+  });
+  it("is null once nothing older remains", () => {
+    expect(nextMonths(weeks, now, 30)).toBeNull();
+    expect(nextMonths([], now, 3)).toBeNull();
   });
 });

@@ -3,7 +3,9 @@ import {
   activeTasks,
   completedTasks,
   firstSortOrder,
+  inboxTasks,
   movedSortOrder,
+  newTaskSortOrder,
   nextSortOrder,
   type Task,
   todayTasks,
@@ -152,6 +154,36 @@ describe("firstSortOrder", () => {
     expect(firstSortOrder([{ sortOrder: 3 }, { sortOrder: -2 }])).toBe(-3);
     expect(firstSortOrder([{ sortOrder: 5 }])).toBe(0);
     expect(firstSortOrder([])).toBe(0);
+  });
+});
+
+describe("inboxTasks", () => {
+  it("adds open repeating tasks from other lists to the Inbox's own open tasks", () => {
+    const tasks = [
+      task({ id: "own", listId: "inbox", sortOrder: 2 }),
+      task({ id: "repeats", listId: "work", repeat: { kind: "daily" }, sortOrder: 1 }),
+      task({ id: "plain", listId: "work" }),
+      task({ id: "done", listId: "work", repeat: { kind: "daily" }, completedAt: 5 }),
+      task({ id: "ownDone", listId: "inbox", completedAt: 5 }),
+    ];
+    expect(inboxTasks(tasks, "inbox").map((t) => t.id)).toEqual(["repeats", "own"]);
+  });
+});
+
+describe("newTaskSortOrder", () => {
+  const items = [{ sortOrder: 3 }, { sortOrder: 7 }];
+  it("goes after everything by default and for 'end'", () => {
+    expect(newTaskSortOrder(items)).toBe(8);
+    expect(newTaskSortOrder(items, "end")).toBe(8);
+  });
+  it("goes before everything for 'start'", () => {
+    expect(newTaskSortOrder(items, "start")).toBe(0);
+  });
+  it("lands below starred tasks when started", () => {
+    const starred = task({ id: "star", important: true, sortOrder: 5 });
+    const old = task({ id: "old", sortOrder: 1 });
+    const added = task({ id: "new", sortOrder: newTaskSortOrder([starred, old], "start") });
+    expect(activeTasks([old, added, starred]).map((t) => t.id)).toEqual(["star", "new", "old"]);
   });
 });
 
