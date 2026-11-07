@@ -48,6 +48,15 @@ Closing the window quits the app on Windows/Linux; on macOS it stays running in 
 
 The main process serves `dist/` over `http://localhost:41847` rather than loading `index.html` as a `file:` URL: the bundle references `/assets/*` absolutely, `BrowserRouter` needs real paths, and Firebase auth only trusts an authorised domain — `localhost` is one by default, so no Firebase console change is needed. The port is fixed so the origin (and with it the signed-in session and the Firestore cache) survives a restart; a single-instance lock stops a second launch fighting over it.
 
+### Building installers with Claude Code skills
+
+Two project skills in [`.claude/skills/`](.claude/skills) run the builds for you when you use [Claude Code](https://claude.com/claude-code) in this repo:
+
+- **`/build-mac`** builds both Mac DMGs (Apple silicon and Intel) on your Mac, into `release/`. Needs `.env`. No GitHub involved.
+- **`/build-desktop`** builds the Mac DMGs and the Windows `.exe` on GitHub Actions (`.github/workflows/desktop.yml`), then downloads both into `release/ci/`. Use this for Windows, since it can't be built reliably from a Mac. Needs the four `VITE_FIREBASE_*` values set as repo secrets (Settings → Secrets and variables → Actions). The skill checks for them and can set them from `.env`.
+
+The CI build uses the code on the branch you pick, so push first. Tagging `v*` also publishes both installers to a GitHub release.
+
 ## Android app (Capacitor)
 
 `android/` is a Capacitor project that wraps the production build (`dist/`) in a native WebView, same idea as the Electron shell. Config is in [capacitor.config.ts](capacitor.config.ts); the app serves `dist/` from `https://localhost`, which Firebase Auth trusts by default.
