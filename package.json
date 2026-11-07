@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "packageManager": "pnpm@12.4.2",
+  "packageManager": "pnpm@12.18.0",
   "scripts": {
     "dev": "firebase emulators:exec --project demo-komplett --only auth,firestore --ui \"vite\"",
     "build": "tsc -b && vite build",
