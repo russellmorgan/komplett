@@ -59,6 +59,17 @@ export function Timer({ user }: { user: AuthUser }) {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [view.focus, setView]);
+  // s starts a focus, p pauses it, unless the user is typing in a field.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if ((e.target as HTMLElement).closest("input, textarea, select, [contenteditable]")) return;
+      if (e.key === "s" && state.phase === "idle") startFocus();
+      else if (e.key === "p" && running && !paused) dispatch({ type: "pause", now: Date.now() });
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [state.phase, running, paused, startFocus, dispatch]);
 
   const total = state.phase === "idle" ? (settings?.focusMinutes ?? 25) * 60_000 : state.durationMs;
   const left = state.phase === "idle" ? total : remainingMs(state, now);
