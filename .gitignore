@@ -11,3 +11,4 @@ ui-debug.log
 tsconfig.tsbuildinfo
 .claude/launch.json
 .DS_Store
+env.txt
