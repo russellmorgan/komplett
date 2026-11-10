@@ -38,12 +38,12 @@
           "arch": "arm64"
         }
       ],
-      "icon": "../public/icon-512.png",
+      "icon": "icon.png",
       "category": "public.app-category.productivity"
     },
     "win": {
       "target": "nsis",
-      "icon": "../public/icon-512.png",
+      "icon": "icon.png",
       "artifactName": "${productName}-${version}-Windows.${ext}"
     },
     "linux": {
