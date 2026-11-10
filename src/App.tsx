@@ -14,7 +14,7 @@ import { type AuthUser, useAuthUser } from "./data/auth";
 import { useLists } from "./data/lists";
 import { useReminders } from "./data/reminders";
 import { usePartnerDoneAlert, useSharedTaskSync } from "./data/shared";
-import { useTasks } from "./data/tasks";
+import { useTasksSnapshot } from "./data/tasks";
 import { TimerProvider, useTimerContext } from "./data/timer";
 import { useUserDoc } from "./data/user";
 import { formatMmSs, remainingMs } from "./domain/timer";
@@ -39,8 +39,8 @@ export function App() {
 
 function Shell({ user }: { user: AuthUser }) {
   // Reminders fire on every screen, not just Tasks.
-  const tasks = useTasks(user.uid);
-  useReminders(tasks);
+  const { tasks, synced } = useTasksSnapshot(user.uid);
+  useReminders(tasks, synced);
   const doc = useUserDoc(user.uid);
   const booting = useRef(window.location.pathname === "/");
   useEffect(() => {

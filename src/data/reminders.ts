@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import type { Task } from "../domain/tasks";
 
 const FIRED_KEY = "firedReminders";
@@ -19,8 +19,22 @@ export function requestNotificationPermission() {
 // Fires a Notification for each due reminder while the app is open. Fired keys are remembered in
 // localStorage so a reload doesn't re-fire them.
 // ponytail: setTimeout caps at ~24.8 days; reminders further out are rescheduled on the next task change or reload.
-export function useReminders(tasks: Task[]) {
+//
+// `synced` is true once the task list has come from the server. Until then it may be a stale
+// cached copy (tasks finished on another device still look open), so we hold off. If the server
+// hasn't answered after CACHE_GRACE_MS we assume we're offline and fall back to the cache, so
+// reminders arrive late rather than never.
+const CACHE_GRACE_MS = 30_000;
+export function useReminders(tasks: Task[], synced: boolean) {
+  const [graceOver, setGraceOver] = useState(false);
   useEffect(() => {
+    const id = setTimeout(() => setGraceOver(true), CACHE_GRACE_MS);
+    return () => clearTimeout(id);
+  }, []);
+  const ready = synced || graceOver;
+
+  useEffect(() => {
+    if (!ready) return;
     const done = new Set(fired());
     const timers = tasks.flatMap((t) => {
       if (t.reminderAt === null || t.completedAt !== null) return [];
@@ -39,5 +53,5 @@ export function useReminders(tasks: Task[]) {
       ];
     });
     return () => timers.forEach(clearTimeout);
-  }, [tasks]);
+  }, [tasks, ready]);
 }
