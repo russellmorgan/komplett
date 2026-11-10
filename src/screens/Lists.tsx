@@ -275,6 +275,17 @@ function ListRow({
         >
           <Icon name="edit" size={15} />
         </button>
+        <button
+          type="button"
+          className="ghost icon"
+          aria-label={`Delete ${list.name}`}
+          title="Delete list and its tasks"
+          onClick={() => {
+            if (window.confirm(`Delete "${list.name}" and all its tasks?`)) deleteList(list.id);
+          }}
+        >
+          <Icon name="trash" size={15} />
+        </button>
       </div>
       {editing && (
         <form
