@@ -18,7 +18,7 @@ export function requestNotificationPermission() {
 
 // Fires a Notification for each due reminder while the app is open. Fired keys are remembered in
 // localStorage so a reload doesn't re-fire them.
-// ponytail: setTimeout caps at ~24.8 days; reminders further out are rescheduled on the next task change or reload.
+// setTimeout caps at ~24.8 days; reminders further out re-arm when that timer runs out.
 //
 // `synced` is true once the task list has come from the server. Until then it may be a stale
 // cached copy (tasks finished on another device still look open), so we hold off. If the server
@@ -36,22 +36,29 @@ export function useReminders(tasks: Task[], synced: boolean) {
   useEffect(() => {
     if (!ready) return;
     const done = new Set(fired());
-    const timers = tasks.flatMap((t) => {
-      if (t.reminderAt === null || t.completedAt !== null) return [];
-      const key = `${t.id}:${t.reminderAt}`;
-      if (done.has(key)) return [];
-      const delay = Math.min(Math.max(0, t.reminderAt - Date.now()), 2 ** 31 - 1);
-      return [
-        setTimeout(() => {
-          if (Date.now() < (t.reminderAt as number)) return; // clamped delay; rescheduled later
-          const now = fired();
-          if (now.includes(key)) return;
-          localStorage.setItem(FIRED_KEY, JSON.stringify([...now, key].slice(-200)));
-          if ("Notification" in window && Notification.permission === "granted")
-            new Notification(t.title, { body: t.note || undefined });
-        }, delay),
-      ];
-    });
+    const timers = new Map<string, ReturnType<typeof setTimeout>>();
+    for (const t of tasks) {
+      if (t.reminderAt === null || t.completedAt !== null) continue;
+      const at = t.reminderAt;
+      const key = `${t.id}:${at}`;
+      if (done.has(key)) continue;
+      const arm = () => {
+        const delay = Math.min(Math.max(0, at - Date.now()), 2 ** 31 - 1);
+        timers.set(
+          key,
+          setTimeout(() => {
+            // Not due yet: the delay was clamped, or the timer ran a hair ahead of the wall clock.
+            if (Date.now() < at) return arm();
+            const now = fired();
+            if (now.includes(key)) return;
+            localStorage.setItem(FIRED_KEY, JSON.stringify([...now, key].slice(-200)));
+            if ("Notification" in window && Notification.permission === "granted")
+              new Notification(t.title, { body: t.note || undefined });
+          }, delay),
+        );
+      };
+      arm();
+    }
     return () => timers.forEach(clearTimeout);
   }, [tasks, ready]);
 }
