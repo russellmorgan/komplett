@@ -1,5 +1,19 @@
 [
   {
+    "version": "0.14",
+    "date": "2026-11-11",
+    "changes": [
+      "Choose whether new tasks go at the top or the bottom of a list in Settings.",
+      "Repeating tasks that are still open now also show in your Inbox, labelled with their list.",
+      "History shows the last three months with a focus total for each week; tap Load more to see older weeks.",
+      "Press S to start the timer and P to pause it.",
+      "Delete a list straight from the Lists screen.",
+      "Reminders no longer go off for tasks you already finished on another device, and now arrive on time.",
+      "The desktop app has a new black Ko icon.",
+      "The confirm button when deleting something is now solid red, so it is easier to spot."
+    ]
+  },
+  {
     "version": "0.13",
     "date": "2026-11-06",
     "changes": [
