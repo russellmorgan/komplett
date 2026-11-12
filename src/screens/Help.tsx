@@ -51,7 +51,13 @@ const SECTIONS: [string, string[]][] = [
       "Choose light or dark mode, a theme, and rounded corners for this device.",
     ],
   ],
-  ["Keyboard", ["Press 1 to 6 to jump between screens (shown next to each one in the menu)."]],
+  [
+    "Keyboard",
+    [
+      "Press 1 to 6 to jump between screens (shown next to each one in the menu).",
+      "On the timer, press S to start, P to pause, and F to turn focus mode on or off (Esc also exits it).",
+    ],
+  ],
 ];
 
 export function Help() {
