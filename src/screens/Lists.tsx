@@ -90,7 +90,7 @@ export function Lists({ user }: { user: AuthUser }) {
                     aria-label={`Edit project ${folder.name}`}
                     onClick={() => setDialog({ kind: "project", folder })}
                   >
-                    <Icon name="edit" size={15} />
+                    <Icon name="edit" size={18} />
                   </button>
                   <button
                     type="button"
@@ -99,7 +99,7 @@ export function Lists({ user }: { user: AuthUser }) {
                     title="Delete project, keep its lists"
                     onClick={() => deleteFolder(folder.id)}
                   >
-                    <Icon name="trash" size={15} />
+                    <Icon name="trash" size={18} />
                   </button>
                 </div>
                 {folder.description && <p className="muted folder-desc">{folder.description}</p>}
@@ -273,7 +273,7 @@ function ListRow({
           aria-expanded={editing}
           onClick={() => setEditing(!editing)}
         >
-          <Icon name="edit" size={15} />
+          <Icon name="edit" size={18} />
         </button>
         <button
           type="button"
@@ -284,7 +284,7 @@ function ListRow({
             if (window.confirm(`Delete "${list.name}" and all its tasks?`)) deleteList(list.id);
           }}
         >
-          <Icon name="trash" size={15} />
+          <Icon name="trash" size={18} />
         </button>
       </div>
       {editing && (

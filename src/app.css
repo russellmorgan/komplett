@@ -1068,7 +1068,7 @@ textarea.title-input {
 .list-row,
 .folder-row {
   display: grid;
-  grid-template-columns: 1.875rem 0.875rem minmax(0, 1fr) auto;
+  grid-template-columns: 1.875rem 0.875rem minmax(0, 1fr) auto auto;
   align-items: center;
   gap: 0.75rem;
   min-height: calc(var(--tap) + 1rem + 1px); /* Inbox/Today match rows that hold the grip button */
@@ -1081,6 +1081,15 @@ textarea.title-input {
 }
 .folder-row {
   grid-template-columns: 1.875rem minmax(0, 1fr) auto auto;
+}
+/* Edit and delete read as one pair: narrower than a full tap target, no grid gap between. */
+.list-row > button.icon,
+.folder-row > button.icon {
+  min-width: 2rem;
+}
+.list-row > button.icon + button.icon,
+.folder-row > button.icon + button.icon {
+  margin-left: -0.75rem; /* cancels the row gap */
 }
 .list-name {
   min-width: 0;
